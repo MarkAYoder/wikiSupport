@@ -1,0 +1,4 @@
+s|<head>|<cd-head>|
+s|</head>|</cd-head>|
+s|<body>|<cd-body>|
+s|</body>|</cd-body><cd-foot></cd-foot>|

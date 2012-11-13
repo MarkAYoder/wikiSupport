@@ -1,0 +1,70 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Reads the info part of a pdf document and creates the Javascript code
+# to be used by the re.se@rch search engine.  See reSearchSuite-SearchForm/search.js
+#
+# Run using:
+# cd chapters/01intro
+# getKeywords ### $(find ../.. -name "*.pdf")
+#  Where ### is the index number of one past the last index in search.js
+#
+
+use strict;
+
+system("adOn");
+
+use pdflib_pl 4.0;
+
+if( $#ARGV lt 0) {
+  print "Usage: $0 startpage in1 in2 ...\n";
+  exit;
+}
+my $outfile = '/tmp/search.js';
+
+open FD, ">$outfile" or die "Can't open $outfile";
+
+my $page = shift;
+
+# Make a new pdf object and set a few parameters.
+my $p = PDF_new();
+
+# Go through each of the input files and add them to the output file.
+my $file;
+foreach $file (@ARGV) {
+  my $doc = PDF_open_pdi($p, $file, "", 0);
+  if($doc == -1) {
+    print "Can't open $file\n";
+    next;
+  }
+
+  my @tmp = split(/\//, $file);
+
+  my $type = ucfirst($tmp[$#tmp-1]);
+
+  my $pagecount = PDF_get_pdi_value($p, '/Root/Pages/Count', $doc, -1, 0);
+  my $title     = PDF_get_pdi_parameter($p, "/Info/Title",    $doc, -1, 0);
+  my $keywords  = lc(PDF_get_pdi_parameter($p, "/Info/Keywords", $doc, -1, 0));
+  $keywords =~ s/, /,/g;
+#  print "$file: page count = $pagecount\n";
+  if($keywords) {
+    print FD "entry.item[$page].page = \"$file\";\n";
+    print FD "entry.item[$page].description = \"<b>$type</b> $title\";\n";
+    print FD "entry.item[$page].keywords = \"$keywords\";\n";
+    $page++;
+  }
+}
+
+PDF_delete($p);
+
+# Now add some extra entries.
+print FD "entry.item[$page].page = \"http://www.prenhall.com\";\n";
+print FD "entry.item[$page].description = \"Prentice-Hall\";\n";
+print FD "entry.item[$page].keywords = \"publisher,prentice,hall,tom,robbins \";\n";
+
+$page++;
+print FD "entry.item[$page].page = \"http://www.rose-hulman.edu\";\n";
+print FD "entry.item[$page].description = \"Rose-Hulman\";\n";
+print FD "entry.item[$page].keywords = \"rose,hulman,rose-hulman,mark,yoder \";\n";
+
+print FD "\nvar index_max = $page;\n";

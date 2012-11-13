@@ -1,0 +1,22 @@
+#!/bin/csh
+# Make the matlab header file
+set Header = /tmp/header
+echo '%$Header: /a/crowe/export/home/crowe3/ee2200cd/support/scripts/RCS/mat2RCS,v 1.1 1995/06/19 17:27:14 myoder Exp $' >! $Header
+echo '%$Log: mat2RCS,v $
+# Revision 1.1  1995/06/19  17:27:14  myoder
+# Initial revision
+#' >> $Header
+echo '' >> $Header
+
+foreach file ($*)
+    if(-e RCS/$file,v) then
+	echo Skipping $file, "it's" alrady checked in
+    else
+	echo ">>>>> " $file " <<<<<"
+	head $file
+	mv $file $file.old
+	cat /tmp/header $file.old > $file
+	rcs -il -c% $file
+	myci -l $file
+   endif
+end

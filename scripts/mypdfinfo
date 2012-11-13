@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Prints the info fields of a PDF file use PDFLib
+#
+
+use strict;
+
+system("adOn");	# Use the version of pdflib that has PDI included.
+
+use pdflib_pl 4.0;
+
+if( $#ARGV lt 0) {
+  print "Usage: $0 in1 in2 ...\n";
+  exit;
+}
+
+# Make a new pdf object and set a few parameters.
+my $p = PDF_new();
+
+# Go through each of the input files and add them to the output file.
+my $file;
+foreach $file (@ARGV) {
+  my $doc = PDF_open_pdi($p, $file, "", 0);
+  die "Can't open $file" if($doc == -1);
+
+  my $pagecount = PDF_get_pdi_value($p, '/Root/Pages/Count', $doc, -1, 0);
+  print "$file: page count = $pagecount\n";
+
+#  my $page = PDF_open_pdi_page($p, $doc, 1, "");
+  my $infoName;
+  foreach $infoName (qw(Title Subject Keywords Author Creator Producer )) {
+    my $info = PDF_get_pdi_parameter($p, "/Info/$infoName", $doc, -1, 0);
+    print "\t$infoName = $info\n";
+  }
+}
+
+# PDF_close($p);
+
+PDF_delete($p);

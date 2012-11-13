@@ -1,0 +1,13 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+while(my $keywords = lc(<>)) {
+$keywords =~ s/[^a-zA-Z0-9\[\]\/\-]+/,,/g;
+$keywords = ','. $keywords . ',';
+$keywords =~ s/,(([0-9]+)|a|and|of|\&|=|the),/,/g;
+$keywords =~ s/,+/,/g;
+$keywords = substr($keywords, 1, -1);
+
+print "$keywords\n";
+}

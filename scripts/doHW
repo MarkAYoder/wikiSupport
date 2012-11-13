@@ -1,0 +1,178 @@
+#!/usr/bin/perl
+
+use strict;
+
+chdir $ENV{'CDROOT'} . '/archives';
+
+my $db = 'DB_withKeywords.txt';
+
+my $fromGIF=1;	# Set to 1 if reading from gif files, otherwise pdf inputs are 
+		# used.
+# system("adOff") if $fromGIF;	# Use the version of PDFLib that
+				# doesn't print pdflib in the background.
+# system("adOn");
+
+if(!@ARGV) {
+  print "Usage: $0 -faculty [-hw | -ex]\n";
+  exit;
+}
+
+print "Only doing pdf's\n" unless $fromGIF;
+
+my $statementdir = 'statemnt';
+my $solutiondir  = 'sols';
+my $statesoldir  = 'stusol';
+
+my $faculty = '';
+if($ARGV[0] eq '-faculty') {
+  $faculty = $ARGV[0];
+  shift @ARGV;
+  $statesoldir = 'facsol';
+}
+
+my $type = $ARGV[0];
+$type =~ s/^-//;
+
+my $ex = '';
+if($ARGV[0] eq '-hw') {
+  $db = 'DB_withKeywords.txt';
+} elsif($ARGV[0] eq '-ex') {
+  $db = 'DBforExercises.txt';
+  $faculty = '-faculty';  # This is so we do them all when the title is 'TITLE' for every one.
+  $statementdir     = 'exercises';
+  $solutiondir      = 'solutions';
+  $statesoldir      = 'exersol';
+  $ex = '-ex';
+} else {
+  print "Usage:  $0 [-faculty] [-hw | -ex]\n";
+  exit;
+}
+
+#
+# Read in the HW database.
+#
+my %hw;
+
+open HW, "<$db" or die "Can't open $db";
+
+my $i=0;
+while (<HW>) {
+  #  print "=====\n$_";
+  /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+  my $quarter = $1;
+  my $statement = $2;
+  my $desc = $3;
+  my $chap = $4;
+  my $sol  = $5;
+  my $keywords = $6;
+
+  $keywords =~ s/[\r\n]*$//;  # Removing trailing return or linefeed/
+  $keywords =~ s/\"//g;
+  $sol =~ s/\"//g;
+  $sol = '' if($sol eq ' ');
+  $sol = '' if($sol eq 'NONE');
+  $desc =~ s/\"//g;
+  $quarter = '' if($quarter eq 'Exercises');
+  $chap =~ s/"//g;     # Remove "'s
+
+  if (0) {
+    print "quarter = $quarter\n";
+    print "$statement\n";
+    print "$desc\n";
+    print "$chap\n";
+    print "$sol\n";
+    print "$keywords\n";
+  }
+
+    next if $chap =~ /-/;	# Skip chaps with - in them
+
+# Handle problems that are in book.  $chap == x.y if in book.
+  if($chap =~ /\./) {
+    if($faculty) {   # Add problem number to description.
+      $desc = "<b>P-$chap</b> $desc";
+      print "$desc\n";
+    } else {  # If it's a student, remove the solution
+      $sol = '';
+    }
+    $chap =~ s/\..*//;
+  }
+
+#  print "chap = $chap\n";
+# If $Chap has a ',' in it it need to appear in multiple chapters, but
+# only process it once.
+  my @Chaps = split(/,/, $chap);   # Put the chap numbers into a list
+  $chap = $Chaps[0] + 0;
+#  print "$chap\n";
+  $hw{$chap} = {} if(!defined($hw{$chap}));
+  $hw{$chap}{lc($desc)} = [] if(!defined($hw{$chap}{lc($desc)}));
+  push @{$hw{$chap}{lc($desc)}}, [$quarter, $statement, $sol, $keywords, $desc];
+
+#  print "$desc\n";
+
+  $i++;
+  last if $i>5;
+} # while
+
+close HW;
+
+my $ii=0;
+my ($chap, $hw, $desc, $keywords, $sol, $quarter, $statement, $Desc);
+foreach $chap (2..13,'A'){
+# foreach $chap (3){
+
+  print "****\nchap = $chap\n***\n";
+
+  foreach $desc (sort keys %{$hw{$chap}}) {
+    my $count = @{$hw{$chap}{$desc}};
+    print "\t$desc: $count\n";
+
+    foreach $hw (@{$hw{$chap}{$desc}}) {
+      $quarter   = $hw->[0];
+      $statement = $hw->[1];
+      $sol       = $hw->[2];
+      $keywords  = $hw->[3];
+      $Desc      = $hw->[4];
+
+      my @sol = split /,/, $sol;
+
+      if(!-e  "$statesoldir/$quarter") {
+	mkdir "$statesoldir/$quarter";
+	print "mkdir $statesoldir/$quarter\n";
+      }
+
+      print "$statesoldir/$quarter/$statement\n";
+
+      my $pdf = $statement;
+      $pdf =~ s/\.png$/.pdf/;
+      my $eps = $statement;
+      $eps =~ s/\.pds$/.eps/;
+
+#      print "*$desc*\t*$statement*\t*@sol*$keywords*\n";
+
+      $type = 'example' if($statement =~ /exam/);
+      $type = 'exercise' if($statement =~ /exer/);
+
+      my $cmd = "meld2pdf $faculty $ex \"chap$chap $type $Desc\" \"$keywords\" $statesoldir/$quarter/$pdf $statementdir/$quarter/$statement page ";
+      while(@sol){
+	$cmd .= "$solutiondir/$quarter/$sol[0] ";
+	shift @sol;
+#        print "cmd = $cmd\n";
+      }
+
+#      print "cmd = $cmd\n";
+      # Create the new pdf only if an old one isn't there.
+      system($cmd) if(!-e "$statesoldir/$quarter/$pdf");
+
+      print "#";
+#      last unless $faculty;
+      $ii++;
+#      last if $ii>0;
+    }
+  }
+  $ii++;
+#  last if $ii>0;
+}
+
+print "\n$ii\n";
+
+close FD;

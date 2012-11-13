@@ -1,0 +1,14 @@
+#!/bin/csh
+#Sets the correct environment variables for CD2HTML then fixes
+#group and premissions on the output files.  Recall that cd2html
+#reads the .cd files and outputs .htm files with cool navigation
+#buttons, etc.
+
+set path=( /database/bookcd/support/scripts $path )
+setenv CDROOT /database/bookcd
+setenv PERLLIB ~myoder/bookcd/support/lib:/usr/users/faculty/monaco/mirror/lib
+setenv CD2HTMLDATA $CDROOT/support/lib/cd2htmlData
+setenv  MAPPINGDATA $CDROOT/support/lib/MappingData
+cd2html *
+chgrp bookcd *
+chmod g+w *

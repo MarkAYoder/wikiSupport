@@ -1,0 +1,4 @@
+#!/bin/bash
+echo $@
+
+# node $HOME/cdrom/wikiSupport/scripts/node.js/uploadPage.js 

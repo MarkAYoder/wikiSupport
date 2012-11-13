@@ -1,0 +1,47 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.05.22.15.37.19;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@A quick hack to convert tab separated data into an html table.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# Convert tab separated data into html tables.
+
+$Header = '$Header$';
+# $Log$
+
+$file = $ARGV[0];
+$outfile = $file;
+$outfile =~ s/.tab$/.cd/;
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+open(INPUT, $file) || die("$0: Can't open $file\n");
+
+while(<INPUT>) {
+	chop;
+	@@row = split(/\t/);
+	print OUTPUT "<tr>\n\t";
+	foreach $col (@@row) {
+		print OUTPUT "<td><a href = \"$col.html\"><cd-ybullet>$col</a></td>\n\t";
+		}
+	print OUTPUT "\n</tr>\n";
+}
+@

@@ -1,0 +1,70 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $db = 'ALL_HW.txt';
+
+if(!@ARGV) {
+  print "Usage: $0 [hw | examples | exercises]\n";
+  exit;
+}
+
+if($ARGV[0] eq 'hw') {
+  $db = 'ALL_HW.txt';
+} elsif($ARGV[0] eq 'examples') {
+  $db = 'ALL_EXAMPLES.xlt';
+} elsif ($ARGV[0] eq 'exercises') {
+  $db = 'ALL_EXER.xlt';
+}
+
+open FD, "<$db" or die "Can't open $db";
+
+<FD> if $ARGV[0] eq 'hw';	# Skip headers
+
+my $i=0;
+while(<FD>) {
+  /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+  my $quarter = $1;
+  my $statement = $2;
+  my $sol1 = $3;
+  my $sol2 = $4;
+  my $sol3 = $5;
+  my $sol4 = $6;
+  my $chap = $7;
+  my $desc = $8;
+
+  $statement =~ s/\.gif$/.pdf/;
+
+  next if $chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+
+  my $quarterPDF = $quarter;
+  $quarterPDF =~ s/-/_/;
+
+  my $newpdf =  "../FromJim/HW/$quarterPDF/$statement";
+  print "$newpdf\n";
+  next unless (-e $newpdf);
+
+  $quarter =~ s/-//;
+  $quarter .= '_gif' if $ARGV[0] eq 'hw';
+  $desc =~ s/\"//g;
+
+  my $quarterNew = $quarter;
+  $quarterNew =~ s/_gif/_pdf/;
+
+  mkdir $quarterNew unless (-e $quarterNew);
+
+  # The .pdf version of the statement and solution must already be made.
+  die "Can't open $quarter/$statement" unless (-e "$quarter/$statement");
+
+  print "$quarter/$statement\n";
+
+  # print "*$desc*\t*$statement*\t*$sol1*\n";
+  my $command = "catpdf $newpdf $quarter/$statement $quarterNew/$statement";
+  print "$command\n";
+#  system($command);
+
+  $i++;
+  last if $i>5;
+}
+
+close FD;

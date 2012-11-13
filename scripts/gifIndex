@@ -1,0 +1,55 @@
+#!/usr/local/gnu/bin/perl
+
+# This file is passed a directory name and builds an html file
+# that displays all the .gif and .Mov files.
+
+$Header = '$Header: /database/bookcd/support/scripts/RCS/gifIndex,v 1.2 1996/01/17 18:06:36 myoder Exp $';
+# $Log: gifIndex,v $
+# Revision 1.2  1996/01/17  18:06:36  myoder
+# Handles directories better.
+# Show Movs with sizes first then show GIFs.
+#
+# Revision 1.1  1995/05/18  16:50:05  myoder
+# Initial revision
+#
+
+$dir = $ARGV[0];
+$index = "index.html";
+
+print "Opening $dir\n";
+
+opendir(DIRHANDLE, $dir) || die("Can't open $dir\n");
+
+@files = readdir(DIRHANDLE);
+
+#print "Files in $dir are @files\n";
+
+closedir(DIRHANDLE);
+
+if( -e $index) {
+	print "Making backup of $index in $index.old\n";
+	rename($index, $index . ".old")
+}
+
+open(INDEX, ">" . $index)  || die("Can't open $index\n");
+
+print INDEX "<title>.gif's and .Mov's in $dir</title>\n";
+print INDEX "<h1>.gif's and .Mov's in $dir</h1>\n";
+
+# print "@files\n";
+
+foreach $file (sort(@files)) {
+	if (substr($file, -4) eq ".Mov") {
+#		print "$file\n";
+		@stats = stat("$dir/$file");
+		printf INDEX "<a href = \"$dir/$file\">$file</a>(%d kb)<br>\n",
+			$stats[7]/1000;
+	}
+}
+
+foreach $file (sort(@files)) {
+ if(substr($file, -4) eq ".gif") {
+#		print "$file\n";
+ 	print INDEX "<img src=\"$dir/$file\"><br>$file<br>\n";
+	}
+}

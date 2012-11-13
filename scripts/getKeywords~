@@ -1,0 +1,223 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Reads the info part of a pdf document and creates the Javascript code
+# to be used by the re.se@rch search engine.  See reSearchSuite-SearchForm/search.js
+#
+# Run using:
+# getKeywords [-faculty] ###
+#  Where ### is the index number of one past the last index in search.js
+#
+
+use strict;
+
+# system("adOn");
+
+# use pdflib_pl 4.0;
+
+if( $#ARGV gt 1) {
+  print "Usage: $0 [-faculty] startpage ...\n";
+  exit;
+}
+
+my $tmpfile = '/tmp/getKeywords.tmp';
+my $outfile = '/tmp/search.js';
+my $statesoldir = 'stusol';
+my $visible  = $ENV{'CDROOT'} . '/visible3';
+my @hwList   = ("$visible/archives/DB_withKeywords.txt",
+		"$visible/archives/DBforExercises.txt");
+
+my $faculty = '';
+if($ARGV[0] eq '-faculty') {
+  $faculty = $ARGV[0];
+  shift @ARGV;
+  $outfile = '/tmp/facsearch.js';
+  $statesoldir = 'facsol';
+}
+
+chdir $ENV{'CDROOT'} . '/visible3/chapters/01intro';
+system("ls ../../chapters/*/labs/*/lab*.pdf > $tmpfile");
+
+#
+# Read in the HW and exercise databases.
+#
+my %hw;
+
+my $hwList;
+foreach $hwList (@hwList) {
+  print "$hwList\n";
+
+  open HW, "<$hwList" or die "Can't open $hwList";
+
+  while(<HW>) {
+    /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+    my $Quarter = $1;
+    my $Statement = $2;
+    my $Desc = $3;
+    my $Chap = $4;
+    my $Sol  = $5;
+
+    $Quarter = '' if($Quarter eq 'Exercises');
+
+    $Chap =~ s/\..*//;
+
+# Some descriptions are close.  If they differ by only small words, group them together.
+#  print "\n$Desc\n";
+    my $desc = ' ' . lc($Desc) . ' ';
+    $desc =~ s/,/ , /g;
+    $desc =~ s/;/ ; /g;
+#  print "$desc\n";
+    $desc =~ s/ (a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|,) / /g;
+    $desc =~ s/ (a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|,|;) / /g;
+#  print "$desc\n";
+    $desc =~ s/ +/ /g;
+#  print "$desc\n";
+
+    next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+    $hw{$Chap} = {} if(!defined($hw{$Chap}));
+    $hw{$Chap}{$Desc} = [] if(!defined($hw{$Chap}{$desc}));
+    push @{$hw{$Chap}{$desc}}, [$Quarter, "$statesoldir/$Quarter/$Statement", $Sol, $Desc];
+  }
+  close HW;
+# Hack, switch to example directories
+  $statesoldir = 'exersol';
+}
+
+open FD, ">>$tmpfile" or die "Can't open $tmpfile";
+
+#
+# Append hw files to end of $tmpfile
+#
+my ($chap, $hw, $desc, $keywords, $sol, $quarter, $statement, $Desc);
+foreach $chap (2..13,'A'){
+
+#  print "****\nchap = $chap\n***\n";
+
+  foreach $desc (sort keys %{$hw{$chap}}) {
+    my $count = @{$hw{$chap}{$desc}};
+#    print "\t$desc: $count\n";
+
+    foreach $hw (@{$hw{$chap}{$desc}}) {
+      $statement = $hw->[1];
+      $Desc      = $hw->[3];
+
+      print FD "../../archives/$statement\n";
+      last unless ($faculty or $Desc =~ /TITLE/);
+    }
+  }
+}
+
+close FD;
+
+open FD, ">$outfile" or die "Can't open $outfile";
+
+my $page = shift;
+
+print FD "/////\n";
+print FD "// Created with getKeywords $faculty $page\n";
+print FD "/////\n";
+
+# Make a new pdf object and set a few parameters.
+# my $p = PDF_new();
+
+# Go through each of the input files and add them to the output file.
+open FDIN, "<$tmpfile" || die "Can't open $tmpfile";
+
+my $file;
+foreach $file (<FDIN>) {
+  $file =~ s/[\r\n]*$//;
+#  print "$file\n";
+#  my $doc = PDF_open_pdi($p, $file, "", 0);
+#  if($doc == -1) {
+#    print "Can't open $file\n";
+#    next;
+#  }
+
+  open FD2, "pdfinfo $file 2>&1 |" or die "Can't run pdfinfo $file";
+  $_ = <FD2>;
+  while($_ and !/^Title/) {
+    $_ = <FD2>;
+  }
+  if(!$_) {
+    print "Can't find Title in $file\n";
+    close FD2;
+    next;
+  }
+
+  my $title = $_;
+#  print "title = $title\n";
+  $title =~ s/^Title: *(.*)[\r\n]*$/\1/;
+#  print "title = $title\n";
+
+  $_ = <FD2>;
+  while($_ and !/^Keywords/i) {
+    $_ = <FD2>;
+  }
+  if(!$_) {
+    print "Can't find Keywords in $file\n";
+    close FD2;
+    next;
+  }
+
+  my $keywords = lc($_);
+#  print "keywords = $keywords\n";
+  $keywords =~ s/^keywords: *(.*)[\r\n]*$/\1/i;
+#  print "keywords = $keywords\n";
+  close FD2;
+
+#  my @tmp = split(/\//, $file);
+
+#  my $type = ucfirst($tmp[$#tmp-1]);
+
+#  my $pagecount = PDF_get_pdi_value($p, '/Root/Pages/Count', $doc, -1, 0);
+#  my $title     = PDF_get_pdi_parameter($p, "/Info/Title",    $doc, -1, 0);
+#  my $keywords  = lc(PDF_get_pdi_parameter($p, "/Info/Keywords", $doc, -1, 0));
+
+  $keywords =~ s/, /,/g;
+#  print "$file: page count = $pagecount\n";
+
+  if($keywords) {
+    if(-e $file) {
+      if($title =~ /hw|example|exercise/) {
+	$title =~ s/chap(\d+)/<i>$1<\/i>/;
+	$title =~ s/(hw|example|exercise)/<b>$1<\/b>/;
+      } else {
+	$keywords =~ /chap(\d+)/;
+	my $chap = $1;
+	$keywords =~ /(lab.*?),/;
+	my $lab = ucfirst($1);
+	$title = "<i>$chap</i> <b>$lab</b> $title";
+      }
+      print FD "entry.item[$page].page = \"$file\";\n";
+#    print FD "entry.item[$page].description = \"<b>$type</b> $title\";\n";
+      print FD "entry.item[$page].description = \"$title\";\n";
+      print FD "entry.item[$page].keywords = \"$keywords\";\n";
+      $page++;
+    } else {
+      print "Can't find $file\n" 
+    }
+#    PDF_close_pdi($p, $doc);
+  }
+}
+
+close FDIN;
+# PDF_delete($p);
+
+# Now add some extra entries.
+print FD "entry.item[$page].page = \"http://www.prenhall.com\";\n";
+print FD "entry.item[$page].description = \"Prentice-Hall\";\n";
+print FD "entry.item[$page].keywords = \"publisher,prentice,hall,tom,robbins\";\n";
+
+$page++;
+print FD "entry.item[$page].page = \"http://www.rose-hulman.edu\";\n";
+print FD "entry.item[$page].description = \"Rose-Hulman\";\n";
+print FD "entry.item[$page].keywords = \"rose,hulman,rose-hulman,mark,yoder\";\n";
+
+$page++;
+print FD "entry.item[$page].page = \"../../graphics/percy.jpg\";\n";
+print FD "entry.item[$page].description = \"Percy the Cat\";\n";
+print FD "entry.item[$page].keywords = \"percy,cat,cover\";\n";
+
+print FD "\nvar index_max = $page;\n";
+
+close FD;

@@ -1,0 +1,11 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my %test;
+
+dbmopen(%test, '/tmp/test', 0666) or die "Can't open test";
+
+print "$test{'cd-eqn'}\n";
+
+dbmclose(%test);

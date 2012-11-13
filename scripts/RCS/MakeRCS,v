@@ -1,0 +1,39 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.05.17.13.40.41;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Creates and RCS directory and sets the proper group and mode.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/bin/csh -f
+chgrp bookcd $*
+chmod g+w $*
+foreach file ($*)
+	echo $file
+	if( -d $file && $file != 'RCS') then
+		mkdir $file/RCS
+		chgrp bookcd $file/RCS
+		chmod g+w $file/RCS
+	endif
+end
+
+# $Header$
+
+# $Log$
+@

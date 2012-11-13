@@ -1,0 +1,97 @@
+#!/usr/bin/perl
+
+# Create the Live Figure index files
+# run in the figures directory.
+
+$Header = '$Header';
+# $Log: MakeDemo,v $
+
+use strict;
+require 'isthere.pl';
+require 'constants.pl';
+
+my $path = '.';
+my $outfile = "$path/index.cd";
+my $overfile = "$path/overview.txt";
+my $infile = "$path/figure.txt";
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+if(-e $overfile) {
+rename($overfile, "$overfile.old");
+}
+
+open(INPUT, "<$infile")  || die("$0: Can't open $infile\n");
+# print "$infile\n";
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+# print "$outfile\n";
+
+open(OVER, ">$overfile")  || die("$0: Can't open $overfile\n");
+# print "$overfile\n";
+
+# The first line has type number page short title and title
+$_ = <INPUT>;
+s/([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)//;
+my $type       = $1;
+my $number     = $2;
+my $page       = $3;
+my $shortTitle = $4;
+my $title;
+
+# print "****$_****\n";
+
+if(/\t(.*)/) {
+$title      = $1; 
+  chop($title); chop($title);
+} else {
+  chop($shortTitle); chop($shortTitle); $title = $shortTitle;
+}
+$number =~ /(.*)\./;   # Get the number before the .
+my $chap = $1;
+# print "($type)($number)($page)($title)($chap)\n";
+
+# The first lines up to a blank line is the short description
+# for overview file
+
+print OVER "$number $shortTitle\r
+<cd-dtsp-link page=\"$page\">p$page</cd-dtsp-link> - ";
+
+while(<INPUT>) {
+  last if (/^[\r\n]*$/);
+  print OVER $_;
+}
+
+print OUTPUT "<cd-head chap=$chap unit=$type>
+<!-- Do not Edit, this file is created by $0 -->
+<title>$type $number $shortTitle</title>
+</cd-head>
+<cd-body>
+<!-- ============================================== -->
+<!--                $type $number                     -->
+<!-- ============================================== -->
+
+<div class=\"Heading\"> $title - $type $number, <cd-dtsp-link page=\"$page\">p$page</cd-dtsp-link> </div>
+<div class=\"Entry\">
+";
+while(<INPUT>) {
+  print OUTPUT $_;
+}
+print OUTPUT "
+</div>
+
+</cd-body>
+
+<cd-foot>
+</cd-foot>
+";
+
+close(INPUT);
+close(OUTPUT);
+close(OVER);
+
+#system("cd2html $outfile; rm $outfile");
+system("cd2html $outfile");
+

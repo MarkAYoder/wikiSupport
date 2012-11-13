@@ -1,0 +1,126 @@
+head	1.2;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	94.08.01.13.31.27;	author fielding;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	94.07.21.02.46.45;	author fielding;	state Exp;
+branches;
+next	;
+
+
+desc
+@This program tests the wwwbot.pl library and is based on the one
+written by Brooks Cutter.
+@
+
+
+1.2
+log
+@Changed interface to wwwbot'allowed
+@
+text
+@#!/usr/public/bin/perl
+# $Id: testbot,v 1.1 1994/07/21 02:46:45 fielding Exp fielding $
+#-----------------------------------------------------------------
+# This program tests the wwwbot.pl library and is based on the one
+# written by Brooks Cutter.
+#
+# The program starts with the BASE URL equal to the current file directory.
+# To change it, enter a URL prefixed with "base=", e.g,
+#
+#    Enter a URL (^D to exit): base=http://www.ics.uci.edu/
+#
+# The program starts with the User-Agent equal to program name.
+# To change it, enter a name prefixed with "ua=", e.g,
+#
+#    Enter a URL (^D to exit): ua=MOMspider/0.20
+#
+# 20 Jul 1994 (RTF): Initial Version 
+# 31 Jul 1994 (RTF): Changed interface to wwwbot'allowed
+#
+#-----------------------------------------------------------------
+if ($libloc = $ENV{'LIBWWW_PERL'}) { unshift(@@INC, $libloc); }
+
+require "www.pl";
+require "wwwurl.pl";
+require "wwwbot.pl";
+require "dumpvar.pl";
+ 
+$ua = $0;                                      # Method = program name
+$ua =~ s#^.*/([^/]+)$#$1#;                     # lose the path
+
+&www'set_def_header('http', 'User-Agent', "$ua/0.1");
+                                               # Set up User-Agent: header
+$pwd = ( $ENV{'PWD'} || $ENV{'cwd'} || '' );
+
+$base = "file://localhost$pwd/";               # Set up initial Base URL
+
+#-----------------------------------------------------------------
+
+if ($#ARGV == 0) {                             # Quickie, one-line version
+    $url = &wwwurl'absolute($base, $ARGV[0]);
+    &test($url);
+}
+else {                                         # Interactive version
+    print "Enter a URL (^D to exit): ";
+    while (<>) {
+        chop;
+        if (/^base=(.*)$/) { $base = $1;  next; }
+        if (/^ua=(.*)$/)  
+        {
+            $ua = $1;
+            &www'set_def_header('http', 'User-Agent', $ua);
+            next;
+        }
+        $url = &wwwurl'absolute($base, $_);
+        &test($url);
+    }
+    continue
+    {
+        print "===========================================================\n";
+        print "Enter a URL (^D to exit): ";
+    }
+    print "\n";
+}
+exit(0);
+
+#-----------------------------------------------------------------
+sub test
+{
+    local($url) = @@_;
+
+    $delay = &wwwbot'visitable($url);
+    print "delay of $delay for $url\n";
+    if ($delay) { sleep($delay); }
+    $ok = &wwwbot'allowed($url);
+    print "$ok: $url\n";
+    &wwwbot'visited($url);
+
+    &dumpvar('wwwbot');
+}
+
+1;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+# $Id$
+d18 1
+d74 1
+a74 1
+    $ok = &wwwbot'allowed($url, $ua);
+@

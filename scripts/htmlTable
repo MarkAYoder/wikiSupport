@@ -1,0 +1,26 @@
+#!/usr/local/gnu/bin/perl
+
+# Convert tab separated data into html tables.
+
+$Header = '$Header: /database/bookcd/CD-ROM/support/scripts/RCS/htmlTable,v 1.1 1995/05/22 15:37:19 myoder Exp $';
+# $Log: htmlTable,v $
+# Revision 1.1  1995/05/22  15:37:19  myoder
+# Initial revision
+#
+
+$file = $ARGV[0];
+$outfile = $file;
+$outfile =~ s/.tab$/.cd/;
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+open(INPUT, $file) || die("$0: Can't open $file\n");
+
+while(<INPUT>) {
+	chop;
+	@row = split(/\t/);
+	print OUTPUT "<tr>\n\t";
+	foreach $col (@row) {
+		print OUTPUT "<td><a href = \"$col.html\"><cd-ybullet>$col</a></td>\n\t";
+		}
+	print OUTPUT "\n</tr>\n";
+}

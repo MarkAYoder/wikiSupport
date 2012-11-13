@@ -1,0 +1,392 @@
+head	1.12;
+access;
+symbols;
+locks
+	myoder:1.12; strict;
+comment	@# @;
+
+
+1.12
+date	97.09.04.21.11.56;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	97.02.27.17.51.53;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.07.05.21.08.25;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.01.10.21.23.24;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.10.17.17.55.47;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.08.21.20.11.17;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.06.29.21.17.48;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.06.01.19.05.28;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.06.01.16.25.13;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.06.01.11.43.38;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.06.01.11.33.54;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.05.17.13.40.41;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Creates the perl database that is used by cd2html.
+@
+
+
+1.12
+log
+@Added <cd-nav>.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# This file creates the database that translates from our
+# html extensions to real html.
+
+#$Log: Makecd2html,v $
+# Revision 1.11  1997/02/27  17:51:53  myoder
+# Added the <movie> tag.
+#
+# Revision 1.10  1996/07/05  21:08:25  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.9  1996/01/10  21:23:24  myoder
+# Changed Yellowbullet.gif to yellow.gif.
+#
+# Revision 1.8  1995/10/17  17:55:47  myoder
+# h1 heading are now centered.
+#
+# Revision 1.7  1995/08/21  20:11:17  myoder
+# Removed <hr> from after head.
+#
+# Revision 1.6  1995/06/29  21:17:48  myoder
+# Using CD2HTMLDTAT environment vairable.
+#
+# Revision 1.5  1995/06/01  19:05:28  myoder
+# Turned img back on.
+# Made cd-ybullet and cd-underconstruct look for the .gif files in
+# the @@path.
+#
+# Revision 1.4  1995/06/01  16:25:13  myoder
+# Added full path to $db_file.
+# Added die() to dbmopen().
+#
+# Revision 1.3  1995/06/01  11:43:38  myoder
+# Added <>'s to output strings.
+# Change matlab, head, foot, body, etc. to work with new cd2html
+#
+# Revision 1.2  1995/06/01  11:33:54  myoder
+# Added ../Graphics to the gif file paths.
+#
+# Revision 1.1  1995/05/17  13:40:41  myoder
+# Initial revision
+#
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.11 1997/02/27 17:51:53 myoder Exp myoder $';
+
+$db_file = $ENV{'CD2HTMLDATA'};
+
+dbmopen(%data, $db_file, 0666) || die "Can't open $db_file";
+
+$data{'a'}		= "&anchor(%params)";
+$data{'img'}		= "&img(%params)";
+$data{'movie'}		= "&movie(%params)";
+
+$data{'cd-title'}	= "<title>";
+$data{'/cd-title'}	= "</title>";
+
+$data{'cd-h1'}		= "<h1><center>";
+$data{'/cd-h1'}		= "</center></h1><p>";
+$data{'cd-h2'}		= "<h2>";
+$data{'/cd-h2'}		= "</h2>";
+$data{'cd-h3'}		= "<p><em>";
+$data{'/cd-h3'}		= "</em><br>";
+
+$data{'cd-head'}	= "&head(%params)";
+$data{'/cd-head'}	= "</head>";
+$data{'cd-body'}	= '&body(%params)';
+$data{'/cd-body'}	= "</body>";
+
+$data{'cd-nav'}          = "&nav(%params)";
+
+$data{'cd-foot'}	= '&foot($file)';
+$data{'/cd-foot'}	= "";
+
+$data{'cd-eqn'}		= "&eqn";
+$data{'/cd-eqn'}	= "&error";
+$data{'cd-matlab'}	= '&matlab';
+$data{'/cd-matlab'}	= "&error";
+$data{'cd-matlabname'} = 'M<font size=-1>ATLAB</font>';
+
+$data{'cd-todo'}	= '<img src="Question.gif"><font size=+2><em><strong>';
+$data{'/cd-todo'}	= "</font></em></strong>";
+$data{'cd-ybullet'}	= '&img((src, "yellow.gif", align, absmiddle))';
+$data{'cd-underconstruct'} = '&img((src, "question.gif", align, absmiddle))';
+
+if(0) {
+while (($key,$val) = each %data) {
+ 	print $key, ' = ', $val, "\n";
+}
+}
+
+dbmclose(%data);
+
+print "Done making $db_file\n";
+@
+
+
+1.11
+log
+@Added the <movie> tag.
+@
+text
+@d7 3
+d44 1
+a44 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.10 1996/07/05 21:08:25 myoder Exp myoder $';
+d68 2
+@
+
+
+1.10
+log
+@Converted to lowercase filenames.
+@
+text
+@d7 3
+d41 1
+a41 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.9 1996/01/10 21:23:24 myoder Exp myoder $';
+d49 1
+@
+
+
+1.9
+log
+@Changed Yellowbullet.gif to yellow.gif.
+@
+text
+@d7 3
+d38 1
+a38 1
+$Header = '$Header: /database/bookcd/support/scripts/RCS/Makecd2html,v 1.8 1995/10/17 17:55:47 myoder Exp $';
+d74 1
+a74 1
+$data{'cd-underconstruct'} = '&img((src, "Question.gif", align, absmiddle))';
+@
+
+
+1.8
+log
+@h1 heading are now centered.
+@
+text
+@d7 3
+d35 1
+a35 1
+$Header = '$Header: /database/bookcd/support/scripts/RCS/Makecd2html,v 1.7 1995/08/21 20:11:17 myoder Exp $';
+d70 1
+a70 1
+$data{'cd-ybullet'}	= '&img((src, "Yellowbullet.gif", align, absmiddle))';
+@
+
+
+1.7
+log
+@Removed <hr> from after head.
+@
+text
+@d7 3
+d32 1
+a32 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.6 1995/06/29 21:17:48 myoder Exp myoder $';
+d44 2
+a45 2
+$data{'cd-h1'}		= "<h1>";
+$data{'/cd-h1'}		= "</h1><p>";
+@
+
+
+1.6
+log
+@Using CD2HTMLDTAT environment vairable.
+@
+text
+@d7 3
+d29 1
+a29 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/scripts/RCS/Makecd2html,v 1.5 1995/06/01 19:05:28 myoder Exp $';
+d49 1
+a49 1
+$data{'/cd-head'}	= "</head><hr>";
+@
+
+
+1.5
+log
+@Turned img back on.
+Made cd-ybullet and cd-underconstruct look for the .gif files in
+the @@path.
+@
+text
+@d7 5
+d26 1
+a26 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.4 1995/06/01 16:25:13 myoder Exp myoder $';
+d28 1
+a28 1
+$db_file = "/database/bookcd/support/scripts/cd2htmlData";
+@
+
+
+1.4
+log
+@Added full path to $db_file.
+Added die() to dbmopen().
+@
+text
+@d7 4
+d21 1
+a21 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.3 1995/06/01 11:43:38 myoder Exp myoder $';
+d28 1
+a28 1
+#$data{'img'}		= "&img(%params)";
+d56 2
+a57 2
+$data{'cd-ybullet'}	= '<img src="Graphics/Yellowbullet.gif">';
+$data{'cd-underconstruct'}	= 'img src="../Graphics/Question.gif" align=absmiddle';
+@
+
+
+1.3
+log
+@Added <>'s to output strings.
+Change matlab, head, foot, body, etc. to work with new cd2html
+@
+text
+@d7 4
+d17 1
+a17 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/Makecd2html,v 1.2 1995/06/01 11:33:54 myoder Exp myoder $';
+d19 1
+a19 1
+$db_file = "cd2htmlData";
+d21 1
+a21 1
+dbmopen(%data, $db_file, 0666);
+@
+
+
+1.2
+log
+@Added ../Graphics to the gif file paths.
+@
+text
+@d7 3
+d13 1
+a13 1
+$Header = '$Header: /home/kirin/myoder/cd/support/scripts/RCS/Makecd2html,v 1.1 1995/05/17 13:40:41 myoder Exp myoder $';
+d19 5
+a23 2
+$data{'cd-title'}		 = "title";
+$data{'/cd-title'}		= "/title";
+d25 24
+a48 26
+$data{'cd-h1'}						= "strong";
+$data{'/cd-h1'}					= "/strong><p";
+$data{'cd-h2'}						= "h2";
+$data{'/cd-h2'}					= "/h2";
+$data{'cd-h3'}						= "p><em";
+$data{'/cd-h3'}					= "/em><br";
+
+$data{'cd-head'}		= "head";
+$data{'/cd-head'}	= "/head";
+$data{'cd-body'}				= 'body  background="../Graphics/ee2200Home.gif" text = f0f0f0 LINK=f0f0f0 VLINK=ffa0a0 ALINK=F0F0F0';
+$data{'/cd-body'}			= "/body";
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$mon = (Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec)[$mon];
+$data{'cd-foot'}		= "hr>Last updated $hour:$min on $mday-$mon-19$year<!";
+$data{'/cd-foot'}	= "hr";
+
+$data{'cd-eqn'}					= "pre";
+$data{'/cd-eqn'}				= "/pre";
+$data{'cd-matlabname'}		= '!>M<font size=-1>ATLAB</font';
+$data{'cd-matlab'}		= 'save &matlab(@@buffer)';
+$data{'/cd-matlab'}	= "/save";
+
+$data{'cd-todo'}					= 'img src="Question.gif"><font size=+2><em><strong';
+$data{'/cd-todo'}				= "/font></em></strong";
+$data{'cd-ybullet'}	= 'img src="../Graphics/Yellowbullet.gif" align=absmiddle';
+d52 1
+a52 1
+    while (($key,$val) = each %data) {
+d54 1
+a54 1
+    }
+a59 1
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d6 5
+a10 2
+$Log = "$Log$";
+$Header = "$Header$";
+d27 2
+a28 2
+$data{'/cd-head'}	= "/head><hr";
+$data{'cd-body'}				= 'body text = f0f0f0 LINK=00ff00 VLINK=ff0000 ALINK=0000ff';
+d38 1
+d44 2
+a45 1
+$data{'cd-ybullet'}	= 'img src="Yellowbullet.gif"';
+d47 2
+a48 1
+while (($key,$val) = each %data) {
+d50 1
+@

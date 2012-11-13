@@ -1,0 +1,692 @@
+head	0.15;
+access;
+symbols;
+locks; strict;
+comment	@% @;
+
+
+0.15
+date	94.09.21.01.23.18;	author fielding;	state Exp;
+branches;
+next	0.14;
+
+0.14
+date	94.08.01.13.30.59;	author fielding;	state Exp;
+branches;
+next	0.13;
+
+0.13
+date	94.07.16.11.12.16;	author fielding;	state Exp;
+branches;
+next	0.12;
+
+0.12
+date	94.07.08.08.08.14;	author fielding;	state Exp;
+branches;
+next	0.11;
+
+0.11
+date	94.07.06.19.19.12;	author fielding;	state Exp;
+branches;
+next	;
+
+
+desc
+@Library for manipulating Uniform Resource Locators as used by WWW
+@
+
+
+0.15
+log
+@Renamed parsing sets to match IETF draft and changed
+how they are tested to use bitmap masks;
+Modified parsing algorithm to use new sets;
+Parser now handles URLs like http://host:/ and uses
+the leftmost "?" as the start of query info;
+Added caching of base URL components so that they don't
+get re-parsed for every URL in a document.
+Allowed lowercase hex digits in unescape.
+@
+text
+@# $Id: wwwurl.pl,v 0.14 1994/08/01 13:30:59 fielding Exp fielding $
+# ---------------------------------------------------------------------------
+# wwwurl: A package for parsing and manipulating World-Wide Web
+#         Uniform Resource Locators (URL).
+#
+# This package has been developed by Roy Fielding <fielding@@ics.uci.edu>
+# as part of the Arcadia project at the University of California, Irvine.
+# It is distributed under the Artistic License (included with your Perl
+# distribution files).
+#
+# 13 Jun 1994 (RTF): Initial version
+# 17 Jun 1994 (RTF): Fixed double-relative URL handling (e.g. ../../)
+# 06 Jul 1994 (RTF): Fixed bug parsing URLs with an empty path and added
+#                    fallback code for undefined associative array entries.
+#                    Replaced complicated unescape loop with a simple
+#                    substitute (from Steven E. Brenner via Brooks Cutter).
+#                    Added escape() routine (w/mods) from Brooks Cutter.
+# 16 Jul 1994 (RTF): Added get_site() routine.
+# 27 Jul 1994 (RTF): Firmed-up algorithm for parsing relative URLs, fixing
+#                    several potential (but unlikely) bugs in the process.
+#                    Removed any hint of "URL:" prefix.
+# 17 Sep 1994 (RTF): Renamed parsing sets to match IETF draft and changed
+#                    how they are tested to use bitmap masks;
+#                    Modified parsing algorithm to use new sets;
+#                    Parser now handles URLs like http://host:/ and uses
+#                    the leftmost "?" as the start of query info;
+#                    Added caching of base URL components so that they don't
+#                    get re-parsed for every URL in a document.
+#                    Allowed lowercase hex digits in unescape.
+#
+# If you have any suggestions, bug reports, fixes, or enhancements,
+# send them to the libwww-perl mailing list at <libwww-perl@@ics.uci.edu>.
+# ---------------------------------------------------------------------------
+
+package wwwurl;
+
+%DefPort = (             # Define the default ports for major net services
+    'ftp',        21,
+    'file',        0,    # note: non-local file URLs are changed to ftp URLs
+    'telnet',     23,
+    'whois',      43,
+    'gopher',     70,
+    'finger',     79,
+    'http',       80,
+    'nntp',      119,
+    'news',      119,
+    'wais',      210,
+    'webster',   765,
+    'prospero', 1525,    # I thought it was 191, but IETF differs
+);
+
+# ===========================================================================
+# The following six categories are bitmap masks for determining membership
+# in the corresponding URL syntactic set, as per the IETF/URI working group
+# draft specification for Relative URLs <draft-ietf-uri-relative-url-00.txt>.
+
+$UsesRelative    = 1;
+$UsesNetloc      = 2;
+$NonHierarchical = 4;
+$UsesParams      = 8;
+$UsesQuery       = 16;
+$UsesFragment    = 32;
+
+%InSet = (      # Define scheme membership in each category
+    '',         ($UsesRelative | $UsesNetloc | $UsesFragment | $UsesQuery),
+    'http',     ($UsesRelative | $UsesNetloc | $UsesFragment | $UsesQuery),
+    'file',     ($UsesRelative | $UsesNetloc | $UsesFragment),
+    'ftp',      ($UsesRelative | $UsesNetloc | $UsesFragment | $UsesParams),
+    'prospero', ($UsesRelative | $UsesNetloc | $UsesFragment | $UsesParams),
+    'nntp',     ($UsesRelative | $UsesNetloc | $UsesFragment),
+    'gopher',   ($UsesRelative | $UsesNetloc | $NonHierarchical |
+                 $UsesFragment),
+    'wais',     ($UsesRelative | $UsesNetloc | $NonHierarchical | $UsesQuery | 
+                 $UsesFragment),
+    'mailto',   ($NonHierarchical),
+    'news',     ($NonHierarchical | $UsesFragment),
+    'finger',   ($UsesNetloc | $NonHierarchical | $UsesFragment),
+    'whois',    ($UsesNetloc | $NonHierarchical | $UsesFragment),
+    'webster',  ($UsesNetloc | $NonHierarchical | $UsesFragment),
+    'telnet',   ($UsesNetloc | $NonHierarchical),
+    'rlogin',   ($UsesNetloc | $NonHierarchical),
+    'tn3270',   ($UsesNetloc | $NonHierarchical),
+);
+
+# ===========================================================================
+# The following package globals are used to cache the last Base URL parsed.
+
+$Burl   = '';
+$Bsch   = '';
+$Baddr  = '';
+$Bport  = '';
+$Bpath  = '';
+$Bquery = '';
+$Bfrag  = '';
+$Bmem   = 0;
+
+
+# ===========================================================================
+# ===========================================================================
+# parse(): Parse the given URL into its component parts according to
+#          WWW URI rules, returning '' for those that are not present. 
+#          If no scheme is given, the URL is parsed according to HTTP rules,
+#          so schemes which use different rules may have to recombine parts.
+#
+#     Returns the folowing in order:
+#
+#             $scheme : The access scheme (converted to lower case);
+#             $address: The login or hostname/IP address (if appropriate);
+#             $port   : The TCP port (if appropriate);
+#             $path   : The object path (plus any params);
+#             $query  : The post-'?' search info (if scheme uses queries);
+#             $frag   : The post-'#' fragment identifier (if uses fragments).
+#             
+sub parse
+{
+    local($url)     = @@_;
+    local($scheme)  = '';
+    local($address) = '';
+    local($port)    = '';
+    local($path)    = '';
+    local($query)   = '';
+    local($frag)    = '';
+
+    if ($url =~ s#^([.+\-\w]+):##)
+    {
+        $scheme = $1;
+        $scheme =~ tr/A-Z/a-z/;
+    }
+
+    local($member) = $InSet{$scheme} || 0;
+
+    if ($member & $UsesFragment)
+    {
+        if ($url =~ s/#([^#]*)$//) { $frag = $1; }
+    }
+
+    if (($member & $UsesNetloc) && ($url =~ m#^//#o))
+    {
+        $url =~ s#^//([^/]*)##;
+        $address = $1;
+        if ($address =~ s/:(\d*)$//)
+        {
+            $port = $1;
+        }
+    }
+
+    if ($member & $UsesQuery)
+    {
+        if ($url =~ s/\?(.*)$//) { $query = $1; }
+    }
+
+    $path = $url;
+
+    return ($scheme, $address, $port, $path, $query, $frag);
+}
+
+
+# ===========================================================================
+# compose(): Recombine the given component parts into a URL string.
+#
+#     The following in components may be passed in:
+#
+#             $scheme : The access scheme;
+#             $address: The hostname/IP address;
+#             $port   : The TCP port;
+#             $path   : The object path (plus any params);
+#             $query  : The post-? search info
+#             $frag   : The post-'#' fragment identifier
+#             
+sub compose
+{
+    local($scheme, $address, $port, $path, $query, $frag) = @@_;
+    local($url) = '';
+
+    if ($scheme) { $url = $scheme . ':'; }
+
+    if ($address)
+    {
+        $url .= "//$address";
+        if ($port) { $url .= ":$port"; }
+    }
+
+    if ($path) { $url .= $path;     }
+    if ($query)
+    {
+        if (!$path) { $url .= '/';  }  # Avoid mistaking query as being
+        $url .= "?$query";             # part of the address
+    }
+    if ($frag) { $url .= "#$frag";  }
+
+    return $url;
+}
+
+
+# ===========================================================================
+# unescape(): Return the passed URL after replacing all %NN escaped chars
+#             with their actual character equivalents.
+#
+sub unescape
+{
+    local($url) = @@_;
+
+    $url =~ s/%([\dA-Fa-f][\dA-Fa-f])/pack("C",hex($1))/ge;
+    return $url;
+}
+
+# ===========================================================================
+# escape(): Return the passed string after replacing all characters matching
+#           the passed pattern with their %XX hex escape chars.  Note that
+#           the caller must be sure not to escape reserved URL characters
+#           (e.g. / in pathnames, ':' between address and port, etc.) and thus
+#           this routine can only be applied to each URL part separately. E.g.
+#
+#           $escname = &escape($name,'[\x00-\x20"#%/;<>?\x7F-\xFF]');
+#
+sub escape
+{
+    local($str, $pat) = @@_;
+         
+    $str =~ s/($pat)/sprintf("%%%02lx",unpack('C',$1))/ge;
+    return($str);
+}
+
+
+# ===========================================================================
+# absolute(): Return the absolute URL given a (possibly relative) URL
+#             and the document's absolute base URL.  Uses the $B* variables
+#             to cache the last Base URL parsed.
+#
+sub absolute
+{
+    local($base, $url) = @@_;
+
+    $url =~ s/^\s+//;  # Remove any preceding whitespace
+    $url =~ s/\s.*//;  # Remove anything after first word
+
+    local($scheme, $addr, $port, $path, $query, $frag) = &parse($url);
+
+    local($member) = $InSet{$scheme} || 0;
+
+
+    RELATED: {
+
+        if (!$base)          # If no base was given then it can't be relative
+        {
+            if (!$scheme) { $scheme = 'file' }   # Default to a file URL
+            last RELATED;
+        }
+
+        if ($base ne $Burl)  # Check the Base URL cache
+        {
+            $Burl = $base;
+            ($Bsch,$Baddr,$Bport,$Bpath,$Bquery,$Bfrag) = &parse($Burl);
+            $Bmem = $InSet{$Bsch} || 0;
+        }
+
+        if (!$scheme)
+        {
+            $scheme = $Bsch;
+            $member = $Bmem;
+            if ($query && !($Bmem & $UsesQuery))  # Restore mistaken queries
+            {
+                $path .= '?'. $query;
+                $query = '';
+            }
+        }
+        else { last RELATED if ($scheme ne $Bsch); }
+
+        last RELATED unless ($member & $UsesRelative);
+
+        last RELATED if ($addr || $port);    # Child must have used '//'
+
+        $addr = $Baddr;                      # else it inherits base netloc
+        $port = $Bport;
+
+        if (!$path)
+        {
+            $path = $Bpath;
+            if (!$query) { $query = $Bquery; }
+        }
+        elsif ($member & $NonHierarchical)
+        {;} # Do nothing
+        elsif ($path !~ m|^/|o)     # If the child URL does not begin with '/'
+        {
+            local($ppath);
+            if ($Bpath)
+            {
+                $ppath = $Bpath;
+                if ($Bmem & $UsesParams)
+                {
+                    $ppath =~ s#;.*##;       # Trim off any base parameters
+                }
+                $ppath =~ s#/[^/]*$#/#;      # Trim off any base filename
+            }
+            else { $ppath = '/'; }
+
+            $path = $ppath . $path;
+            #
+            # The order in which we remove the relative "/." and "xxx/.."
+            # path segment components is extremely important.
+            #
+            while ($path  =~ s#/\./#/#) {;}
+            $path  =~ s#/\.$#/#;
+            while ($path  =~ s#/[^/]*/\.\./#/#) {;}
+            $path  =~ s#/[^/]*/\.\.$#/#;
+        }
+    }
+
+    if ($scheme eq 'file')
+    {
+        if (!$addr)                  { $addr   = 'localhost'; }
+        elsif ($addr ne 'localhost') { $scheme = 'ftp';       }
+        #
+        # The above line will have to be deleted once people stop using
+        # file: as an alias for ftp: (i.e. when the IETF standard is done).
+        #
+    }
+    elsif ($scheme eq 'http')        { $path  =~ s#^/\%7E#/~#io; }
+
+    # NOTE: Fanatical spec-followers should reverse the above substitution
+    #       because it improperly prefers the tilde character over %7E (:-b)
+
+    if ($port && ($port == $DefPort{$scheme})) { $port = ''; }
+
+    if (!$path) { $path = '/'; }
+
+    return &compose($scheme, $addr, $port, $path, $query, $frag);
+}
+
+
+# ===========================================================================
+# get_site(): Return the site part of the passed-in absolute URL
+#             (i.e. the hostname:port) replacing any missing port with
+#             the default.  If the URL scheme does not allow hostport,
+#             then we return '';
+#
+sub get_site
+{
+    local($scheme, $site, $port, $path, $query, $frag) = &parse($_[0]);
+
+    return '' unless (defined($DefPort{$scheme}));
+
+    if (!$port) { $port = $DefPort{$scheme}; }
+
+    if ($port)  { $site .= ":$port"; }
+
+    return $site;
+}
+
+
+# ===========================================================================
+
+1;
+@
+
+
+0.14
+log
+@Firmed-up algorithm for parsing relative URLs, fixing
+several potential (but unlikely) bugs in the process.
+Removed any hint of "URL:" prefix.
+@
+text
+@d1 1
+a1 1
+# $Id: wwwurl.pl,v 0.13 1994/07/16 11:12:16 fielding Exp fielding $
+d22 8
+d32 1
+a32 1
+# send them to Roy Fielding at <fielding@@ics.uci.edu>.
+d52 4
+a55 6
+%CantChange = (          # Define schemes that cannot be altered by absolute
+    'mailto',   1,
+    'news',     1,
+    'mid',      1,
+    'cid',      1,
+);
+d57 6
+a62 8
+%NonHierarchical = (     # Define remaining schemes that can be changed
+    'telnet',   1,       #        but which cannot use relative URL paths
+    'rlogin',   1,
+    'tn3270',   1,
+    'whois',    1,
+    'gopher',   1,
+    'finger',   1,
+);
+d64 19
+a82 3
+%UsesQuery = (           # Define schemes that use '?' to denote a query
+    'http',     1,
+    'wais',     1,
+d85 2
+a86 4
+%UsesParams = (          # Define schemes that use ';' to denote parameters
+    'ftp',      1,
+    'prospero', 1,
+);
+d88 8
+d97 1
+d99 1
+d110 3
+a112 3
+#             $path   : The object path;
+#             $query  : The post-'?' search info (only if scheme uses queries);
+#             $frag   : The post-'#' fragment identifier.
+d130 1
+a130 1
+    if ($url =~ s/#([^#]*)$//)  { $frag  = $1; }
+d132 1
+a132 1
+    if ($url =~ m#^//#o)
+d134 5
+d141 1
+a141 1
+        if ($address =~ s/:(\d+)$//)
+d147 1
+a147 1
+    if (!$scheme || $UsesQuery{$scheme})
+d149 1
+a149 1
+        if ($url =~ s/\?([^?]*)$//) { $query = $1; }
+d166 1
+a166 1
+#             $path   : The object path;
+d203 1
+a203 1
+    $url =~ s/%([\dA-F][\dA-F])/pack("C",hex($1))/ge;
+d227 2
+a228 1
+#             and its parent's absolute URL.
+d232 1
+a232 1
+    local($parent, $url) = @@_;
+d239 1
+a239 1
+    return $url if ($CantChange{$scheme});
+d241 1
+d244 1
+a244 1
+        if (!$parent)      # If no parent was given then it can't be relative
+d250 6
+a255 1
+        local($psch,$paddr,$pport,$ppath,$pquery,$pfrag) = &parse($parent);
+d259 3
+a261 2
+            $scheme = $psch;
+            if ($query && !$UsesQuery{$scheme})  # Restore mistaken queries
+d267 1
+a267 1
+        else { last RELATED if ($scheme ne $psch); }
+d269 1
+a269 1
+        last RELATED if ($addr || $port);        # Child must have used '//'
+d271 1
+a271 2
+        $addr = $paddr;
+        $port = $pport;
+d273 3
+d278 2
+a279 2
+            $path = $ppath;
+            if (!$query) { $query = $pquery; }
+d281 1
+a281 1
+        elsif ($NonHierarchical{$scheme})
+d285 2
+a286 1
+            if ($ppath)
+d288 2
+a289 1
+                if ($UsesParams{$scheme})
+d291 1
+a291 1
+                    $ppath =~ s#;.*##;       # Trim off any parent parameters
+d293 1
+a293 1
+                $ppath =~ s#/[^/]*$#/#;      # Trim off any parent filename
+d304 2
+a305 2
+            while ($path  =~ s#/[^/]+/\.\./#/#) {;}
+            $path  =~ s#/[^/]+/\.\.$#/#;
+d318 1
+a318 1
+    elsif ($scheme eq 'http')        { $path  =~ s#^/\%7E#/~#; }
+d323 3
+a325 1
+    if ($port && $port == $DefPort{$scheme})  { $port = ''; }
+@
+
+
+0.13
+log
+@Added get_site() routine.
+@
+text
+@d1 1
+a1 1
+# $Id: wwwurl.pl,v 0.12 1994/07/08 08:08:14 fielding Exp fielding $
+d19 3
+d30 12
+a41 12
+    'ftp',       21,
+    'file',       0,     # note: non-local file URLs are changed to ftp URLs
+    'telnet',    23,
+    'whois',     43,
+    'gopher',    70,
+    'finger',    79,
+    'http',      80,
+    'nntp',     119,
+    'news',     119,
+    'prospero', 191,
+    'wais',     210,
+    'webster',  765,
+d52 1
+a52 1
+    'telnet',   1,       #        but which cannot use relative URLs
+d60 4
+d65 6
+d74 2
+a75 2
+#          If the scheme is not present, the URL will be parsed according
+#          to HTTP rules.
+d83 2
+a84 2
+#             $query  : The post-? search info (http and wais only)
+#             $frag   : The post-'#' fragment identifier
+d96 1
+a96 1
+    if ($url =~ s#^([+\-\w]+):##)
+a103 5
+    if (!$scheme || ($scheme eq 'http') || ($scheme eq 'wais'))
+    {
+        if ($url =~ s/\?([^?]*)$//) { $query = $1; }
+    }
+
+d113 6
+d150 7
+a156 3
+    if ($path)  { $url .= $path;     }
+    if ($query) { $url .= "?$query"; }
+    if ($frag)  { $url .= "#$frag";  }
+d170 1
+a170 1
+    $url =~ s/%(..)/pack("C",hex($1))/ge;
+d200 2
+a201 1
+    $url =~ s/^url://io;   # Just in case someone follows dumb IETF format
+d217 1
+a217 6
+        if (!$scheme) { $scheme = $psch; }
+        else          { last RELATED if ($scheme ne $psch); }
+
+        if (!$pport)  { $pport = ($DefPort{$psch} || ''); }
+
+        if ($addr || $port)
+d219 6
+a224 3
+            if (!$port) { $port = ($DefPort{$scheme} || ''); }
+            last RELATED if ($addr ne $paddr);
+            last RELATED if ($port ne $pport);
+d226 1
+a226 5
+        else
+        {
+            $addr = $paddr;
+            $port = $pport;
+        }
+d228 1
+a228 1
+        last RELATED if ($NonHierarchical{$scheme});
+d230 3
+d236 1
+a236 2
+            last RELATED if ($query);
+            $query = $pquery;
+d238 19
+a256 4
+        elsif ($path !~ m|^/|o)           # The order in which we resolve the
+        {                                 # relative components is important
+            $ppath =~ s#/[^/]*$#/#;
+            $path  =  $ppath . $path;
+d268 4
+@
+
+
+0.12
+log
+@Fixed bug parsing URLs with an empty path and added
+fallback code for undefined associative array entries.
+Replaced complicated unescape loop with a simple
+substitute (from Steven E. Brenner via Brooks Cutter).
+Added escape() routine (w/mods) from Brooks Cutter.
+@
+text
+@d1 1
+a1 1
+# $Id: wwwurl.pl,v 0.11 1994/07/06 19:19:12 fielding Exp fielding $
+d18 1
+d249 22
+@
+
+
+0.11
+log
+@Placed under RCS version control
+@
+text
+@d1 1
+a1 1
+# $Id$
+d13 5
+d66 1
+a66 1
+#             $address: The hostname/IP address (if appropriate);
+d82 1
+a82 1
+    if ($url =~ s#^([\w-]+):##)
+d97 1
+a97 1
+        $url =~ s#^//([^/]*)/#/#;
+d151 1
+a151 6
+    local($pos) = $[;
+    while (($pos = index($url,'%',$pos)) >= $[)
+    {
+        substr($url,$pos,3) = pack("C", hex(substr($url,($pos + 1),2)));
+        $pos++;
+    }
+d155 16
+d172 1
+d200 1
+a200 1
+        if (!$pport)  { $pport = $DefPort{$psch}; }
+d204 1
+a204 1
+            if (!$port) { $port  = $DefPort{$scheme}; }
+d243 1
+a243 1
+    if ($port == $DefPort{$scheme})  { $port = ''; }
+@

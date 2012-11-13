@@ -1,0 +1,135 @@
+#!/usr/local/bin/perl
+
+# This program is called with the base filename of the .ps file as the
+# first argument and the title of the html document as the second
+# argument.  For example, to convert Lab1.ps I would type:
+#  pstohtml Lab1 "Laboratory Assignment #1"
+
+$USAGE = "Usage:  pstohtml filename title chapter\n" . 
+" Where filename is the name of the .ps file *without* the .ps extension,\n" .
+" title is the title of the HTML document to be produced, and chapter is\n" .
+" the chapter that this lab is associated with.";
+
+$tmpdir = "tmp_";
+
+if ($#ARGV != 2) {
+    print STDERR $USAGE;
+    exit 1;
+}
+
+$base = $ARGV[0];
+$title = $ARGV[1];
+$chap = $ARGV[2];
+
+if (! -e "$base.ps") {
+    print STDERR "file not found: $base.ps\n";
+    print STDERR $USAGE;
+    exit 1;
+}
+
+$commandstring="gs -dNOPAUSE -sDEVICE=ppmraw -sOutputFile=$tmpdir$base.%d.ppm -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -r90 $base.ps -c quit";
+
+open(GS,"|$commandstring");
+close(GS);
+
+if (! -e "$base.pdf") {
+    print "No PDF file exists, creating PDF file\n";
+    system "ps2pdf $base.ps $base.pdf";
+}
+
+open(INDEX,"| cat > $base.cd");
+print INDEX "<HTML>\n";
+print INDEX "<cd-HEAD chap=$chap unit=lab>\n";
+print INDEX "  <TITLE>$title</TITLE>\n</cd-HEAD>\n";
+print INDEX "<cd-BODY BGCOLOR=\"#FFFFFF\">\n";
+print INDEX "<CENTER><H1>$title</H1></CENTER>\n<HR>\n";
+print INDEX "<p>Here is a <A HREF=\"$base.ps\">Postscript</A> version ";
+print INDEX "and here is a <A HREF=\"$base.pdf\">PDF</A> version.\n";
+print INDEX "<p>You may obtain <A HREF=\"http://www.cs.wisc.edu/";
+print INDEX "~ghost/\">Ghostscript and Ghostview</A> for viewing and \n";
+print INDEX "printing the Postscript version.  The PDF version may be \n";
+print INDEX "viewed and printed using <A HREF=\"http://www.adobe.com/\">";
+print INDEX "Adobe Acrobat Reader</A>.\n";
+print INDEX "<HR>\n";
+print INDEX "<p>Or you may view the HTML version:\n";
+print INDEX "<CENTER>\n";
+print INDEX "<TABLE BORDER=2 CELLSPACING=4 CELLPADDING=10 ALIGN=CENTER>\n";
+
+
+open(PPM,"ls $tmpdir$base.*.ppm |");
+@ppmfiles = <PPM>;
+close(PPM);
+$N = $#ppmfiles;
+
+for ($j=0,$i=1; $j <= $N; ++$j) {
+    $ppmfile = "$tmpdir$base." . $i . ".ppm";
+    $gif_file = "$base\_$i.gif";
+    system "ppmquant 256 $ppmfile | ppmtogif > $gif_file";
+    system("rm $ppmfile \n");
+    open(WRAP,"| cat > $base\_$i.htm");
+    print WRAP "<HTML>\n<HEAD>\n   <TITLE>$title (page $i)</TITLE>\n</HEAD>\n";
+    print WRAP "<BODY>\n<CENTER><TABLE ALIGN=CENTER CELLSPACING=20><TR>\n";
+    if ($j > 0) {
+        $p = $i-1;
+	print WRAP "<TD><A HREF=\"$base\_$p.htm\">Page $p</A></TD>\n";
+    } else {
+	print WRAP "<TD>&nbsp</TD>";
+    }
+    print WRAP "<TD><A HREF=\"index.htm\">$title</A></TD>\n";
+    if ($j < $#ppmfiles) {
+	$n = $i+1;
+	print WRAP "<TD><A HREF=\"$base\_$n.htm\">Page $n</A></TD>\n";
+    } else {
+	print WRAP "<TD>&nbsp</TD>";
+    }
+    print WRAP "</TR></TABLE>\n";
+    print WRAP "<P><A HREF=\"$gif_file\"><IMG SRC=\"$gif_file\"></A>";
+    print WRAP "</P>\n</CENTER>\n</BODY>\n</HTML>\n";
+#    print WRAP "<BODY>\n<P><IMG SRC=\"$gif_file\" WIDTH=100%></P>\n</BODY>\n</HTML>\n";
+    close(WRAP);
+    unless ($i-1 & 3)
+    {
+        if ($i > 1) {
+	    print INDEX "</TR>";
+	}
+	print INDEX "<TR>\n";
+    }
+    print INDEX "<TD><A HREF=\"$base\_$i.htm\">Page $i</A></TD>\n";
+    $i++;
+}
+
+$iv = $i-1;
+if ($iv > 0) {
+    $basev = $base . "v";
+    system "psselect -p$iv $base.ps $basev.ps";
+
+    if (! -e "$basev.pdf") {
+        print "No PDF file exists, creating PDF file\n";
+        system "ps2pdf $basev.ps $basev.pdf";
+    }
+    open(WRAP,"| cat > $basev.htm");
+    print WRAP "<HTML>\n<HEAD>\n   <TITLE>$title (Instructor Verification)</TITLE>\n</HEAD>\n";
+    print WRAP "<BODY>\n<P><IMG SRC=\"$gif_file\"></P>\n</BODY>\n</HTML>\n";
+#    print WRAP "<BODY>\n<P><IMG SRC=\"$gif_file\" WIDTH=100%></P>\n</BODY>\n</HTML>\n";
+    close(WRAP);
+}
+
+if ($i > 4) {
+  while ($i-1&3) {
+    $i++;
+    print INDEX "<TD>&nbsp</TD>\n";
+  }
+}
+print INDEX "</TR></TABLE></CENTER><HR>\n";
+print INDEX "The instructor verification sheet is included as the last\n";
+print INDEX "page of the Lab.  It is also available seperately below:\n";
+print INDEX "<CENTER>\n";
+print INDEX "<TABLE BORDER=2 CELLSPACING=4 CELLPADDING=10 ALIGN=CENTER>\n";
+print INDEX "<TR><TD><A HREF=\"$basev.htm\">HTML</A></TD>\n";
+print INDEX "<TD><A HREF=\"$basev.ps\">Postscript</A></TD>\n";
+print INDEX "<TD><A HREF=\"$basev.pdf\">PDF</A></TD>\n";
+print INDEX "</TR></TABLE></CENTER>\n";
+print INDEX "<HR>\n</cd-BODY>\n<cd-foot>\n</cd-foot>\n</cd-HTML>\n";
+close(INDEX);
+
+

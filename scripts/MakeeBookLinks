@@ -1,0 +1,22 @@
+#!/bin/bash -f
+rm /tmp/pagelinks.txt
+cd $CDROOT/chapters
+
+# hack2 runs cd2html on all the .cd files
+find . -name "*.cd" -print -exec hack2 {} \;
+
+# Now do the files in contents
+cd $CDROOT/contents
+MakeDLN -hide figures
+MakeDLN -hide baf
+MakeDLN -hide homework
+MakeDLN -hide labs
+MakeDLN -hide demosLV
+MakeChap -hide
+
+for file in authors.cd copyright.cd index.cd install.cd labview.cd matlab.cd title.cd welcome.cd
+do
+  cd2html $file
+done
+
+sort -n /tmp/pagelinks.txt | uniq > /tmp/eBookLinks.txt

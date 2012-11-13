@@ -1,0 +1,137 @@
+#!/usr/bin/perl
+
+# Create Chapter overview html files.
+#	uses info from overview2.txt and from the Demos/Labs/Homework dires
+# run in the main chapter directory.
+
+$Header = '$Header: /home/ratbert5/myoder/cd/support/scripts/RCS/MakeOver,v 1.10 1997/10/13 21:49:48 myoder Exp myoder $';
+# $Log: MakeOver,v $
+# Revision 1.10  1997/10/13  21:49:48  myoder
+# Added overview.gif
+# Added 2nd argument to makesummary.
+#
+# Revision 1.9  1997/10/01  22:06:25  myoder
+# Removed wav from tape icon
+# Removed .mov
+# Generalized the building of the summaries.
+#
+# Revision 1.8  1997/09/30  17:39:32  myoder
+# No longer includes .au files.
+#
+# Revision 1.7  1997/09/10  22:30:51  myoder
+# Added the alt= field to the img tags.
+# Added a summary of the exercise diretory.
+#
+# Revision 1.6  1996/11/16  21:40:53  myoder
+# Uses speaker icon for .au files.
+#
+# Revision 1.5  1996/11/16  11:57:08  myoder
+# Looks for .au files too.
+#
+# Revision 1.4  1996/11/14  23:20:13  myoder
+# Added "tape" and "camera" icons.
+#
+# Revision 1.3  1996/07/05  21:07:32  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.2  1996/04/29  13:52:34  myoder
+# Puts things in overview.cd now.
+# Looks for chapter overview in overview.txt2.
+# Uses unit = overchap.
+#
+# Revision 1.1  1996/04/15  19:52:05  myoder
+# Initial revision
+#
+# 
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+require 'head.pl';
+
+my $noshow = 0;   # set to 1 if things with hide.txt should be skipped. 
+if($ARGV[0] eq '-hide') {  # Don't show Under Construction and old links
+  $noshow = 1;
+}
+
+$path = '.';
+$outfile = $path . "/" . "overview.cd";
+
+# $pwd = $ENV{'PWD'};
+chop($pwd = `pwd`);
+
+@tmp = split("/", $pwd);	# Find name of current directory
+@tmp = reverse(@tmp);
+$dir = $tmp[0];
+
+open(NAME, 'name.txt');   $chapname = <NAME>; chop($chapname); chop($chapname);
+open(NAME, 'number.txt'); $chapnum  = <NAME>; chop($chapnum);chop($chapnum);
+print "($chapname)\n";
+print "($chapnum)\n";
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+print "$outfile\n";
+
+# print OUTPUT "<cd-head chap=$chapnum unit=overchap>\n";
+print OUTPUT "[[Category:ChapOverview]]\n";
+print OUTPUT "[[Category:Chap$chapnum]]\n";
+print OUTPUT "<!-- Do not Edit, this file is created by $0 -->\n\n";
+print OUTPUT "<title>$chapnum $chapname Overview</title>\n\n";
+if(0) {
+print OUTPUT "</cd-head>\n";
+print OUTPUT "<cd-body>\n";
+if(-e "overview.jpg") {
+  print OUTPUT "<img src=\"overview.jpg\" height=\"64\" width=\"64\" align=\"left\" />\n"
+} elsif(-e "overview.png") {
+  print OUTPUT "<img src=\"overview.png\" height=\"64\" width=\"64\" align=\"left\" />\n"
+} elsif(-e "overview.gif") {
+  print OUTPUT "<img src=\"overview.gif\" height=\"103\" width=\"150\" hspace=\"5\" vspace=\"5\" align=\"right\" />\n"
+}
+if(bookType() eq 'dtps' ) {
+    print OUTPUT "<cd-h1>$chapnum. $chapname <small>(<cd-dtsp-link page=\"" . $eBook[$chapnum] . "\">eBook</cd-dtsp-link>)</small>\n";
+} else {
+    print OUTPUT "<cd-h1>$chapnum. $chapname\n";
+}
+
+	$wav  = "overview.wav";
+	$au   = "overview.au";
+	$mov  = "overview.mov";
+	if(-e $wav) {
+	    print OUTPUT "<a href=\"$wav\">\n";
+	    print OUTPUT "<img style=\"border:none\" alt=\"Click for Audio\" src=\"tape.gif\" />";
+	    print OUTPUT "</a>\n";
+	}
+
+print OUTPUT "</cd-h1>\n";
+} # if(0)
+# if(-e $wav or -e $mov) {
+#       print OUTPUT "<br>\n";
+# }
+
+open(TEXT, 'overview.tx2');
+# copy overview.tx2 to the output file
+while(<TEXT>) {
+    print OUTPUT;
+}
+
+foreach $head (@Headings[2..$#Headings]) {
+#    if(-e "$head/overview.txt") {
+    if(-e "$head") {
+#      print OUTPUT "<cd-h2><a href=\"$head/overview.htm\">$HeadingsID{$head}</a></cd-h2>\n";
+	print OUTPUT "== [[$chapnum $chapname $HeadingsID{$head}]] ==\n";
+      makesummary($head, $head, $noshow, $chapnum);
+    }
+}
+if(0) {
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+} # if(0)
+close(OUTPUT);
+#system("cd2html $outfile; rm $outfile");
+system("cd2wiki $outfile; uploadWiki $outfile; deleteWiki \"$chapnum. $chapname Overview\"");

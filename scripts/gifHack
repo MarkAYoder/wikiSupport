@@ -1,0 +1,11 @@
+#!/bin/csh -f
+mv $1 $1:r.GIF
+# giftoppm $1:r.GIF | ppmtogif -transparent \#ffffff -interlace > $1
+giftopnm $1:r.GIF | ppmtogif -transparent \#ffffff -interlace > $1
+
+# $Header: gifHack,v 1.1 95/05/17 13:40:41 myoder Exp $
+
+# $Log:	gifHack,v $
+# Revision 1.1  95/05/17  13:40:41  13:40:41  myoder (Mark Yoder)
+# Initial revision
+# 

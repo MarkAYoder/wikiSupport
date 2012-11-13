@@ -1,0 +1,31 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use PDF::API2;
+
+if(!@ARGV) {
+  print "Usage: $0 in0 in1 in2 ... out\n";
+  exit;
+}
+
+print "@ARGV\n";
+
+my $outfile = pop @ARGV;
+my $pdfout = PDF::API2->new;
+
+my $inew=1;
+my $file;
+foreach $file (@ARGV) {
+  my $pdf  = PDF::API2->open($file) or die "Can't open $file";
+  print "$file: pages = " . $pdf->pages . "\n";
+
+  for(my $i=2; $i<= $pdf->pages; $i++) {
+    print "i = $i, inew = $inew\n";
+    $pdfout->importpage($pdf, $i, $inew++);
+  }
+  $pdf->end;
+}
+
+$pdfout->saveas($outfile);
+$pdfout->end();

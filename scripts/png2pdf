@@ -1,0 +1,294 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Wraps .gif homework files into .pdf files.
+#
+
+use strict;
+
+use pdflib_pl 4.0;
+
+if( $#ARGV lt 0) {
+  print "Usage: $0 title out.pdf statement.gif page sol1.gif sol2.gif ...\n";
+  exit;
+}
+
+# print "**************\n";
+# print "@ARGV\n";
+# print "**************\n";
+
+my $pagewidth  = 7;
+my $pageheight = 11;
+# We generate a page with the image's dimensions
+my $topmargin = 36+18;	# Prints nicer
+my $botmargin = 36;	# extra added at bottom for the solution buttons.
+my $leftmargin = 18;	# Only used for pdf's gif's already have a margin.
+my $rightmargin = 18;	# Only used to place icon and 'Solution' button
+
+my $title = shift @ARGV;
+my $keywords = shift @ARGV;  $keywords =~ s/;//g;
+my $pdffile = shift @ARGV;
+my $statement = $ARGV[0];
+
+# Extract keywords from the title.
+$keywords .= ' ' . lc($title);
+$keywords =~ s/h\(s\)/hofs/ig;	# I normally remove all ()'s, but I keep H(s) and H(z).
+$keywords =~ s/h\(z\)/hofz/ig;
+# print "1: $keywords\n";
+$keywords =~ s/[^a-zA-Z0-9\[\]\/\-]+/,,/g;
+$keywords =~ s/hofs/H(s)/g;
+$keywords =~ s/hofz/H(z)/g;
+# print "2: $keywords\n";
+$keywords = ','. $keywords . ',';
+# print "3: $keywords\n";
+$keywords =~ s/,(([0-9]+)|a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|(-+)),/,/g;
+# print "4: $keywords\n";
+$keywords =~ s/,+/,/g;
+# print "5: $keywords\n";
+$keywords = substr($keywords, 1, -1);
+# print "6: $keywords\n";
+
+# Make a new pdf object and set a few parameters.
+my $p = PDF_new();
+
+die "Can't open $pdffile" if (PDF_open_file($p, "$pdffile") == -1);
+
+PDF_set_info($p, "Creator", "image.pl");
+PDF_set_info($p, "Author", "Jim McClellan");
+PDF_set_info($p, "Subject", "Signal Processing First, Copyright 2012, Prentice-Hall");
+PDF_set_info($p, "Title", $title);
+PDF_set_info($p, "Keywords", "$keywords");
+
+# PDF_set_value($p, 'compress', 0);
+
+PDF_set_parameter($p, 'imagewarning', 'true');
+PDF_set_parameter($p, 'openmode',   'none');
+PDF_set_parameter($p, 'openaction', 'fitwidth');
+
+# Go through each of the image files and add up the heights
+# and find the max width;
+my $page=1;
+my $iconfile = $ENV{'CDROOT'} . '/graphics/cdimage.png';
+my $iconfile = $ENV{'CDROOT'} . '/graphics/ChirpForCover.png';
+while(@ARGV) {
+  my $file;
+  my $i=0;
+  my @images;
+  my $heightsum = 0;
+  my $maxwidth = 0;
+  my $imagefile;
+
+#
+# Keep opening image files until you have enough to fill a page.
+# Once you have more than a page, save the last image file for the next page.
+#
+  while($imagefile = $ARGV[0]) {
+    my $width;
+    my $height;
+#    print "### @ARGV ###\n";
+    shift @ARGV;
+    last if $imagefile eq 'page';
+
+    if($imagefile =~ /\.pdf$/) {
+      print "opening $imagefile\n";
+#      my $doc = PDF_open_pdi($p, $imagefile, "", 0);
+#      die "Can't open $imagefile" if($doc == -1);
+
+#      my $pagecount = PDF_get_pdi_value($p, '/Root/Pages/Count', $doc, -1, 0);
+#      print "Found $pagecount pages.  Only copying first page\n" 
+#	if $pagecount > 1;
+
+#      my $page = PDF_open_pdi_page($p, $doc, 1, "");
+#      $width  = PDF_get_pdi_value($p, "width",  $doc, $page, 0);
+#      $height = PDF_get_pdi_value($p, "height", $doc, $page, 0);
+#      $images[$i] = ['pdf', $page, $doc];
+
+      # Open corresponding eps file and find size.
+      my $eps = $imagefile;
+      $eps =~ s/\.pdf$/.eps/;
+#      print "$eps\n";
+      $_ = `adjusteps $leftmargin $botmargin $eps /tmp/tmp.eps`;
+#      print "$_\n";
+      /(\d*)\t(\d*)\D/;
+      $width = $1;
+      $height = $2;
+#      print "width = $width, height = $height\n";
+      $images[$i] = ['pdf', $width, $height];
+      close ADJ;
+
+    } else {
+      my $pngfile = $imagefile;
+
+      $images[$i] = ['image', PDF_open_image_file($p, "png", $pngfile, "", 0)];
+      die "Couldn't open image '$imagefile'" if ($images[$i]->[1] == -1);
+
+      # See the PDFlib manual for more advanced image size calculations
+      $width = PDF_get_value($p, "imagewidth", $images[$i]->[1]);
+      $height = PDF_get_value($p, "imageheight", $images[$i]->[1]);
+      }
+
+#    print "width = $width\n";
+#    print "height = $height\n";
+    $heightsum += $height;
+
+    # I use $heightsum/2 since the scale tends to be around .5.
+    if($heightsum/2 > $pageheight*72) {	# The page is too long, start another.
+#      print "$pdffile: Page too tall, heightsum = $heightsum, height = $height\n";
+      if($heightsum > $height) {	# Put on next page
+	$heightsum -= $height;
+	unshift @ARGV, $imagefile;
+	pop @images;
+      } else { # It's the only page, put on this page.
+	$maxwidth = $maxwidth > $width ? $maxwidth : $width;
+	$i++;
+	if($ARGV[0] eq 'page') {shift @ARGV;}
+      }
+      last;
+    }
+    $maxwidth = $maxwidth > $width ? $maxwidth : $width;
+    $i++;
+  } #   while($imagefile = $ARGV[0])
+
+#  print "heightsum = $heightsum\n";
+  last if($heightsum == 0);	# Last @ARGV was 'page'
+
+  my $scale = 1;
+  # print "width = $width, height = $height\n";
+  # Scale so page is not greater than 8 inches.
+
+  if($maxwidth > $pagewidth*72) {
+    $scale = $pagewidth*72/$maxwidth;
+    $maxwidth = $pagewidth*72;
+    $heightsum *= $scale;
+  }
+
+#  print "$scale\n";
+
+  # Scale the icon
+  my $icon = PDF_open_image_file($p, "png", $iconfile, "", 0);
+  die "Couldn't open $iconfile" if($icon == -1);
+  my $iconwidth  = PDF_get_value($p, "imagewidth",  $icon);
+  my $iconheight = PDF_get_value($p, "imageheight", $icon);
+  my $iconscale = $topmargin*2/3/$iconheight;
+
+  $maxwidth = 8.5*72;
+  PDF_begin_page($p, $maxwidth, $heightsum+$botmargin+$topmargin);
+
+#  print "maxwidth = $maxwidth\n";
+
+  my $image;
+  $heightsum = 0;
+  foreach $image (reverse @images) { # Start at the bottom and work up.
+    if($image->[0] eq 'image') {
+      PDF_place_image($p, $image->[1], $leftmargin, $botmargin+$heightsum, 
+		      $scale) unless $page == 1;
+      $heightsum += PDF_get_value($p, "imageheight", $image->[1])*$scale;
+      PDF_close_image($p, $image->[1]);
+
+    } elsif($image->[0] eq 'pdf') {
+      PDF_place_pdi_page($p, $image->[1], $leftmargin, $botmargin+$heightsum, 
+			 1 ,1) unless $page ==1;
+#      $heightsum += PDF_get_pdi_value($p, "height", 
+#				      $image->[2], $image->[1], 0);
+#      PDF_close_pdi_page($p, $image->[1]);
+#      PDF_close_pdi($p, $image->[2]);
+      $heightsum += $image->[2];
+    } else {
+      print "Error, don't understand type ", $image->[0], "\n";
+    }
+  }
+
+  PDF_place_image($p, $icon, $maxwidth-$iconscale*$iconwidth-$rightmargin, 
+		  $heightsum+$botmargin, $iconscale);
+
+  my $bwidth = 75;	# Width of the Solution button.
+
+#  print "++++ @ARGV ++++ \n";
+  if($page == 1) {
+    if(@ARGV and $ARGV[0] ne 'page') {
+      PDF_add_locallink($p, $maxwidth-1*$bwidth-$rightmargin, 0, 
+			$maxwidth-0*$bwidth-$rightmargin, $botmargin, 
+			2, 'fitpage');
+
+#      print "$maxwidth-1*$bwidth-$rightmargin, 0, 
+#			$maxwidth-0*$bwidth-$rightmargin, $botmargin\n"; 
+      # Change "host" encoding to "winansi" or whatever you need!
+      my $font = PDF_findfont($p, "Helvetica-Bold", "host", 0);
+
+      PDF_setfont($p, $font, 12.0);
+
+      PDF_set_text_pos($p, $maxwidth-1*$bwidth+15-$rightmargin, 
+		       $botmargin/2.5);
+      PDF_setcolor($p, 'fill', 'cmyk', 0.20, 0.706, 0.9451, 0.067);
+      PDF_show($p, "Solution");
+      #  PDF_continue_text($p, "(page)");
+    }
+    #
+    # Put in the links to the various formats of problem statements.
+    #
+    my $font = PDF_findfont($p, "Times-Roman", "host", 0);
+    my $fontI= PDF_findfont($p, "Times-Italic", "host", 0);
+    PDF_setfont($p, $font, 8.0);
+    PDF_set_text_pos($p, $leftmargin, 12);
+    PDF_setcolor($p, 'fill', 'cmyk', 0, 0, 0, 1);
+    PDF_show($p, "McClellan, Schafer, and Yoder, ");
+
+    my @types = qw(png tex pdf eps);
+    my $type;
+    my $butmarg = 6;
+    my $butspace = 12;
+    my $buttop = $heightsum+$botmargin+$topmargin-$butspace;
+    my $butwid = 18;
+    my $butleft = 0;
+    my $link = $statement;
+    $link =~ s/\....$//;  # Remove the png ext so you can tack others on
+
+    foreach $type (@types) {
+      PDF_add_launchlink($p, $butleft, $buttop, 
+			 +$butwid+$butleft, $buttop+$butspace,
+			 "../../$link.$type");
+      PDF_set_text_pos($p, $butmarg+$butleft-2, $buttop+4);
+      PDF_show($p, $type);
+#    PDF_continue_text($p, "(launch)");
+      # $buttop -= $butspace;
+      $butleft += $butwid;
+      print "Can't find $link.$type\n" if(!-e "$link.$type");
+    }
+
+  }
+
+  my $font = PDF_findfont($p, "Times-Roman", "host", 0);
+  my $fontI= PDF_findfont($p, "Times-Italic", "host", 0);
+  PDF_setfont($p, $font, 8.0);
+  PDF_set_text_pos($p, $leftmargin, 12);
+  PDF_setcolor($p, 'fill', 'cmyk', 0, 0, 0, 1);
+  PDF_show($p, "McClellan, Schafer, and Yoder, ");
+
+  PDF_setfont($p, $fontI, 8.0);
+  PDF_show($p, "Signal Processing First, ");
+
+  PDF_setfont($p, $font, 8.0);
+  PDF_show($p, "ISBN 0-13-065562-7.");
+  PDF_continue_text($p, "Prentice Hall, Upper Saddle River, NJ 07458. © 2012 Pearson Education, Inc.");
+
+  PDF_end_page($p);
+  $page++;
+}
+
+PDF_close($p);
+
+PDF_delete($p);
+
+# Now hack the newly margined eps file to a pdf file and overlay it
+# on the newly created template.
+system("epstopdf /tmp/tmp.eps") == 0
+  or die "epstodpf failed on $pdffile";
+system("pdfmeld $pdffile /tmp/tmp1.pdf -pages 1 -force") == 0
+  or die "pdfmeld failed to get first page of $pdffile";
+system("pdfmeld $pdffile /tmp/tmp2.pdf -pages 2-10 -force")  == 0
+  or die "pdfmeld failed to get 2-10 pages of $pdffile";
+system("pdcat -r -b -logo /tmp/tmp.pdf /tmp/tmp1.pdf /tmp/tmp3.pdf") == 0
+  or die "pdcat failed on logo for $pdffile";
+system("pdfmeld -r /tmp/tmp3.pdf,/tmp/tmp2.pdf $pdffile -force") == 0
+  or die "pdfmeld faild to cat $pdffile";
+system("acroread /tmp/tmp*.pdf $pdffile");

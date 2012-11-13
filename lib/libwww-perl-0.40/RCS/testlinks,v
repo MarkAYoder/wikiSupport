@@ -1,0 +1,207 @@
+head	1.2;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	94.09.21.01.23.18;	author fielding;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	94.07.20.19.14.56;	author fielding;	state Exp;
+branches;
+next	;
+
+
+desc
+@A simple program for testing link extraction and libwww-perl requests.
+GET and extract the links from the URLs passed as arguments, test them
+using HEAD requests, and output an HTML index fragment describing the
+results.
+@
+
+
+1.2
+log
+@Added initialization of $headers
+@
+text
+@#!/usr/public/bin/perl
+# $Id: testlinks,v 1.1 1994/07/20 19:14:56 fielding Exp fielding $
+# ---------------------------------------------------------------------------
+# GET and extract the links from the URLs passed as arguments, test them
+# using HEAD requests, and output an HTML index fragment describing the
+# results.  Relative links are resolved relative to the URL $base.
+#
+# Note that this is a non-recursive, completely inefficient version
+# of MOMspider's index without the visual cues for problem links.  See
+# <http://www.ics.uci.edu/WebSoft/MOMspider/>  for more information.
+#
+# 21 Apr 1994 (RTF): Initial Version 
+# 12 Jul 1994 (RTF): Rewritten to work with libwww-perl
+# 20 Jul 1994 (RTF): The default From header is now set by www.pl
+#                    and &www'set_def_header() is called to set User-Agent.
+#                    Added to libwww-perl distribution.
+# 20 Sep 1994 (RTF): Added initialization of $headers
+#
+# Created by Roy Fielding to test MOMspider and the libwww-perl system
+#-----------------------------------------------------------------
+if ($libloc = $ENV{'LIBWWW_PERL'}) { unshift(@@INC, $libloc); }
+
+require "www.pl";
+require "wwwurl.pl";
+require "wwwhtml.pl";
+require "wwwerror.pl";
+require "wwwdates.pl";
+
+$pname = $0;                                  # Method = program name
+$pname =~ s#^.*/([^/]+)$#$1#;                 # lose the path
+
+&www'set_def_header('http', 'User-Agent', "$pname/0.3");
+                                              # Set up User-Agent: header
+$pwd = ( $ENV{'PWD'} || $ENV{'cwd'} || '' );
+
+$base = "file://localhost$pwd/";              # Set up initial Base URL
+
+$vidx = 'tl0001';
+#-----------------------------------------------------------------
+
+while ($ARGV[0])
+{
+    $rel = shift;
+    $url = &wwwurl'absolute($base, $rel);
+
+    $content = '';
+    $headers = '';
+    %headers = ();
+
+    $response = &www'request('GET', $url, *headers, *content, 30);
+
+    @@TestLinks = ();
+    @@TestAbs   = ();
+    @@TestOrig  = ();
+    @@TestType  = ();
+
+    &wwwhtml'extract_links($url, *headers, *content,
+                           *TestLinks, *TestAbs, *TestOrig, *TestType);
+
+    # Now print out the index entry for this URL
+
+    $nextbit = ($headers{'title'} || $url);
+    print "<H2><A NAME=\"$vidx\">$nextbit</A></H2>\n";
+    $vidx++;
+    print "$response $wwwerror'RespMessage{$response}\n",
+          "<A HREF=\"$url\">\n$url</A>";
+
+    if ($nextbit = ($headers{'uri'} || $headers{'location'}))
+    {
+        print "<BR>\nURI: $nextbit";
+    }
+
+    if ($nextbit = $headers{'last-modified'})
+    {
+        print "<BR>\nLast-modified: $nextbit";
+    }
+
+    if ($nextbit = $headers{'expires'})
+    {
+        print "<BR>\nExpires: $nextbit";
+    }
+
+    if ($nextbit = $headers{'reply-to'})
+    {
+        print "<BR>\nReply-to: $nextbit";
+    }
+    print "\n";
+
+    undef $content;
+    undef $headers;
+    undef %headers;
+
+    if ($TestLinks[0])
+    {
+        print "<UL>\n";
+        foreach $idx (0 .. $#TestLinks)
+        {
+            $nextbit = (($TestType[$idx] eq 'L') && 'Link')  ||
+                       (($TestType[$idx] eq 'I') && 'Image') ||
+                       (($TestType[$idx] eq 'Q') && 'Query');
+
+            print "<LI><A NAME=\"$vidx\">$nextbit</A>\n";
+            $vidx++;
+
+            &test_child($url, $TestLinks[$idx], $TestAbs[$idx],
+                              $TestOrig[$idx]);
+        }
+        print "</UL>\n";
+    }
+    print "\n";
+
+    undef @@TestLinks;
+    undef @@TestAbs;
+    undef @@TestOrig;
+    undef @@TestType;
+}
+
+exit(0);
+
+sub test_child
+{
+    local($parent, $link, $labs, $lorig) = @@_;
+    local($response, $nextbit) = 0;
+
+    local($content) = '';
+    local($headers) = '';
+    local(%headers) = ();
+
+    if ($parent) { $headers{'Referer'} = $parent; }
+    if ($link =~ /^http/) { sleep(20); }
+
+    $response = &www'request('HEAD', $link, *headers, *content, 30);
+
+    print "    $response $wwwerror'RespMessage{$response}\n",
+          "    <A HREF=\"$labs\">\n    $lorig</A>";
+
+    if ($nextbit = ($headers{'uri'} || $headers{'location'}))
+    {
+        print "<BR>\n    URI: $nextbit";
+    }
+
+    if ($nextbit = $headers{'last-modified'})
+    {
+        print "<BR>\n    Last-modified: $nextbit";
+    }
+
+    if ($nextbit = $headers{'expires'})
+    {
+        print "<BR>\n    Expires: $nextbit";
+    }
+
+    if ($nextbit = $headers{'reply-to'})
+    {
+        print "<BR>\n    Reply-To: $nextbit";
+    }
+    print "\n";
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+# $Id$
+d17 1
+d47 1
+d62 1
+a62 1
+    $nextbit = ($headers{title} || $url);
+d90 1
+d126 1
+@

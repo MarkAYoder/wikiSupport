@@ -1,0 +1,52 @@
+#!/usr/local/gnu/bin/perl
+
+# This file converts /usr/local/gnu/bin/perl to /usr/sbin/perl so I can
+# use the perl files developed at GT
+
+#'$Log: toroseperl,v $
+# Revision 1.1  1995/06/29  21:19:19  myoder
+# Initial revision
+#
+#';
+
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/scripts/RCS/toroseperl,v 1.1 1995/06/29 21:19:19 myoder Exp $';
+
+require 'getopts.pl';
+
+# Process the command line options
+&Getopts('du');
+
+$debug = $opt_d;
+
+# process each file on the command line
+foreach $file (@ARGV) {
+	print "$file\n";
+	rename($file, "$file.old");
+	$_ = "$file.old";
+
+	$outname = $file;
+
+	open(INFILE, $_);
+
+	print "Reading $file, ";
+	print "Outputting to $outname\n\n";
+
+	open(OUTFILE, ">$outname") || die "Cannot open $outfile";
+
+# Change only the first line.
+$_ = <INFILE>;
+if($opt_u) {	# undo, i.e. got back to gt
+	s#/usr/sbin/perl#/usr/local/gnu/bin/perl#;
+} else {
+	s#/usr/local/gnu/bin/perl#/usr/sbin/perl#;
+}
+print OUTFILE;
+
+# Read the rest of the input file.
+	while($_ = <INFILE>) {
+		print OUTFILE;
+	}
+	close(OUTFILE);
+	system("chmod 775 $file");
+
+}

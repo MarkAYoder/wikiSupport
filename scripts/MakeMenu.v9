@@ -1,0 +1,1043 @@
+#!/usr/bin/perl
+
+#
+# This script creates the javascript file used by the menu system to 
+#  build its menu.
+#
+# Usage:  MakeMenu [-faculty] [-hide]
+# Use the option 'hide' to not show Under Construction and 'old' links
+use strict;
+require 'constants.pl';
+require 'head.pl';
+
+# Maps the chapter number to the page number in the pdf file
+our @pdfhw;   # Matlab problems
+our @pdfhwe;  # Extra homeworks
+our @pdfhws;  # Solutions to extra homeworks
+
+my $title    = 'DSP First';
+my $visible  = $ENV{'CDROOT'};
+my $menupath = "$visible/contents";
+my $statesol  = 'stusol';
+my $treefile = "menu.cd";
+my $linkfile = "links.htm";   # This is for the search engines to find.
+my $sitemap  = "sitemap.xml";
+my $server;
+if(bookType() eq 'dtsp') {
+  $server   = "http://yoder-3.institute.rose-hulman.edu/dtsp";
+} else {
+  $server   = "http://yoder-3.institute.rose-hulman.edu/visible3";
+}
+my $makelink = 1;  # Creates $linkfile and $sitemap.
+my $maketree = 1;  # Creates $treefile
+my $chapters = "$visible/chapters";
+my $hwList   = "$visible/archives/DB_withKeywords.txt";
+my $exampleList   = "$visible/archives/DBforExercises.txt";
+# my $exerciseList   = "$visible/archives/ALL_EXER.xlt";
+
+my $noshow = 0;	# ==1 if Under Contruction and old links are hidden.
+
+my $faculty = 0;
+
+if($ARGV[0] eq '-faculty') {
+  $faculty = 1;
+#  $menufile = "faculty_menus.js";
+  $statesol  = 'facsol';
+}
+if($ARGV[0] eq '-hide') {  # Don't show Under Construction and old links
+  $noshow = 1;
+}
+
+#######################################################
+# Read the databases
+#######################################################
+my %hw;
+my %example;
+
+ #
+ # Read in the HW database.
+ #
+
+ open HW, "<$hwList" or die "Can't open $hwList";
+
+ while(<HW>) {
+   /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+   my $Quarter = $1;
+   my $Statement = $2;
+   my $Desc = $3;
+   my $Chap = $4;
+   my $Sol  = $5;
+ #  my $Keywords = $6;
+ #  $Keywords =~ s/[\r\n]*$//;  # Removing trailing return or linefeed/
+
+   $Desc =~ s/\"//g;
+   $Desc =~ s/ & / &amp; /g;
+   $Desc =~ s/<-->/&harr;/;
+   $Desc =~ s/-->/&rarr;/;
+   $Desc =~ s/<--/&larr;/;
+
+ # Some descriptions are close.  If they differ by only small words, group them together.
+ #  print "\n$Desc\n";
+   my $desc = ' ' . lc($Desc) . ' ';
+   $desc =~ s/,/ , /g;
+   $desc =~ s/;/ ; /g;
+ #  print "$desc\n";
+   $desc =~ s/ (a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|,) / /g;
+   $desc =~ s/ (a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|,|;) / /g;
+ #  print "$desc\n";
+   $desc =~ s/ +/ /g;
+ #  print "$desc\n";
+
+ # Handle problems that are in book.  $chap == x.y if in book.
+   if($Chap =~ /\./) {
+     if($faculty) {   # Add problem number to description.
+       $Desc = "<b>P-$Chap</b> $Desc";
+ #      print "$Desc\n";
+     } else {  # If it's a student, remove the solution
+       $Sol = '';
+     }
+     $Chap =~ s/\..*//;
+   }
+
+   next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+
+# If $Chap has a ',' in it it need to appear in multiple chapters.
+  my @Chaps = split(/,/, $Chap);   # Put the chap numbers into a list
+#  print "$Chap\n";
+#  print "@Chaps\n";
+  foreach $Chap (@Chaps) {
+    $Chap = $Chap + 0;
+    $hw{$Chap} = {} if(!defined($hw{$Chap}));
+    $hw{$Chap}{$desc} = [] if(!defined($hw{$Chap}{$desc}));
+    push @{$hw{$Chap}{$desc}}, [$Quarter, $Statement, $Sol, $Desc];
+  }
+
+ }
+ close HW;
+
+ # Read in the Example and Exercise databases.
+
+ open EXAM, "<$exampleList" or die "Can't open $exampleList";
+
+ while(<EXAM>) {
+   /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+   my $Quarter = $1;
+   my $Statement = $2;
+   my $Desc = $3;
+   my $Chap = $4;
+   my $Sol  = $5;
+
+   $Desc =~ s/\"//g;
+   $Desc =~ s/ & / &amp; /g;
+   $Desc =~ s/<-->/&harr;/;
+   $Desc =~ s/-->/&rarr;/;
+   $Desc =~ s/<--/&larr;/;
+
+   next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+   $example{$Chap} = {} if(!defined($example{$Chap}));
+   $example{$Chap}{$Statement} = [] if(!defined($example{$Chap}{$Statement}));
+   push @{$example{$Chap}{$Statement}}, [$Quarter, $Desc];
+ }
+ close EXAM;
+
+ # Read in the Exercise database.  *** No need to do, it's with the example database.
+ if(0) {
+ my %exercise;
+
+ #open EXER, "<$exerciseList" or die "Can't open $exerciseList";
+
+ while(<EXER>) {
+   /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+   my $Quarter="$1";
+   my $Statement=$2;
+   my $Sol1=$3;
+   my $Sol2=$4;
+   my $Sol3=$5;
+   my $Sol4=$6;
+   my $Chap=$7;
+   my $Desc=$8;
+   $Quarter =~ s/-//;
+   $Desc =~ s/\"//g;
+   $Statement =~ s/$\.gif/.pdf/;	# Look for pdf files now.
+
+   next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+   $exercise{$Chap} = {} if(!defined($exercise{$Chap}));
+   $exercise{$Chap}{$Statement} = [] if(!defined($exercise{$Chap}{$Statement}));
+   push @{$exercise{$Chap}{$Statement}}, [$Quarter, $Desc];
+ }
+ close EXER;
+ }
+
+#######################################################
+# Build the menu
+#######################################################
+
+my $num = 100;
+my $name = 'tmp';
+my $path = 'this/that.html';
+my $dumpmenu = 0;	# Set to 1 to have a separate browswer window opened and debug info printed in it.
+
+#if(-e "$menupath/$menufile") {
+#  rename "$menupath/$menufile", "$menupath/$menufile.old" 
+#    or die "Can't rename $menupath/$menufile";
+#}
+#open(FD, ">$menupath/$menufile") 
+#  or die "Can't open $menupath/$menufile";
+
+if($makelink) {
+    open(LINKS, ">$menupath/$linkfile") 
+	or die "Can't open $menupath/$linkfile";
+    open(SITE,  ">$menupath/$sitemap")
+	or die "Can't open $menupath/$sitemap";
+}
+
+if($maketree) {
+    open(TREE, ">$menupath/$treefile") 
+	or die "Can't open $menupath/$treefile";
+}
+
+print LINKS "<! Do not Edit, this file is created by $0>
+<head>
+<title>Links for DSP First</title>
+</head>
+<body>
+Here are the links:
+<p>
+</body>
+</html>
+" if($makelink);
+
+print TREE "
+
+<!-- Do not Edit, this file is created by $0 -->
+
+<cd-head analytics=\"none\">
+	<meta name=\"description\" content=\"Shows a collapsed Javascript Tree where you can click both the categories and the nodes. Use right tree to call different methods on tree.\" />
+	<meta name=\"keywords\" content=\"dhtml tools,javascript,DHTML Tools,Javascript,ajax,AJAX,Ajax,ajax tools,AJAX Tools,tools controls,simple javascript tools\" />
+	<title>Zapatec DHTML Tree Widget - Basic features</title>
+
+	<!-- Common JS files -->
+	<script type=\"text/javascript\" src=\"scripts/zapatec/utils/zapatec.js\"></script>
+
+	<!-- Custom includes -->
+	<script type=\"text/javascript\" src=\"scripts/zapatec/src/tree.js\"></script>
+
+	<link rel=\"SHORTCUT ICON\" href=\"http://www.zapatec.com/website/main/favicon.ico\" />
+
+</cd-head css=\"menu.css\">
+
+<body >
+
+" if($maketree);
+
+print SITE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<urlset xmlns=\"http://www.google.com/schemas/sitemap/0.84\">
+
+";
+
+if($dumpmenu) {
+# print FD 
+"
+var dumpMenu = window.open(\"\", \"dumpMenu\");
+dumpMenu.document.write(\"count = \" + theMenu.count + \"<br>\")
+
+for(prop in theBrowser) {
+	dumpMenu.document.write(\"theBrowser.\" + prop + \"=\" + theBrowser[prop] + \"<br>\")
+}
+dumpMenu.document.write(\"<br>\")
+
+for(var i=0; i<theMenu.count; i++) {
+	dumpMenu.document.write(\"entry[\" + i + \"] = \" + theMenu.entry[i] + \"<br>\")
+	for(prop in theMenu.entry[i]) {
+		dumpMenu.document.write(\"entry[\" + i + \"].\" + prop + \"=\" + 
+			theMenu.entry[i][prop] + \"<br>\")
+	}	
+	dumpMenu.document.write(\"<br>\")
+}
+";
+}
+
+chdir $chapters or die "Can't chdir to $chapters";
+
+opendir(DIR, '.') or die "Can't open $chapters";
+
+my @chapters = sort readdir(DIR);
+my $chapter;
+foreach $chapter (@chapters) {
+  next if $chapter =~ m/^(\.|\.\.)$/;	# Don't do . and ..
+  next unless $chapter =~ m/^\d\d/;	# Don't process a directory unless it begins with two digits.
+
+  # Get the chapter number
+  open(NUM, "<$chapter/number.txt") or die "Can't open $chapter/number.txt";
+  $num = <NUM>; chop $num; chop $num;
+  close(NUM);
+  # Get the chater title
+  open(NAME, "<$chapter/name.txt") or die "Can't open $chapter/name.txt";
+  $name = <NAME>; chop $name; chop $name;
+  close(NAME);
+
+  next if($num eq 'B' and !$faculty);
+# Skip chapter 13 of dtsp since we don't have anything for them yet
+  next if(bookType() eq 'dtsp' and ($num eq 13));
+
+  print "$chapter\n";
+  $path = "../chapters/$chapter";
+
+  if($num == 1) {	# Chap 01 doesn't have labs, etc., so treat it differently
+    if(bookType() eq 'dtsp') {
+
+      if($maketree) {
+      print TREE "<ul id=\"tree\">\n";
+      print TREE "<li id=\"contents\"  class=\"myh1\"><span onclick='text.location=\"chapters.htm\"'><b>Contents</b></span>\n";
+      print TREE "\n  <ul> <!-- Chapter 1 heading -->\n";
+      print TREE "  <li id=\"intro\"><span onclick='text.location=\"welcome.htm\"'>1: Introduction</span>\n";
+      print TREE "    <ul> <!-- Chapter 1 list -->\n";
+      treeli("welcome.htm","Welcome");
+      treeli("instructors.htm","Instructors");
+      treeli("ToC.pdf", "Text - Table of Contents");
+      treeli("preface.pdf","Text - Preface");
+      treeli("matlab.htm","Learning M<small>ATLAB</small>");
+      treeli("install.htm", "<b>Install Demos</b>");
+#      treeli("authors.htm", "Authors");
+#      treeli("INDEX.pdf", "Index");
+    }
+
+      if($makelink) {
+	print LINKS "##### Chapter 1 #####<br>\n";
+	my @links = ("welcome.htm", "help.htm", "authors.htm", "prenhall.htm", 
+		     "license.htm", "feedback.htm", "FRONT.pdf", "INDEX.pdf");
+	my $link;
+	foreach $link (@links) {
+	  print LINKS "<a href=$link>$link</a><br>\n";
+	  siteurl("contents/$link");
+	}
+      }
+    } # if(bookType() eq 'dtsp') {
+####################
+    else {  # must be SP First
+
+      if($maketree) {
+	print TREE "<ul id=\"tree\">\n";
+	print TREE "<li id=\"contents\"><span onclick='text.location=\"chapters.htm\"'><b>Contents</b></span>\n";
+	print TREE "  <ul>\n";
+	print TREE "  <li id=\"intro\"><span onclick='text.location=\"welcome.htm\"'>1: Introduction</span>\n";
+	print TREE "    <ul>\n";
+	treeli("welcome.htm","Welcome");
+	treeli("starhelp.htm","<b>Getting Started</b>");
+	treeli("http://users.ece.gatech.edu/mcclella/SPFirst", "DSP First Resources");
+	treeli("help.htm",  "Help");
+	treeli("authors.htm", "Authors");
+	treeli("prenhall.htm", "Prentice Hall");
+	treeli("license.htm", "License");
+#	treeli("feedback.htm", "Feedback");
+	treeli("links.htm", "Site Map");
+	treeli("FRONT.pdf", "Table of Contents");
+	treeli("INDEX.pdf", "Index");
+      }
+
+      if($makelink) {
+	print LINKS "##### Chapter 1 #####<br>\n";
+	my @links = ("welcome.htm", "starhelp.htm", "help.htm", "authors.htm", "prenhall.htm", 
+		     "license.htm", "feedback.htm", "FRONT.pdf", "INDEX.pdf");
+	my $link;
+	foreach $link (@links) {
+	  print LINKS "<a href=$link>$link</a><br>\n";
+	  siteurl("contents/$link");
+	}
+      }
+
+#  } elsif($num == 9) {
+#       print "Skipping Chapter 9\n";
+#  } elsif($num == 10) {
+#       print "Skipping Chapter 10\n";
+#  } elsif($num == 11) {
+#       print "Skipping Chapter 11\n";
+#  } elsif($num == 12) {
+#       print "Skipping Chapter 12\n";
+  } # if(bookType() eq 'dtsp'
+  } # if($num == 1)
+  else {
+
+    print LINKS "<p>##### Chap $num #####<br>\n" if($makelink);
+    print LINKS "<a href=$path/overview.htm>overview.htm</a><br>\n" if($makelink);
+    siteurl("$path/overview.htm");
+    if($maketree) {
+      print TREE "\n  <li><span onclick='text.location=\"../chapters/$chapter/overview.htm\"'><b>$num</b>: $name</span>\n";
+      print TREE "\n    <ul> <!-- Chapter $chapter list -->\n";
+    }
+
+  #
+  # Link in Live Figures
+  #
+    makesum('figures', $chapters, 'labview', '', '', 'Live Figures', 'figures.htm', $chapter);
+
+  #
+  # Link in Build a Figure
+  #
+    makesum('baf', $chapters, 'labview', '', '', 'Build-a-Figure', 'baf.htm', $chapter);
+
+  #
+  # Link in Homework
+  #
+    makesum('homework', $chapters, 'homework', '', '', 'Homework', 'homework.htm', $chapter);
+
+  #
+  # Link in the MATLAB Labs
+  #
+      makesum('labs', $chapters, 'matlab', '', '', 'M<small>ATLAB</small> Projects', 'labs.htm', $chapter);
+
+  #
+  # Link in Simulink Labs
+  #
+      makesum('labsSL', $chapters, 'matlab', '', '', 'Labs - Simulink', 'labs.htm', $chapter);
+
+  #
+  # Link in the LabVIEW Labs
+  #
+    makesum('labsLV', $chapters, 'labview', '', '', 'Labs - LabVIEW', 'labs.htm', $chapter);
+
+  #
+  # Link in the Demos
+  #
+      makesum('demos', $chapters, 'matlab', '', '', 'Demos', 'demos.htm', $chapter);
+
+  #
+  # Link in the LabVIEW  Demos
+  #
+    makesum('demosLV', $chapters, 'labview', '', '', 'Demos', 'demos.htm', $chapter);
+
+  #
+  # Link in the Examples
+  #
+
+# To Do:  Have $maketree do examples, exerciese, etc.
+    my $close=0;   # ==1 if a </ul> is needed.
+
+  if($example{$num}) {
+    my $first=1;
+    print LINKS "<br>### Examples ###<br>\n" if($makelink);
+    my $Statement;
+    foreach $Statement (sort sortOrder keys %{$example{$num}}) {
+      next if $Statement !~ /exam/i;
+      	my $Quarter   = $example{$num}{$Statement}[0][0];
+	my $desc      = $example{$num}{$Statement}[0][1];
+	$Statement =~ /exam(.*)_0*(\d*)\./;
+
+      if(-e "../archives/exersol/$Statement") {
+	if($first) {
+	  $first=0;
+	  print LINKS "<a href=$path/example/overview.htm>overview.htm</a><br>\n" if($makelink);
+	  siteurl("$path/example/overview.htm");
+
+	  if($maketree) {
+	    $close = 1;
+	    print TREE "    <li><span onclick='text.location=\"$path/example/overview.htm\"'>Examples</span>\n";
+	    print TREE "      <ul>\n";
+	  }
+	}
+	print LINKS "<a href=../archives/exersol/$Statement>../archives/exersol/$Statement</a><br>\n" if($makelink);
+	siteurl("../archives/exersol/$Statement");
+	treeli("../archives/exersol/$Statement", "$1-$2: $desc");
+      } else {
+	print "Can't find exersol/$Statement\n";
+      }
+    }  # foreach $statement
+
+    if($close) {
+      print TREE "      </ul>\n";
+      print TREE "    </li>  <!-- End Examples $chapter  -->\n";
+      $close = 0;
+    }
+  }
+
+  #
+  # Link in the Exercises
+  #
+  if($example{$num}) {
+    print LINKS "<br>### Exercises ###<br>\n" if($makelink);
+    print LINKS "<a href=$path/exercise/overview.htm>overview.htm</a><br>\n" if($makelink);
+    siteurl("$path/exercise/overview.htm");
+    if($maketree) {
+      $close = 1;
+      print TREE "    <li><span onclick='text.location=\"$path/exercise/overview.htm\"'>Exercises</span>\n";
+      print TREE "      <ul>\n";
+    }
+
+    my $Statement;
+    foreach $Statement (sort sortOrder keys %{$example{$num}}) {
+      next if $Statement !~ /exer/i;
+      my $Quarter   = $example{$num}{$Statement}[0][0];
+      my $desc      = $example{$num}{$Statement}[0][1];
+      $Statement =~ /exer(.*)_(\d*)\./;
+      
+      if(-e "../archives/exersol/$Statement") {
+	print LINKS "<a href=../archives/exersol/$Statement>../archives/exersol/$Statement</a><br>\n" if($makelink);
+	siteurl("../archives/exersol/$Statement");
+	treeli("../archives/exersol/$Statement", "$1.$2");
+      } else {
+	print "Can't find exersol/$Statement\n";
+      }
+    }
+    if($close) {
+      print TREE "      </ul>\n";
+      print TREE "    </li>  <!-- End Exercises $chapter  -->\n";
+      $close = 0;
+    }
+
+  }
+
+  #
+  # Link in the Homework
+  #
+
+  if($hw{$num}) {
+    print LINKS "<br>### Homework ###<br>\n" if($makelink);
+    print LINKS "<a href=$path/homework/overview.htm>overview.htm</a><br>\n" if($makelink);
+    siteurl("$path/homework/overview.htm");
+    if($maketree) {
+      $close = 1;
+      print TREE "    <li><span onclick='text.location=\"$path/homework/overview.htm\"'>Homework (<span style=\"color:green\">with</span> solutions)</span>\n";
+      print TREE "      <ul>\n";
+    }
+
+    my $desc;
+    foreach $desc (sort keys %{$hw{$num}}) {
+      my $count = @{$hw{$num}{$desc}};
+      # print "\t$desc: $count\n";
+      my $sol = $hw{$num}{$desc}[0][2];
+      if($sol) {     # Add only if it has a solution.
+	if(!$faculty) {
+	  my $Quarter   = $hw{$num}{$desc}[0][0];
+	  my $Statement = $hw{$num}{$desc}[0][1];
+	  my $Desc      = $hw{$num}{$desc}[0][3];
+
+	  if(-e "../archives/$statesol/$Quarter/$Statement") {
+	    siteurl("../archives/$statesol/$Quarter/$Statement");
+	    treeli("../archives/$statesol/$Quarter/$Statement", "$Desc");
+	  } else {
+	    print "Can't find $statesol/$Quarter/$Statement\n";
+	  }
+	} else {
+	  my $Quarter   = $hw{$num}{$desc}[0][0];
+	  my $Statement = $hw{$num}{$desc}[0][1];
+	  my $Desc      = $hw{$num}{$desc}[0][3];
+
+	  my $hw;
+	  my $hwNum = 1;
+	  if($faculty) {
+	    foreach $hw (@{$hw{$num}{$desc}}) {
+	      $Quarter   = $hw->[0];
+	      $Statement = $hw->[1];
+	      $Desc      = $hw->[3];
+	      #	  $Quarter =~ /(.*)_/;
+	      #	  my $desc = $1;
+	      if(-e "../archives/$statesol/$Quarter/$Statement") {
+		if($hwNum==1) {
+#		  print FD "      tmp2 = theMenu.addChild(tmp,'pdf',\"$Desc (<font color=green>Students have this</font>)\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+		} else {
+#		  print FD "      tmp2 = theMenu.addChild(tmp,'pdf',\"$Desc\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+	      }
+	      } else {
+		print "Can't find $statesol/$Quarter/$Statement\n";
+	      }
+	      $hwNum++;
+	    }
+	  } # if($faculty)
+	}
+      } # if ($sol)
+    }
+    #    print FD "} // end if\n";
+    if($close) {
+      print TREE "      </ul>\n      </li>  <!--- End Homwork w/sol -->\n";
+      $close = 0;
+    }
+
+  }
+
+    if(1) {
+  #
+  # Link in the Homework without solutions
+  #
+  if($hw{$num}) {
+    if($maketree) {
+      $close = 1;
+      print TREE "    <li><span onclick='text.location=\"$path/homework/overview.htm\"'>Homework (<span style=\"color:blue\">w/o</span> solutions)</span>\n";
+      print TREE "      <ul>\n";
+    }
+
+    my $desc;
+    foreach $desc (sort keys %{$hw{$num}}) {
+      my $count = @{$hw{$num}{$desc}};
+      # print "\t$desc: $count\n";
+      my $sol = $hw{$num}{$desc}[0][2];
+      if(!$sol) {     # Add only if it has no solution.
+      if(!$faculty) {
+	my $Quarter   = $hw{$num}{$desc}[0][0];
+	my $Statement = $hw{$num}{$desc}[0][1];
+	my $Desc      = $hw{$num}{$desc}[0][3];
+	if(-e "../archives/$statesol/$Quarter/$Statement") {
+#	print FD "    tmp = theMenu.addChild(level2ID,'pdf',\"$Desc\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+	treeli("../archives/$statesol/$Quarter/$Statement", "$Desc");
+      } else {
+	print "Can't find $statesol/$Quarter/$Statement\n";
+      }
+      } else {
+	my $Quarter   = $hw{$num}{$desc}[0][0];
+	my $Statement = $hw{$num}{$desc}[0][1];
+	my $Desc      = $hw{$num}{$desc}[0][3];
+#	print FD "    tmp = theMenu.addChild(level2ID,'Folder',  \"<i>($count)</i> $Desc\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+	my $hw;
+	my $hwNum = 1;
+	if($faculty) {
+	foreach $hw (@{$hw{$num}{$desc}}) {
+	  $Quarter   = $hw->[0];
+	  $Statement = $hw->[1];
+	  $Desc      = $hw->[3];
+#	  $Quarter =~ /(.*)_/;
+#	  my $desc = $1;
+#	  print FD "      tmp2 = theMenu.addChild(tmp,'pdf',\"$desc\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+	  if($hwNum==1) {
+#	  print FD "      tmp2 = theMenu.addChild(tmp,'pdf',\"$Desc (<font color=red>Students have this</font>)\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+	} else {
+#	  print FD "      tmp2 = theMenu.addChild(tmp,'pdf',\"$Desc\",\n\t\t'../archives/$statesol/$Quarter/$Statement');\n";
+	}
+	  $hwNum++;
+	}
+      } # if($faculty)
+      }
+    } # if ($sol)
+    }
+#    print FD "} // end if\n";
+    if($close) {
+      print TREE "      </ul>\n      </li>  <!-- End Homework w/0 sol -->\n";
+      $close = 0;
+    }
+  }
+}  # If(1)
+  }
+  if($maketree) {
+    print TREE "    </ul>\n";
+    print TREE "    </li>  <!-- End Chapter $chapter  -->\n";
+  }
+
+} # foreach chapter
+
+
+if ($dumpmenu) {
+# print FD 
+"
+
+var stopTime=new Date();
+
+dumpMenu.document.write(\"Start time = \" + startTime.getTime() + \"<br>\")
+dumpMenu.document.write(\"Stop  time = \" +  stopTime.getTime() + \"<br>\")
+dumpMenu.document.write(\"Total time = \" + stopTime.getTime()-startTime.getTime() + \"<br>\")
+";
+}
+
+if($maketree) {
+  print TREE "\n  </ul>\n</li>\t<!-- End of Contents -->\n\n";  # Close off 'Contents' list
+}
+
+if(bookType() eq 'dtsp') {
+# Live Figures ######################################
+if($maketree) {
+  print TREE "\n\n<li id=\"figures\"><span onclick='text.location=\"figures.htm\"'><b>Live Figures</b></span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('figures', $chapters, 'labview', 'true', 'fig', 'Live Figures', 'demos.htm');
+
+closesum();
+
+# Build-a-Figure ######################################
+if($maketree) {
+  print TREE "\n\n<li id=\"baf\"><span onclick='text.location=\"baf.htm\"'><b>Build-a-Figure</b></span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('baf', $chapters, 'labview', 'true', 'fig', 'Build-a-Figure', 'baf.htm');
+
+closesum();
+
+# Homework  ######################################
+if($maketree) {
+  print TREE "\n\n<li id=\"homework\"><span onclick='text.location=\"homework.htm\"'><b>Homework</b></span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('homework', $chapters, 'homework', 'true', 'fig', 'Homework', 'homework.htm');
+
+closesum();
+
+# Demos ###############################
+  if($maketree) {
+    print TREE "\n\n<li id=\"projects\"><span onclick='text.location=\"labs.htm\"'><b>MATLAB Projects</b></span>\n";
+    print TREE "  <ul>\n";
+  }
+  makesum('labs', $chapters, 'matlab', 'true', '', 'MATLAB Projects', 'labs.htm');
+closesum();
+
+# Demos ######################################
+if($maketree) {
+  print TREE "\n\n<li id=\"demos\"><span onclick='text.location=\"demosLV.htm\"'><b>Demos</b></span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('demosLV', $chapters, 'labview', 'true', 'demo', 'Interactive', 'demos.htm');
+# closesum();
+
+makesum('demos', $chapters, 'matlab', '', '', 'Static', 'demos.htm');
+closesum();
+
+} else {  # Do SP First
+#######################################################################################
+
+# Demos ######################################
+if($maketree) {
+  print TREE "\n\n<li id=\"demosLV\"><span onclick='text.location=\"demosLV.htm\"'>Demos - LabVIEW</span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('demosLV', $chapters, 'labview', 'true', 'demo', 'Interactive', 'demos.htm');
+
+closesum();
+
+if($maketree) {
+  print TREE "\n\n<li id=\"demos\"><span onclick='text.location=\"demos.htm\"'>Demos - MATLAB</span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('demos', $chapters, 'matlab', '', '', 'Static', 'demos.htm');
+
+closesum();
+
+# Labs ######################################
+if($maketree) {
+  print TREE "\n\n<li id=\"labsLV\"><span onclick='text.location=\"labsLV.htm\"'>Labs - LabVIEW</span>\n";
+  print TREE "  <ul>\n";
+}
+makesum('labsLV', $chapters, 'labview', 'false', 'lab', 'LabVIEW', 'demos.htm');
+
+closesum();
+
+  if($maketree) {
+    print TREE "\n\n<li id=\"labs\"><span onclick='text.location=\"labs.htm\"'>Labs - MATLAB</span>\n";
+    print TREE "  <ul>\n";
+  }
+  makesum('labs', $chapters, 'matlab', 'true', '', 'MATLAB Projects', 'labs.htm');
+
+closesum();
+  
+  if($maketree) {
+    print TREE "\n\n<li id=\"labsSL\"><span onclick='text.location=\"labsSL.htm\"'>Labs - Simulink</span>\n";
+    print TREE "  <ul>\n";
+  }
+  makesum('labsSL', $chapters, 'matlab', 'false', '', 'Simulink', 'labs.htm');
+
+  closesum();
+
+}  # if(BookType() eq 'dtsp')
+
+if($makelink) {
+    close LINKS;
+
+    print SITE "</urlset>\n";
+    close SITE;
+}
+
+if($maketree) {
+print TREE "
+
+</ul>\t<!-- End of everything -->
+
+<div style=\"width: 250px; text-align:center; margin-top:2em; font-size:10px\">
+
+   <a href='javascript:parent.tree.collapseAll();parent.tree.getNode(\"contents\").expand();
+      parent.tree.getNode(\"intro\").expand(); parent.frames.text.location=\"/dtsp/contents/welcome.htm\"' target='text'
+	title=\"Click to go to the Home page.\">Home</a>
+
+   <a href=\"javascript:parent.tree.collapseAll()\"
+	title='Click to collapse all folders in the menu.'>Collapse</a>
+
+   <a href=\"javascript:parent.tree.expandAll()\"
+	title='Click to expand all folders in the menu.'>Expand</a>
+
+</div>
+
+<!-- <img src=\"images/uc.jpg\" height=\"10\">= Under Construction -->
+
+<script type=\"text/javascript\">
+	var tree = new Zapatec.Tree({
+		tree: \"tree\",
+                compact: false,
+		expandOnLabelClick: true,
+                quick: false,
+                initLevel: 1,
+                saveState: false,
+                saveId: \"dtsp\",
+                highlightSelectedNode: false,
+                theme: \"lines\"
+	});
+        tree.getNode(\"contents\").expand();
+        tree.getNode(\"intro\").expand();
+        tree.reconfigure({theme: \"default\"});  /* Makes the menu look right. */
+
+        parent.tree = tree;   // This is so menuctrl.htm can get to it.
+        text = parent.frames.text;
+
+</script>
+
+	<noscript>
+		<br/>
+		This page uses an <a href='http://www.zapatec.com/website/main/products/suite/'>
+		AJAX Component</a> - Zapatec DHTML Tree Widget, but your browser does not support Javascript.
+		<br/>
+		<br/>
+	</noscript>
+
+<div class=\"footer\" style=\"width: 250px; text-align:center; margin-top:2em; font-size:0px\">
+ &copy; 2004-2007 <br/><strong> <a href=\"http://www.zapatec.com/\">Zapatec, Inc.</a> </strong>
+</div>
+
+<p style=\"width: 250px; text-align:center; margin-top:2em; font-size:10px\">
+Oppenheim, Schafer,
+<i>Discrete-Time Signal Processing</i>,
+ISBN 0-13-198842-5.
+<br/>
+Prentice Hall, Upper Saddle River, NJ 07458. &copy; 2010 Pearson Education, Inc.</p>
+
+</body>
+
+</html>
+";
+}
+
+closedir DIR;
+close TREE;
+
+# run through cd2html
+chdir($menupath);
+system("cd2html $treefile");
+
+##################################################################
+
+sub makesum {      # makesum($unit, $chapters, $icon, $open, $funcname, $name, $path, $oneChap)
+  my $unit = shift;     # demos/labs, etc.
+  my $chapters = shift; # Path to the chapters
+  my $icon = shift;
+  my $open = shift;     # Tells whether the outer folder should start open/closed
+  my $funcname = shift; # Name to use on function
+  my $name = shift;     # Name to use on folder
+  my $path = shift;     # path to $demos.htm or $labs.htm
+  my $oneChap = shift;  # set to true if processing just one chapter.
+
+  # print "makesum: chapters=$path\n";
+  # If $name is given, insert outer folder
+
+  chdir $chapters or die "Can't chdir to $chapters";
+
+  my @chapters;
+  if($oneChap) {
+    @chapters = ($oneChap);
+  } else {
+    opendir(DIR, '.') or die "makesum: Can't open $chapters";
+
+    @chapters = sort readdir(DIR);
+  }
+  # print "makesum: chapters = @chapters\n";
+  my $chapter;
+  foreach $chapter (@chapters) {
+    next if $chapter =~ m/^(\.|\.\.)$/;	# Don't do . and ..
+    next unless $chapter =~ m/^\d\d/;	# Don't process a directory unless it begins with two digits.
+
+    #  print "$chapter\n";
+    $path = "../chapters/$chapter";
+
+    # Check each unit in the chapter
+    opendir(DEMOS, "$chapter/$unit") or next;
+    my @demos = sort readdir(DEMOS);
+    closedir DEMOS;
+
+    my $first = 1;
+    my $close = 0;  # Tells when to add closing </ul>
+    my $demo;
+    foreach $demo (@demos) {
+      # print "$chapter/$unit/$demo\n";
+      next if !-d "$chapter/$unit/$demo";
+      next if $demo =~ m/^(\.|\.\.)$/;	# Don't do . and ..
+      next if $demo =~ m/^RCS$/;		# Don't do RCS
+      # print "$demo\n";
+
+      if($first and $oneChap) {
+	$first = 0;
+	print LINKS "<br>### $name ###<br\n" if($makelink);
+	siteurl("$path/$unit/overview.htm");
+	if($maketree) {
+	  $close = 1;
+	  print TREE "    <li><span onclick='text.location=\"$path/$unit/overview.htm\"'>$name</span>\n";
+	  print TREE "      <ul>\n";
+	}
+      }
+
+      open OVER, "<$chapter/$unit/$demo/overview.txt" or next;
+      my $name = <OVER>; $name =~ s/[\r\n]*$//;
+      my $tip = <OVER>;  $tip  =~ s/[\r\n]*$//; $tip =~ s/'/\\'/;
+      close OVER;
+
+      # Remove <tags> from the title.
+      # print "tip = $tip\n";
+      if($tip =~ s/<[^>]*>//g) {
+#	print "tip = $tip\n";
+      }
+
+      # Replace & in titles with &amp;
+      $name =~ s/ & / &amp; /g;
+
+      my $hide = 0;  # Set to 1 if hide.txt exists.
+      $hide = 1 if(-e "$path/$unit/$demo/hide.txt");
+#      if($hide) {
+#	print "Found hide.txt at $path/$unit/$demo\n";
+#    }
+
+      # Get the chapter number
+      open(NUM, "<$chapter/number.txt") or die "Can't open $chapter/number.txt";
+      my $num = <NUM>; chop $num; chop $num;
+      close(NUM);
+
+      # Insert the chapter number if doing the overall summaries.
+
+      if($unit ne 'figures' and !$oneChap) {
+	$name = $num . ': ' . $name;
+      }
+
+      # Link in .pds, index.htm, and .zip files.
+      # If more than one exists, put a heading in
+      my $count = 0;  # Count how many files there are
+      my $head = '';
+      if(-e "$path/$unit/$demo/$demo.zip") { $count++; $head = "$demo.zip";}
+      if(-e "$path/$unit/$demo/$demo.docx") { $count++; $head = "$demo.docx";}
+      if(-e "$path/$unit/$demo/$demo.pdf") { $count++; $head = "$demo.pdf";}
+      if(-e "$path/$unit/$demo/index.htm") { $count++; $head = "index.htm";}
+
+      siteurl("$path/$unit/$demo/$head");
+      if($unit eq 'homework') {
+	$head .= "#pagemode=bookmarks&view=Fit&page=$pdfhw[$num]" if($demo eq 'hw');
+	$head .= "#pagemode=bookmarks&view=Fit&page=$pdfhwe[$num]" if($demo eq 'hwe');
+	$head .= "#pagemode=bookmarks&view=Fit&page=$pdfhws[$num]" if($demo eq 'hws');
+	#	  print("homework found, path=$path, unit=$unit, demo=$demo, head=$head\n");
+	}
+
+#      print "count = $count; num = $num; head = $head\n";
+
+      if($count == 1) {
+	treeli("$path/$unit/$demo/$head", $name, $tip, $hide);
+      } elsif($count > 1) {
+	treeli("$path/$unit/$demo/$head", $name, $tip, $hide, 1);
+	print TREE "      <ul>\n" if($maketree);
+	if(-e "$path/$unit/$demo/index.htm" and $head ne "index.htm") { 
+	  siteurl("$path/$unit/$demo/index.htm");
+	  treeli("$path/$unit/$demo/index.htm", $name, $tip);
+	}
+	if(-e "$path/$unit/$demo/$demo.pdf" and $head ne "$demo.pdf") { 
+	  siteurl("$path/$unit/$demo/$demo.pdf");
+	  treeli("$path/$unit/$demo/$demo.pdf", "Handout (pdf)", $tip);
+	}
+	if(-e "$path/$unit/$demo/$demo.docx" and $head ne "$demo.docx") { 
+	  siteurl("$path/$unit/$demo/$demo.docx");
+	  treeli("$path/$unit/$demo/$demo.docx", "Handout (docx)", $tip);
+	}
+	if(-e "$path/$unit/$demo/$demo.zip" and $head ne "$demo.zip") { 
+	  treeli("$path/$unit/$demo/$demo.zip", "Files", $tip);
+	}
+
+#	  print LINKS "<a href=$path/labs/$lab/$lab.pdf>$path/labs/$lab/$lab.pdf</a><br>\n" if($makelink);
+#	  siteurl("$path/labs/$lab/$lab.pdf");
+	print TREE "      </ul>\n      </li>  <!-- End $demo -->\n" if($maketree);
+
+      } # if($count > 1)
+  } # foreach $demo (@demos)
+    if($close) {
+      print TREE "      </ul>  <!-- End $unit  -->\n";
+      print TREE "      </li>\n";
+      $close = 0;
+    }
+} # foreach $chapter
+
+    if($open) {  # Print only if $open is given.
+    $open = ", $open";
+}
+
+}
+###########################################
+sub closesum {
+#  print FD "}\n";
+  print TREE "  </ul>\n  </li>\t<!-- Close Sum -->\n\n" if($maketree);
+}
+
+sub sortOrder {
+
+#  print "a = $a, b = $b\n";
+
+  $a =~ /_(\d*)\./;
+  my $a2 = $1;
+  $b =~ /_(\d*)\./;
+  my $b2 = $1;
+
+#  print "a2 = $a2, b2 = $b2, a2 <=> b2 = ", $a2 <=> $b2, "\n";
+
+  return $a2 <=> $b2;
+}
+
+###########################################
+sub siteurl {
+    if($makelink) {
+	$_[0] =~ s/\.\.\///;
+        my $path = "$visible/$_[0]";
+#	print "$path\n";
+# Don't include password protected files and .old files.
+	if (!($path =~ s,(doc|docx|pdf)$,,) && !($path =~ s,\.old,,)) {
+#	  print "found it#################\n";
+	  print SITE "<url><loc>$server/$_[0]</loc></url>\n";
+	}
+	print LINKS "<a href=../$_[0]>$_[0]</a><br/>\n";
+    }
+  }
+
+###########################################
+# treeli(url of link, Label of link, tip, hide flag, no </li>
+sub treeli {
+  if($maketree) {
+    # if tip isn't given, use Link label
+#    $_[1] =~ s/ & / &amp; /g;
+    if(!$_[2]){
+	$_[2] = $_[1];
+#    print "No tip\n";
+}	
+#	print("treeli: tip = $_[2]\n");
+    $_[2] =~ s/<[^>]*>//g;	# Remove <tags> from title
+#	print("treeli: tip = $_[2]\n");
+
+    # If hidden
+    if($_[3]) {
+	if(!$noshow) {
+# Add Under Construction icon if flag is set
+	  print TREE "    <li><img src=images/uc.jpg height=10><a href=\"$_[0]\" target=\"text\" title=\"$_[2]\">$_[1]</a>";
+	}
+    } else {
+# Gray links with .old in them.
+	if($_[0] =~ m/\.old/) {
+	  if(!$noshow) {
+      	    print TREE "    <li><a href=\"$_[0]\" target=\"text\" title=\"$_[2]\"><font color=\"gray\">$_[1]</font></a>";
+	  }
+
+	} else { # Don't hide
+      print TREE "    <li><a href=\"$_[0]\" target=\"text\" title=\"$_[2]\">$_[1]</a>";
+	}
+      } # if hidden
+
+#      print TREE "    <li><span onclick='open(\"$_[0]\")' target=\"text\" title=\"$_[2]\">$_[1]</span>";
+#      print TREE "    <li><span onclick='text.location=\"$_[0]\"' target=\"text\" title=\"$_[2]\">$_[1]</span>";
+
+    # Fix this.  
+      if($_[4] == 0 and !$_[3]) {  # if 4 argument is 1, don't print </li>
+	print TREE "</li>";
+      }
+      print TREE "\n";
+
+  }
+}

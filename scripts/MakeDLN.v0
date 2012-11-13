@@ -1,0 +1,112 @@
+#!/usr/bin/perl
+
+# Create the lab summary file.
+
+$Header = '$Header: /home/ratbert5/myoder/cd/visible3/support/scripts/RCS/MakeDLN,v 1.9 1997/10/13 21:50:32 myoder Exp myoder $';
+# $Log: MakeDLN,v $
+# Revision 1.9  1997/10/13  21:50:32  myoder
+# Added labs overview.wav (labsover.wav)
+# Added 2nd argument to makesummary.
+#
+# Revision 1.8  1997/10/10  12:53:00  myoder
+# Moved the gif's to the left of the chapter names.
+#
+# Revision 1.7  1997/10/01  22:03:37  myoder
+# Added $HeadingsID.
+# Added .gif's for each chapter.
+#
+# Revision 1.6  1997/09/30  17:39:05  myoder
+# Now uses standard Nav box.
+#
+# Revision 1.5  1997/09/12  20:51:51  myoder
+# Added toc and help buttons.
+#
+# Revision 1.4  1997/09/11  20:19:00  myoder
+# Removed "." from beginning.
+# Changed ToC icon to map.gif.
+#
+# Revision 1.3  1997/07/09  13:54:18  myoder
+# Added bgcolor=000000 to <body> so white text will appear while the
+# background image is loading.
+#
+# Revision 1.2  1996/09/02  16:07:14  myoder
+# Converted to lowercase file names.
+# SOrts numericall.
+#
+# Revision 1.1  1996/07/05  21:04:56  myoder
+# Initial revision
+#
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+
+$dir = $ARGV[0];
+print "$dir\n";
+
+$path = $ENV{'CDROOT'};
+chdir "$path/contents";
+$outfile = $path . "/contents/$dir.cd";
+$path .= "/chapters";
+print "$path\n";
+
+if(-e $outfile) {
+rename($outfile, $outfile.".old");
+}
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+
+opendir(CHAPS, $path) || die("$0: Can't open $path\n");
+
+print OUTPUT "<! Do not Edit, this file is created by $0 @ARGV>\n";
+print OUTPUT "<cd-head chap=0 unit=chap>\n<title>$HeadingsID{$dir}</title>\n</cd-head>\n";
+# print OUTPUT "<body bgcolor=\"000000\" background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT "<cd-body>\n";
+
+print OUTPUT "<h1>$HeadingsID{$dir}</h1>\n";
+$wav = $dir . "over.wav";
+if(-e $wav) {
+    print OUTPUT "&nbsp&nbsp&nbsp<a href=\"$wav\">";
+    print OUTPUT "<img border=0 alt=\"audio\" src=\"tape.gif\" align=middle>";
+    print OUTPUT "</a>\n";
+}
+print OUTPUT "<p>\n";
+
+foreach $chap (sort {$a <=> $b} readdir(CHAPS)) {
+    $_ = $chap;
+    if(/^\d+\w/) {# If it starts with a digit assume it a chapter.
+	$text = "../chapters/$chap/overview.txt";
+	$html = "../chapters/$chap/overview.htm";
+	$ind  = "../chapters/$chap/index.htm";
+	$gif  = "../chapters/$chap/overview.gif";
+	$png  = "../chapters/$chap/overview.png";
+	$wav  = "../chapters/$chap/overview.wav";
+	$mov  = "../chapters/$chap/overview.mov";
+	$name = "../chapters/$chap/name.txt";
+	$numb = "../chapters/$chap/number.txt";
+	# get the chapter number and name from the name.txt and 
+	# number.txt files
+	open(NAME, $name);   $chapname = <NAME>; chop($chapname); chop($chapname);
+	open(NAME, $numb);   $chapnum  = <NAME>; chop($chapnum); chop($chapnum);
+	print "$_\n";
+
+	print OUTPUT "<a href=\"../chapters/$chap/overview.htm\">";
+	if(-e $png) {
+		print OUTPUT "<img src=$png width=64 height=64>\n";
+	} elsif(-e $gif) {
+		print OUTPUT "<img src=$gif width=64 height=64>\n";
+	} else {
+	    print OUTPUT &isthere($html);
+	}
+	print OUTPUT "<strong><font size=+2>$chapnum. $chapname</font></strong></a>&nbsp\n";
+	makesummary("$path/$chap/$dir", $dir);
+	print OUTPUT "<br>\n";
+	}	
+}
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+system("cd2html $outfile");

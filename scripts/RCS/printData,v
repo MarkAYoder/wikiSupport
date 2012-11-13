@@ -1,0 +1,85 @@
+head	1.2;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	96.02.07.19.07.39;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.02.06.16.10.30;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Prints the perl database that tells how the names were remapped when
+going to 8.3 format.
+@
+
+
+1.2
+log
+@Added mappings for many of the .gif's in Graphics.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# This file prints the contents of a perl database.
+
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/printData,v 1.1 1996/02/06 16:10:30 myoder Exp myoder $';
+
+# other requires
+require 'getopts.pl';
+
+# open the filename mapping database
+
+$db_file = $ENV{'MAPPINGDATA'};
+
+if ( ! -e $db_file . ".dir") {
+	die "$0: Cannot open mapping database $db_file\n";
+}
+print "$db_file\n";
+dbmopen(%Map, $db_file, 0666) ||
+	die "Cannot open mapping database $db_file";
+
+#$Map{'overview.html'} = 'overview.htm';
+#$Map{'index.html'} = 'index.htm';
+#$Map{'index2.htm'} = 'index.htm';
+# Graphics mapping
+#$Map{'Orangebullet.gif'} = 'orange.gif';
+#$Map{'Question2.gif'} = 'ques2.gif';
+#$Map{'Yellowbullet.gif'} = 'yellow.gif';
+#$Map{'next_motif.gif'} = 'next.gif';
+#$Map{'nextmotif_gr.gif'} = 'next_gr.gif';
+#$Map{'previous_motif.gif'} = 'prev.gif';
+#$Map{'previous_motif_gr.gif'} = 'prev_gr.gif';
+$Map{'foot_motif.gif'} = 'foot.gif';
+
+$print_db = 1;
+if($print_db) {
+	print "----------------\n";
+	while (($key,$val) = each %Map) {
+ 		print $key, ' = ', $val, "\n";
+	}
+	print "----------------\n";
+}	# if($print_db)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /database/bookcd/support/scripts/RCS/to8.3,v 1.4 1996/01/17 22:22:49 myoder Exp $';
+d22 11
+a32 1
+$Map{'index.html'} = 'index.htm';
+@

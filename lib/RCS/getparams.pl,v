@@ -1,0 +1,235 @@
+head	1.8;
+access;
+symbols;
+locks; strict;
+comment	@#@;
+
+
+1.8
+date	96.01.17.18.42.06;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.10.10.14.07.01;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.06.19.18.26.40;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.06.19.18.16.45;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.06.19.18.10.36;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.06.01.19.00.12;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.06.01.16.41.30;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.06.01.15.58.44;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@getparams($tag) is passed a tag like:
+<a href = "This_is_a_test" width = 25%">
+and puts the parameters in a perl associative array like:
+(href This_is_a_test width 25%).
+Presently it doesn't handle spaces inside "" correctly.
+@
+
+
+1.8
+log
+@Handles NULL ("") string such as alt="" now.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+#"$Log: getparams.pl,v $
+#Revision 1.7  1995/10/10  14:07:01  myoder
+#Keywords are mapped to lower case.
+#
+#Revision 1.6  1995/06/19  18:26:40  myoder
+#Added 1; at the end so it will work with 'require'.
+#
+#Revision 1.5  1995/06/19  18:16:45  myoder
+#*** empty log message ***
+#
+#Revision 1.4  1995/06/19  18:10:36  myoder
+#Fixed comment bug
+#
+#Revision 1.3  1995/06/01  19:00:12  myoder
+#Added putparams() which undoes what getparams() did.
+#
+#Revision 1.2  1995/06/01  16:41:30  myoder
+#Changed comment character to #
+#
+#Revision 1.1  1995/06/01  15:58:44  myoder
+#Initial revision
+#";
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/getparams.pl,v 1.7 1995/10/10 14:07:01 myoder Exp $';
+
+sub getparams {
+local(@@here, @@keys, @@values, %data, $value, $key);
+local($tag) = @@_;
+
+local($debug) = 0;
+
+$_ = $tag;
+
+#print "$_\n" if $debug;
+
+s/\s*=\s*/=/g;		# remove stuff around ='s
+
+#print "$_\n" if $debug;
+
+@@here = split(/[ \t\n>]+/);	# split on white space and >
+
+print "@@here\n" if $debug;
+
+grep(do {
+	($key, $value) = /(\w+)=([\S]+)/;		# Pull stuff off before and after =
+#	print "key = $key, value = $value\n" if $debug;
+	$value =~ s/"//g;	# strip off quotes.
+	if( ! $value) { $value = '""'; }	# check for empty string
+	$key =~ y/A-Z/a-z/;	# Make lower case
+	$data{$key} = $value if $key;			# save it in an assoc array
+	0;
+}, @@here);
+
+if($debug) {
+@@keys = keys %data;
+@@values = values %data;
+while ($#keys >= 0) {
+    print pop(@@keys), '=', pop(@@values), "\n";
+}
+}  # end if($debug)
+
+return(%data);
+}
+
+#=============
+# putparams
+#=============
+
+sub putparams {
+local($tag) = "";
+local(%params) = @@_;
+
+local($debug) = 0;
+
+@@keys = keys %params;
+@@values = values %params;
+while ($#keys >= 0) {
+	$tag .= pop(@@keys) . '=' . pop(@@values) . ' ';
+	}
+$tag;
+}
+
+1;
+@
+
+
+1.7
+log
+@Keywords are mapped to lower case.
+@
+text
+@d4 3
+d25 1
+a25 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/lib/RCS/getparams.pl,v 1.6 1995/06/19 18:26:40 myoder Exp $';
+d49 1
+@
+
+
+1.6
+log
+@Added 1; at the end so it will work with 'require'.
+@
+text
+@d4 3
+d22 1
+a22 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/getparams.pl,v 1.5 1995/06/19 18:16:45 myoder Exp myoder $';
+d46 1
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d4 3
+d19 1
+a19 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/getparams.pl,v 1.4 1995/06/19 18:10:36 myoder Exp myoder $';
+d75 2
+@
+
+
+1.4
+log
+@Fixed comment bug
+@
+text
+@d4 3
+d16 1
+a16 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/getparams.pl,v 1.3 1995/06/01 19:00:12 myoder Exp myoder $';
+@
+
+
+1.3
+log
+@Added putparams() which undoes what getparams() did.
+@
+text
+@d4 3
+d13 1
+a13 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/getparams.pl,v 1.2 1995/06/01 16:41:30 myoder Exp myoder $';
+@
+
+
+1.2
+log
+@Changed comment character to #
+@
+text
+@d4 3
+d10 1
+a10 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/getparams.pl,v 1.1 1995/06/01 15:58:44 myoder Exp myoder $';
+d47 18
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 5
+a7 2
+#"$Log$";
+$Header = '$Header$';
+@

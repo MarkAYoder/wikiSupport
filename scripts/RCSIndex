@@ -1,0 +1,59 @@
+#!/usr/local/gnu/bin/perl
+
+# Create the chapter index files based on the RCS log files.
+
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/scripts/RCS/RCSIndex,v 1.3 1995/06/19 17:45:09 myoder Exp $';
+# $Log: RCSIndex,v $
+# Revision 1.3  1995/06/19  17:45:09  myoder
+# Fixed $Log.
+#
+
+$outfile = "RCS.cd";
+
+if(-e $outfile) {
+rename($outfile, $outfile.".old");
+}
+
+$path = @ARGV[0] . "/RCS";
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+
+opendir(RCS, $path) || die("$0: Can't open $path\n");
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head>\n<cd-title>RCS Files</cd-title>\n</cd-head>\n";
+print OUTPUT "<body background=\"../Graphics/ee2200barback.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT ".<br><font size=+3><strong>RCS Files</strong></font>\n";
+print OUTPUT "<p>\n";
+print OUTPUT "<table border=1 width=470>\n";
+
+foreach $filev (sort readdir(RCS)) {
+    $_ = $filev;
+    if(/,v$/) { # File name must end in ,v to be an RCS file.
+	$file = $filev; $file =~ s/,v$//;
+	print "$_\n";
+
+	open(FILE, "rlog -t $filev|");
+	while(<FILE>) { # Skip to the description
+		if(/^description:$/) {last;}
+	}
+	print OUTPUT "<tr align=left>\n";
+	print OUTPUT "<td><a href=\"$file\">$file</a><br>";
+	print OUTPUT "<a href=\"RCS/$filev\">$filev</a></td>\n";
+	print OUTPUT "<td>";
+	while(<FILE>) {
+		if(/^===================/) { last;}
+	print OUTPUT $_;
+	}
+	print OUTPUT "\n</td>\n";
+	print OUTPUT "</tr>";
+    }
+}
+
+print OUTPUT "</table>\n";
+print OUTPUT "</cd-body>\n";
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot\n";
+
+close(OUTPUT);
+system("cd2html $outfile; rm $outfile");

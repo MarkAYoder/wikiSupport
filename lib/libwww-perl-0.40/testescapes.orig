@@ -1,0 +1,28 @@
+#!/usr/public/bin/perl
+# $Id: testescapes,v 1.1 1994/07/08 08:08:14 fielding Exp $
+#-----------------------------------------------------------------
+# testescapes: A simple program for testing WWW URL escaping and unescaping.
+#
+# 07 Jul 1994 (RTF): Initial Version 
+#
+# Created by Roy Fielding to test the libwww-perl system
+#-----------------------------------------------------------------
+if ($libloc = $ENV{'LIBWWW_PERL'}) { unshift(@INC, $libloc); }
+
+require "wwwurl.pl";
+
+print 'Enter a string (^D to exit): ';
+while (<>)
+{
+    chop;
+
+    if ($_)
+    {
+        $escpd = &wwwurl'escape($_, '[\x00-\x20"#%/;<>?\x7F-\xFF]');
+        print $_,' = ', $escpd,' = ', &wwwurl'unescape($escpd), "\n";
+    }
+    print 'Enter a date (^D to exit): ';
+}
+print "\n";
+
+exit(0);

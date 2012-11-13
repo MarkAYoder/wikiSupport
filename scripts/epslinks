@@ -1,0 +1,208 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+# This script reads and eps file and changes:
+# FOOSPFirst	'the title of the hw problem'
+# /Subject ()	/Subject (Signal Processing First, Copyright....)
+# FOOKEYWORD	'the keywords from the title and database'
+# FOO.zip	../../statemnt/term/file.zip
+# FOO.pdf	../../statemnt/term/file.pdf
+# FOO.eps	../../statemnt/term/file.eps
+# FOO.png	../../statemnt/term/file.png
+
+# Usage:  epslinks  "This is the title" "Here are the keywords" path inputfile.eps outputfile.eps
+
+if($#ARGV ne 4 and $#ARGV ne 5) {
+  print "Usage: $0 [-faculty] Title Keywords path file.eps outfile\n";
+  exit;
+}
+
+my $faculty = 0;
+if($ARGV[0] eq '-faculty') {
+  $faculty = 1;
+  shift @ARGV;
+}
+
+my ($title, $keywords, $path, $input, $output) = @ARGV;
+
+#  print "$title, $keywords, $path, $input, $output\n";
+
+open FD, "<$input" or die "Can't read $input";
+open FDOUT, ">$output" or die "Can't open $output for writing";
+
+$path =~ s/\.pdf$//;
+
+# print "path = $path\n";
+#####################################################################
+if($faculty) {
+$_ = <FD>;
+while($_ and !/FOOSPFirst/) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find FOOSPFirst in $input";
+
+/(.*)FOOSPFirst(.*)/;
+my $start = $1;
+my $end = $2;
+
+$end =~ s/Subject \(\)/Subject(Signal Processing First)/;
+
+print FDOUT "$start$title$end\n";
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$_ = <FD>;
+while($_ and !/FOOKEYWORD/) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find FOOKEYWORD in $input";
+
+/(.*)FOOKEYWORD(.*)/;
+$start = $1;
+$end = $2;
+
+print FDOUT "$start$keywords$end\n";
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% tex
+
+$_ = <FD>;
+while($_ and !/SDict begin \[ \/H/) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find tex link in $input";
+
+print "$input, tex: $_" if !/^SDict begin \[ \/H \/I \/Border \[0 0 12\] \/Color \[0 1 1\] \/Action/;
+$_ = <FD>;
+print "$input, tex: $_" if !/pdfmark end$/;
+
+print FDOUT "SDict begin [ /Subtype /Link /H /I /Border [0 0 12] /Color [0 .5 .5]
+/Action << /S /Launch /F ($path.tex) /D [0  /FitBH ]>> H.B /ANN pdfmark
+end
+";
+
+#/(.*)FOO.zip(.*)/;
+#$start = $1;
+#$end = $2;
+
+# print FDOUT "$start$path.tex$end\n";
+
+my $test = "$path.tex";
+$test =~ s|^../../||;
+print "$test not found\n" if !-e "$test";
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% pdf
+
+$_ = <FD>;
+while($_ and !/FOO.pdf/) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find pdf link in $input";
+
+/(.*)FOO.pdf(.*)/;
+$start = $1;
+$end = $2;
+
+print FDOUT "$start$path.pdf$end\n";
+
+$test = "$path.pdf";
+$test =~ s|^../../||;
+print "$test not found\n" if !-e "$test";
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  eps
+
+$_ = <FD>;
+while($_ and !/SDict begin \[ \/H /) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find eps link in $input";
+
+print "$input, eps: $_" if !/^SDict begin \[ \/H \/I \/Border \[0 0 12\] \/Color \[0 1 1\] \/Action/;
+$_ = <FD>;
+print "$input, eps: $_" if !/pdfmark end$/;
+
+print FDOUT "SDict begin [ /Subtype /Link /H /I /Border [0 0 12] /Color [0 .5 .5]
+/Action << /S /Launch /F ($path.eps) /D [0  /FitBH ]>> H.B /ANN pdfmark
+end
+";
+
+#/(.*)FOO.eps(.*)/;
+#$start = $1;
+#$end = $2;
+
+#print FDOUT "$start$path.eps$end\n";
+
+$test = "$path.eps";
+$test =~ s|^../../||;
+print "$test not found\n" if !-e "$test";
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% png
+
+$_ = <FD>;
+while($_ and !/SDict begin \[ \/H /) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find png link in $input";
+
+
+print "$input, png: $_" if !/^SDict begin \[ \/H \/I \/Border \[0 0 12\] \/Color \[0 1 1\] \/Action/;
+$_ = <FD>;
+print "$input, png: $_" if !/pdfmark end$/;
+
+print FDOUT "SDict begin [ /Subtype /Link /H /I /Border [0 0 12] /Color [0 .5 .5]
+/Action << /S /Launch /F ($path.png) /D [0  /FitBH ]>> H.B /ANN pdfmark
+end
+";
+
+#/(.*)FOO.png(.*)/;
+#$start = $1;
+#$end = $2;
+
+#print FDOUT "$start$path.png$end\n";
+
+$test = "$path.png";
+$test =~ s|^../../||;
+print "$test not found\n" if !-e "$test";
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#####################################################################
+
+} else { # if not faculty
+
+# Copy everything before the four buttons at the top.
+$_ = <FD>;
+while($_ and !/DOCINFO pdfmark end/) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+$_ or die "Can't find first 'pdfmark end' in $input";
+
+  print FDOUT $_;
+
+# Skip the lines with the four buttons at the top on them
+$_ = <FD>;
+while($_ and !/FOO.png/) {
+  $_ = <FD>;
+}
+$_ or die "Can't find 'FOO.png' in $input";
+
+}
+#####################################################################
+
+# Copy rest of file.
+while(<FD>) {
+  print FDOUT $_;
+}
+
+close FDOUT;
+close FD;

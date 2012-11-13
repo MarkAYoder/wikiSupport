@@ -1,0 +1,530 @@
+head	1.16;
+access;
+symbols;
+locks
+	myoder:1.16; strict;
+comment	@# @;
+
+
+1.16
+date	97.10.14.18.06.13;	author myoder;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	97.10.13.21.51.20;	author myoder;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	97.10.01.22.05.40;	author myoder;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	97.09.09.22.33.11;	author myoder;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.11.14.23.18.29;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.07.05.21.06.50;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.02.13.20.22.11;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.02.13.18.38.18;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.01.24.21.30.20;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.01.17.20.51.51;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.01.17.20.30.54;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	96.01.10.21.16.41;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.12.08.12.38.47;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.12.06.21.40.40;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.10.26.10.29.16;	author schodorf;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.09.20.12.32.40;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Creates the overview.html pages for Demos based on the overview.txt
+and overview.gif files in the individual demo directories.
+@
+
+
+1.16
+log
+@Commented out some print statements.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# Create the demo index files
+# run in the Demo directory.
+
+$Header = '$Header';
+# $Log: MakeDemo,v $
+# Revision 1.15  1997/10/13  21:51:20  myoder
+# Added 2nd argument to makesummary
+#
+# Revision 1.14  1997/10/01  22:05:40  myoder
+# Added $HeadingsID.
+# Removed .mov.
+#
+# Revision 1.13  1997/09/09  22:33:11  myoder
+# Added alt= field to images.
+#
+# Revision 1.12  1996/11/14  23:18:29  myoder
+# Added "tape" and "camera" icons.
+#
+# Revision 1.11  1996/07/05  21:06:50  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.10  1996/02/13  20:22:11  myoder
+# Moved the <table> building stuff to makesummary in /lib.
+#
+# Revision 1.9  1996/02/13  18:38:18  myoder
+# Added checks for .gif, .wav, and .mov.  If present, they are linked in.
+#
+# Revision 1.8  1996/01/24  21:30:20  myoder
+# Added a message telling when overview.txt can't be found.
+#
+# Revision 1.7  1996/01/17  20:51:51  myoder
+# Changed pwd back.  It didn't work onthe GT machines.
+#
+# Revision 1.6  1996/01/17  20:30:54  myoder
+# $pwd comes from pwd command rather than PWD in environment.
+#
+# Revision 1.5  1996/01/10  21:16:41  myoder
+# Changed .html to .htm.
+# If the .htm file is there it will use it.  If not it will use the .html file.
+#
+# Revision 1.4  1995/12/08  12:38:47  myoder
+# Generalized to work with Labs and Homeworks.  Uses the name of the
+# current directory (Demos, Labs, Homework, etc.) in title.
+#
+# Revision 1.2  95/10/26  10:29:16  10:29:16  schodorf (Jeff Schodorf)
+# didn't change anything, just tried to run it (and failed) :(
+# 
+# Revision 1.1  95/09/20  12:32:40  12:32:40  myoder (Mark Yoder)
+# Initial revision
+# 
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+
+$path = '.';
+$outfile = $path . "/" . "overview.cd";
+
+# $pwd = $ENV{'PWD'};
+chop($pwd = `pwd`);
+
+@@tmp = split("/", $pwd);	# Find name of current directory
+@@tmp = reverse(@@tmp);
+$dir = $tmp[0];
+
+open(NAME, '../name.txt');   $chapname = <NAME>; chop($chapname);
+open(NAME, '../number.txt'); $chapnum  = <NAME>; chop($chapnum);
+# print "($chapname)\n";
+# print "($chapnum)\n";
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+# print "$outfile\n";
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=$chapnum unit=overview>\n<cd-title>$chapnum. $chapname $HeadingsID{$dir}</cd-title>\n</cd-head>\n";
+print OUTPUT "<cd-body bgcolor=\"000000\">\n";
+print OUTPUT "<br><font size=+3><strong>$chapnum. $chapname $HeadingsID{$dir}</strong></font>\n";
+
+	$wav  = "overview.wav";
+	$mov  = "overview.mov";
+#	if(-e $wav) {
+#	    print OUTPUT "<br><a href=\"$wav\">";
+#	    print OUTPUT "<img border=0 alt=\"audio\" src=\"tape.gif\">";
+#	    print OUTPUT "</a>\n";
+#	}
+#	if(-e $mov) {
+#	    print OUTPUT "<a href=\"$mov\">\n";
+#	    print OUTPUT "<img border=0 alt=\"video\" src=\"camera2.gif\">";
+#	    print OUTPUT "</a>\n";
+#	}
+
+print OUTPUT "<br><br><br><br>\n";
+
+makesummary($path, $dir);
+
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+#system("cd2html $outfile; rm $outfile");
+system("cd2html $outfile");
+@
+
+
+1.15
+log
+@Added 2nd argument to makesummary
+@
+text
+@d8 3
+d70 2
+a71 2
+print "($chapname)\n";
+print "($chapnum)\n";
+d78 1
+a78 1
+print "$outfile\n";
+@
+
+
+1.14
+log
+@Added $HeadingsID.
+Removed .mov.
+@
+text
+@d8 4
+d85 1
+a85 1
+#	    print OUTPUT "<br><a href=\"$wav\">\n";
+d97 1
+a97 1
+makesummary($path);
+@
+
+
+1.13
+log
+@Added alt= field to images.
+@
+text
+@d8 3
+d74 1
+a74 1
+print OUTPUT "<cd-head chap=$chapnum unit=overview>\n<cd-title>$chapnum. $chapname $dir</cd-title>\n</cd-head>\n";
+d76 1
+a76 1
+print OUTPUT "<br><font size=+3><strong>$chapnum. $chapname $dir</strong></font>\n";
+d85 5
+a89 5
+	if(-e $mov) {
+	    print OUTPUT "<a href=\"$mov\">\n";
+	    print OUTPUT "<img border=0 alt=\"video\" src=\"camera2.gif\">";
+	    print OUTPUT "</a>\n";
+	}
+@
+
+
+1.12
+log
+@Added "tape" and "camera" icons.
+@
+text
+@d8 3
+d72 2
+a73 2
+print OUTPUT "<cd-body>\n";
+print OUTPUT ".<br><font size=+3><strong>$chapnum. $chapname $dir</strong></font>\n";
+d77 5
+a81 5
+	if(-e $wav) {
+	    print OUTPUT "<br><a href=\"$wav\">\n";
+	    print OUTPUT "<img border=0 src=\"tape.gif\">";
+	    print OUTPUT "</a>\n";
+	}
+d84 1
+a84 1
+	    print OUTPUT "<img border=0 src=\"camera2.gif\">";
+@
+
+
+1.11
+log
+@Converted to lowercase filenames.
+@
+text
+@d8 3
+d71 14
+@
+
+
+1.10
+log
+@Moved the <table> building stuff to makesummary in /lib.
+@
+text
+@d8 3
+d68 1
+a68 1
+print OUTPUT "<p>\n";
+@
+
+
+1.9
+log
+@Added checks for .gif, .wav, and .mov.  If present, they are linked in.
+@
+text
+@d8 3
+d37 1
+a37 1
+
+a60 2
+opendir(DEMOS, $path) || die("$0: Can't open $path\n");
+
+a65 1
+print OUTPUT "<table border=1 width=470>\n";
+d67 1
+a67 54
+foreach $demo (sort readdir(DEMOS)) {
+    $_ = $demo;
+#    print "$_\n";
+    if(-d $demo && $demo ne "." && $demo ne ".." && $demo ne "RCS" ) {
+	$text = "$path/$demo/overview.txt";
+	$html = "$path/$demo/index.htm";
+	$gif  = "$path/$demo/overview.gif";
+	$wav  = "$path/$demo/overview.wav";
+	$mov  = "$path/$demo/overview.mov";
+
+	if(-e $text) {
+	print "$_\n";
+	print OUTPUT "<tr align=left>\n";
+
+	print OUTPUT "<td>";
+	if(-e $wav) {
+	    print OUTPUT "<a href=\"$wav\">";
+	    }
+	if(-e $gif) {
+	    print OUTPUT "<img src=\"$gif\" width=64 height=64>";
+	} else {
+	    print OUTPUT &isthere($html);
+	    }
+
+	if(-e $wav) {
+	    print OUTPUT "</a>";
+	    }
+	print OUTPUT "</td>\n";
+
+	open(TEXT, $text);
+#	First line of text if the name of the demo.
+	$tmp = <TEXT>; chop($tmp);
+	print OUTPUT "<td><a href=\"$html\">";
+	print OUTPUT "<font size=+1><strong>$tmp</strong></font>";
+	print OUTPUT "</a></td>";
+#	The rest of the text is the description.
+	print OUTPUT "<td>\n";
+	if(-e $mov) {
+	    print OUTPUT "<a href=\"$mov\">";
+	}
+	while(<TEXT>) {
+	    print OUTPUT;
+	}
+	if(-e $mov) {
+	    print OUTPUT "</a>";
+	    }
+	print OUTPUT "</td>\n";
+    } else {
+	print "No overview.txt for $demo\n";
+    }
+}	# if(-d.....
+
+}
+print OUTPUT "</tr>\n";
+a68 1
+print OUTPUT "</table>\n";
+@
+
+
+1.8
+log
+@Added a message telling when overview.txt can't be found.
+@
+text
+@d8 3
+d35 1
+d39 2
+a40 2
+$pwd = $ENV{'PWD'};
+# chop($pwd = `pwd`);
+d52 1
+a52 1
+rename($outfile, $outfile.".old");
+d55 1
+a55 1
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+d71 5
+a75 4
+	$text = $path . "/$demo/overview.txt";
+	$htm  = $path . "/$demo/index.htm";
+	$html = $path . "/$demo/index.html";
+	$gif  = $path . "/$demo/overview.gif";
+d81 6
+a86 3
+	if(-e $htm) {
+	    print OUTPUT "<td><a href=\"$htm\">";
+	    print OUTPUT &isthere($htm);
+a87 1
+	    print OUTPUT "<td><a href=\"$html\">";
+d89 6
+a94 2
+	}
+	print OUTPUT "</a></td>\n";
+d99 1
+a99 5
+	if(-e $htm) {
+	    print OUTPUT "<td><a href=\"$htm\">";
+	} else {
+	    print OUTPUT "<td><a href=\"$html\">";
+	}
+d104 3
+d110 3
+@
+
+
+1.7
+log
+@Changed pwd back.  It didn't work onthe GT machines.
+@
+text
+@d8 3
+d101 2
+@
+
+
+1.6
+log
+@$pwd comes from pwd command rather than PWD in environment.
+@
+text
+@d8 3
+d33 1
+a33 1
+chop($pwd = `pwd`);
+@
+
+
+1.5
+log
+@Changed .html to .htm.
+If the .htm file is there it will use it.  If not it will use the .html file.
+@
+text
+@d8 4
+d29 3
+a31 1
+$pwd = $ENV{'PWD'};	# Used by relpath
+a34 1
+
+@
+
+
+1.4
+log
+@Generalized to work with Labs and Homeworks.  Uses the name of the
+current directory (Demos, Labs, Homework, etc.) in title.
+@
+text
+@d1 1
+a1 1
+#!/usr/sbin/perl
+d7 5
+a11 1
+# $Log:	MakeDemo,v $
+d57 1
+d65 7
+a71 2
+	print OUTPUT "<td><a href=\"$html\">";
+	print OUTPUT &isthere($html);
+d77 5
+a81 1
+	print OUTPUT "<td><a href=\"$html\">";
+@
+
+
+1.3
+log
+@Changed unit=demo to unit=overview so cd2html will treat
+the files created by MakeDemo differently from the overviews of the
+individual demos.
+@
+text
+@d21 6
+d42 1
+a42 1
+print OUTPUT "<cd-head chap=$chapnum unit=overview>\n<cd-title>$chapnum. $chapname Demos</cd-title>\n</cd-head>\n";
+d44 1
+a44 1
+print OUTPUT ".<br><font size=+3><strong>$chapnum. $chapname Demos</strong></font>\n";
+@
+
+
+1.2
+log
+@didn't change anything, just tried to run it (and failed) :(
+@
+text
+@d8 3
+d36 1
+a36 1
+print OUTPUT "<cd-head chap=$chapnum unit=demo>\n<cd-title>$chapnum. $chapname Demos</cd-title>\n</cd-head>\n";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d7 4
+a10 1
+# $Log$
+@

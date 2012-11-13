@@ -1,0 +1,776 @@
+head	2.3;
+access;
+symbols;
+locks
+	myoder:2.3; strict;
+comment	@# @;
+
+
+2.3
+date	2000.04.28.19.00.56;	author myoder;	state Exp;
+branches;
+next	2.2;
+
+2.2
+date	2000.04.12.19.53.39;	author myoder;	state Exp;
+branches;
+next	2.1;
+
+2.1
+date	2000.04.12.18.16.45;	author myoder;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	97.10.24.16.38.12;	author myoder;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	96.11.14.13.30.13;	author myoder;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	96.07.05.21.09.01;	author myoder;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	96.07.05.17.01.03;	author myoder;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	96.05.01.21.07.09;	author myoder;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	96.04.29.13.55.27;	author myoder;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	96.03.26.17.27.12;	author myoder;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	96.03.15.21.05.45;	author myoder;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	96.02.05.18.46.57;	author myoder;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.01.17.20.53.53;	author myoder;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.01.17.20.10.56;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.01.10.21.25.55;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.08.22.20.23.23;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.08.08.20.10.50;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.08.08.16.51.56;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.07.06.17.11.08;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.06.29.21.15.52;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.06.19.18.40.26;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.06.01.19.03.39;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.06.01.11.56.03;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.05.22.15.32.39;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.05.17.13.40.41;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Converts our html extensions to html.  Uses a perl database build
+via Makecd2html.
+@
+
+
+2.3
+log
+@Changed path to perl.
+@
+text
+@#!/usr/local/bin/perl
+
+# This file convert our html extensions to real html.
+
+# The input file must end in .cd.
+# The output file will end in .htm.
+
+# Revision 1.4  1995/06/01  19:03:39  myoder
+# Addd $tmp to specify the absolution paths to perl support
+# functions (I should learn about libraries and perl paths)
+# Added the Do not Edit line as the first written to the .html file.
+#
+# Revision 1.3  1995/06/01  11:56:03  myoder
+# Added foundtag().
+# Changed method of sending data to support routines such as the
+# routine that puts the URLs in matlab code.
+# Now the support routine reads the data from the global @@allwords and
+# is responsible for knowing when to return to the main loop.
+#
+# Revision 1.2  1995/05/22  15:32:39  myoder
+# Added full path to mat2cd.pl.
+# Added full path to cd2htmlData.
+#
+# Revision 1.1  1995/05/17  13:40:41  myoder
+# Initial revision
+
+$Header = '$Header: /home/kirin/myoder/cd/support/scripts/RCS/cd2html,v 1.1 1995/05/17 13:40:41 myoder Exp myoder ';
+
+# local requires
+require 'mat2cd.pl';
+require 'head.pl';
+require 'getparams.pl';
+require 'findpath.pl';
+require 'htmlscan.pl';
+
+# other requires
+require 'getopts.pl';
+
+# $pwd = $ENV{'PWD'};	# Used by relpath
+chop($pwd = `pwd`);	# Used by relpath
+
+local($tag);
+
+$path = $ENV{'CDROOT'};
+@@path = (".", "../", "../Demos", "../Solution",
+	 "Graphics", 
+	 "../Graphics",
+	 "../../Graphics",
+	 $path . "/visible2/Graphics",
+	 $path . "/visible2/Archives",
+	 $path . "/visible2/Contents",
+	 $path . "/visible2/Chapters"
+	 );
+
+@@path = (".", "../", "../demos", "../solution",
+	 "graphics", 
+	 "../graphics",
+	 "../../graphics",
+	 $path . "/visible2/graphics",
+	 $path . "/visible2/archives",
+	 $path . "/visible2/contents",
+	 $path . "/visible2/chapters"
+	 );
+
+# open the subsitutions database
+# this is where all the subs are
+$db_file = $ENV{'CD2HTMLDATA'};
+
+if ( ! -e $db_file . ".dir") {
+	die "$0: Cannot open subsitution database $db_file\n";
+}
+dbmopen(%tmp, $db_file, 0444) ||
+	die "Cannot open subsitution database $db_file";
+%data = %tmp;	# hack so we can open other databases;
+
+$print_db = 0;
+if($print_db) {
+	print "----------------\n";
+	while (($key,$val) = each %data) {
+ 		print $key, ' = ', $val, "\n";
+	}
+	print "----------------\n";
+}	# if($print_db)
+
+ # Process the command line options
+&Getopts('bdi');
+
+$back_flag = 1;
+if ($opt_b) {
+	print "Excluding backgrounds\n";
+	$back_flag = 0;
+}
+$debug = $opt_d;
+print "opt_b = $opt_b\topt_d = $opt_d\n" if $debug;
+
+# process each file on the command line
+
+foreach $file (@@ARGV) {
+# print "$file\n";
+$_ = $file;
+next unless(/\.cd$/);	# Skip unless it ends with .cd.
+
+$outname = $file;
+$outname =~ s/.cd$/.htm/;
+if ($opt_i) {			# install in master directory
+    print "Changing $outname\nto\n" if $debug;
+    $outname = $pwd . "/" . $outname;
+    print "$outname to \n" if $debug;
+    $outname =~ s#$ENV{'HOME'}#$ENV{'CDROOT'}#;
+    print "$outname to \n" if $debug;
+    $outname =~ s#bookcd/bookcd#bookcd/visible2#;
+    print "$outname\n" if $debug;
+}
+
+open(INFILE, $file);
+
+$mtime = (stat($file))[9];
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($mtime);
+$mon = (Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec)[$mon];
+
+print "Reading $file, ";
+print "Last Modified $hour:$min on $mday-$mon-19$year\n";
+print "Outputting to $outname\n\n";
+
+open(HTML, ">$outname") || die "Cannot open $outfile";
+print HTML "<! Do not Edit, this file is created by $0>\n";
+
+# Read the entire input file.
+while(<INFILE>) {
+	@@linewords = split(/([<>])/);
+	push(@@allwords, @@linewords);
+}
+
+&htmlscan(@@allwords);
+
+} # foreach $file (@@ARGV)
+
+dbmclose(%data);
+close(HTML);
+# symlink($outname, $outname . "l");
+system("chgrp bookcd $outname");
+system("chmod 664 $outname");
+@
+
+
+2.2
+log
+@changed visible to visible2.
+@
+text
+@d1 1
+a1 1
+#!/usr/local/gnu/bin/perl
+@
+
+
+2.1
+log
+@Version for 2nd edition.
+@
+text
+@d49 4
+a52 4
+	 $path . "/visible/Graphics",
+	 $path . "/visible/Archives",
+	 $path . "/visible/Contents",
+	 $path . "/visible/Chapters"
+d59 4
+a62 4
+	 $path . "/visible/graphics",
+	 $path . "/visible/archives",
+	 $path . "/visible/contents",
+	 $path . "/visible/chapters"
+d111 1
+a111 1
+    $outname =~ s#bookcd/bookcd#bookcd/visible#;
+@
+
+
+1.22
+log
+@Added the -e flag which causes <movie>'s to be embedded.
+@
+text
+@d86 1
+a86 1
+&Getopts('bdie');
+a91 3
+}
+if($opt_e) {
+    print "Embedding movies\n";
+@
+
+
+1.21
+log
+@Changed chmod g+w to chmod 664.
+@
+text
+@d86 1
+a86 1
+&Getopts('bdi');
+d92 3
+@
+
+
+1.20
+log
+@Converted to lowercase filenames.
+@
+text
+@d142 1
+a142 1
+system("chmod g+w $outname");
+@
+
+
+1.19
+log
+@Does chmod to g+w and chgrp to bookcd on .htm file.
+@
+text
+@d55 10
+@
+
+
+1.18
+log
+@Added Archives to the path.
+@
+text
+@d131 2
+@
+
+
+1.17
+log
+@Added "Graphics" to the search path.
+@
+text
+@d45 9
+a53 5
+@@path = (".", "Graphics", "../Graphics", "../Demos", "../Solution",
+	"../../Graphics",
+	$path . "/visible/Graphics",
+	$path . "/visible/Contents"
+	);
+@
+
+
+1.16
+log
+@Added ../../Graphics and /visible/Contents to the search path.
+@
+text
+@d1 1
+a1 1
+#!/usr/sbin/perl
+d45 1
+a45 1
+@@path = (".", "../Graphics", "../Demos", "../Solution",
+@
+
+
+1.15
+log
+@Uses 'pwd' to get path.
+Added Graphics to the search path.
+@
+text
+@d1 1
+a1 1
+#!/usr/local/gnu/bin/perl
+d45 2
+a46 1
+@@path = (".", "Graphics", "../Graphics", "../Demos", "../Solution",
+d48 1
+a48 1
+	$path . "/visible/Contents",
+a109 2
+
+if(-e $outname) { rename($outname, "$outname.old") }
+@
+
+
+1.14
+log
+@No longer symlinks to *.html
+@
+text
+@d39 2
+a40 2
+$pwd = $ENV{'PWD'};	# Used by relpath
+# chop($pwd = `pwd`);	# Used by relpath
+d45 1
+a45 1
+@@path = (".", "../Graphics", "../Demos", "../Solution",
+d109 2
+@
+
+
+1.13
+log
+@Changed pwd back.  It didn't work onthe GT machines.
+@
+text
+@d125 1
+a125 1
+symlink($outname, $outname . "l");
+@
+
+
+1.12
+log
+@Using pwd command to find pwd rather than PWD in environment.
+symlink .htm to .html, just in case.
+@
+text
+@d40 1
+a40 1
+chop($pwd = `pwd`);	# Used by relpath
+@
+
+
+1.11
+log
+@Changed .html to .htm
+@
+text
+@d40 1
+d124 2
+@
+
+
+1.10
+log
+@Gets $pwd from ENV
+added -i which should "install" the html in the master directory.
+It doesn't find the .gifs.
+@
+text
+@d6 1
+a6 1
+# The output file will end in .html.
+d88 1
+a88 1
+$outname =~ s/.cd$/.html/;
+@
+
+
+1.9
+log
+@Checking the support_makefile fix
+@
+text
+@d39 1
+a39 1
+$pwd = `pwd`;		# Used by relpath
+d70 1
+a70 1
+&Getopts('bd');
+d89 9
+@
+
+
+1.8
+log
+@Added ../Demos and ../Solution to @@path
+@
+text
+@d1 1
+a1 1
+#!/usr/sbin/perl
+@
+
+
+1.7
+log
+@Moved foundtag to htmlscan.pl.
+Made scanning loop into a sub called htmlscan and moved to htmlscan.pl.
+Fixed $pwd bug.
+@
+text
+@d44 1
+a44 1
+@@path = (".", "../Graphics", 
+@
+
+
+1.6
+log
+@Added the following options:
+	-b don't use background image
+	-d debug mode.
+@
+text
+@d1 1
+a1 1
+#!/usr/local/gnu/bin/perl
+a28 1
+$tmp = "/a/kirin/users/kirin/myoder";
+d34 1
+d39 1
+a39 1
+$pwd = system('pwd');		# Used by relpath
+d43 1
+d45 2
+a46 2
+	$tmp . "/bookcd/Graphics",
+	$tmp . "/bookcd/Contents",
+d72 1
+a72 1
+$back_flag = 0;
+d109 1
+a109 2
+while(@@allwords) {
+	$word = shift(@@allwords);
+a110 12
+	if($word eq ">") {	# A complete html tag has been found
+		$tag .= $word;
+		&foundtag($tag);
+		$tag = '';
+		}
+	elsif($word eq "<" || $tag) {	# the start of a tag
+		$tag .= $word;
+		}
+	else {	# no tag, keep passing things through
+		print HTML $word;
+	}
+}	# while(@@allwords)
+a113 27
+
+#===========================
+# foundtag
+#===========================
+sub foundtag {
+local($tag) = @@_;
+
+#print "Tag $tag\n" if $debug;
+@@fields = split(/[<\s>]/, $tag);	# Parse so we can get to the first word
+#foreach $tmp (@@fields) {
+#	print "fields[] = $tmp\n";
+#	}
+
+# Lookup the word in database
+$value = $data{@@fields[1]};
+if($value) {			# True if it was there
+#	print "Found tag, $tag, with value, $value\n" if $debug;
+	if(substr($value,0,1) eq "&") {
+#		print "Found function $value\n" if $debug;
+		%params = &getparams($tag);
+		$value = eval $value;		# database has name of function to call
+#		print "Processing chap $chap, unit $unit\n" if $debug;
+		}
+	$tag = $value;
+	} # if($value)
+print HTML "$tag";
+}
+@
+
+
+1.5
+log
+@replaced the 'do's with 'require's.
+You must now have the following n your .cshrc file
+setenv PERLLIB /a/crowe/export/home/crowe3/ee2200cd/support/lib
+@
+text
+@d30 1
+d36 3
+a42 1
+$debug = 1;
+d50 1
+a50 1
+$db_file = "/database/bookcd/support/scripts/cd2htmlData";	
+d67 11
+@
+
+
+1.4
+log
+@Addd $tmp to specify the absolution paths to perl support
+functions (I should learn about libraries and perl paths)
+Added the Do not Edit line as the first written to the .html file.
+@
+text
+@d8 5
+a12 1
+#"$Log: cd2html,v $
+d26 1
+a26 1
+#";
+d29 5
+a33 5
+$tmp = "/home/kirin/myoder";
+do $tmp . '/bookcd/support/scripts/mat2cd.pl';
+do $tmp . '/bookcd/support/scripts/head.pl';
+do $tmp . '/bookcd/support/scripts/getparams.pl';
+do $tmp . '/bookcd/support/scripts/findpath.pl';
+d41 2
+a42 2
+	$tmp . "/bookcd/visible/Graphics",
+	$tmp . "/bookcd/visible/Contents",
+@
+
+
+1.3
+log
+@Added foundtag().
+Changed method of sending data to support routines such as the
+routine that puts the URLs in matlab code.
+Now the support routine reads the data from the global @@allwords and
+is responsible for knowing when to return to the main loop.
+@
+text
+@d9 7
+d25 5
+a29 1
+do '/database/bookcd/support/scripts/mat2cd.pl';
+d31 1
+a31 4
+do 'matlab.pl';
+do 'head.pl';
+do 'getparams.pl';
+do 'findpath.pl';
+d37 2
+a38 2
+	"/database/bookcd/visible/Graphics",
+	"/database/bookcd/visible/Contents",
+d82 1
+@
+
+
+1.2
+log
+@Added full path to mat2cd.pl.
+Added full path to cd2htmlData.
+@
+text
+@d9 4
+d20 5
+d27 9
+a35 7
+$file = $ARGV[0];
+
+$outname = $file;
+$outname =~ s/.cd$//;
+$outname .= ".html";
+
+$db_file = "/database/bookcd/support/scripts/cd2htmlData";		# this is where all the subs are
+d37 1
+a37 5
+# if ( ! -e $db_file) {
+#	die "$0: Cannot open subsitution database $db_file\n";
+#}
+
+dbmopen(%data, $db_file, 0666) ||
+d39 4
+a49 1
+
+d53 11
+a63 1
+open(THEFILE, $file);
+d73 1
+a73 1
+open(HTML, ">$outname");
+d75 2
+a76 1
+while(<THEFILE>) {
+d81 6
+a86 36
+$save = 0;
+foreach $word (@@allwords) {
+	unless (($word eq "<") || ($tag)) { 
+		if($save) {push(@@buffer, $word)}
+		else {print HTML $word } }
+	else {
+	unless ($word eq ">") { $tag .= $word }
+	else {
+		$tag = substr($tag, 1);		# Remove the leading <
+#		print "Tag $tag\n";
+		@@tags = split(/ /, $tag);	# Parse so we can get to the first word
+		$value = $data{@@tags[0]};	# Lookup the word in database
+		if($value) {			# True if it was there
+#			print "Found tag, $tag, with value, $value\n";
+			if(substr($value,0,4) eq "save") {
+				$save = 1;	# = 1 if in save mode
+				undef(@@buffer);	# reset save buffer
+				} 
+			elsif($value eq "/save") {
+				$save = 0;
+				@@tags = split('<>', @@buffer[0]);	# pull off first < >
+																			# the first word should be "<save"
+				$tags = substr(@@tags[0], 6);	# skip over it
+				@@buffer = @@buffer[2..$#buffer];
+				chop($tags);				# Remove the trailing >
+#				print "calling $tags with \n<start>\n@@buffer\n<stop>\n";
+				$value = eval $tags;		# database has name of function to call
+				}
+			$tag = $value;
+			} # if($value)
+		if ($save) {
+			push(@@buffer, "<$tag>");
+			} 
+		else {
+			print HTML "<$tag>";
+			}
+d89 5
+d95 2
+a96 1
+}	# foreach $word
+d99 27
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 5
+a12 2
+$Log = "$Log$";
+$Header = "$Header$";
+d14 1
+a14 1
+do 'matlab.pl';
+d24 1
+a24 1
+$db_file = "cd2htmlData";		# this is where all the subs are
+@

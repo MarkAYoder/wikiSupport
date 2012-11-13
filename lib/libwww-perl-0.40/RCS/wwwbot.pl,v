@@ -1,0 +1,525 @@
+head	1.3;
+access;
+symbols;
+locks; strict;
+comment	@% @;
+
+
+1.3
+date	94.09.21.01.23.18;	author fielding;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	94.08.01.13.32.01;	author fielding;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	94.07.21.02.46.45;	author fielding;	state Exp;
+branches;
+next	;
+
+
+desc
+@This library implements the Robot Exclusion protocol
+(draft 6/30/94) as documented on
+<http://web.nexor.co.uk/mak/doc/robots/robots.html>
+@
+
+
+1.3
+log
+@Added initialization of $headers
+@
+text
+@# $Id: wwwbot.pl,v 1.2 1994/08/01 13:32:01 fielding Exp fielding $
+# ---------------------------------------------------------------------------
+# wwwbot.pl: This library implements the Robot Exclusion protocol
+#            (draft 6/30/94) as documented on
+#            <http://web.nexor.co.uk/mak/doc/robots/robots.html>
+#
+# wwwbot features (or the difference between this library and the two
+# others I've seen):
+#
+# - There is one routine to call (&wwwbot'allowed) with a URL and your 
+#   UserAgent line.  You don't worry about retrieving or parsing /robots.txt
+# - The retrieved /robots.txt is cached in memory (by default) so multiple
+#   calls to the same host:port retrieve /robots.txt once..
+# - The routines &visited() tracks the last time your robot visited a host, 
+#   and &visitable() returns the number of seconds (if any) your robot 
+#   should wait before visiting the site again.
+#
+# This package has been developed by Brooks Cutter <bcutter@@stuff.com>.
+# It is distributed under the Artistic License (included with your Perl
+# distribution files and with the standard distribution of this package).
+#
+# 07 Jul 1994 (BBC): Initial version
+# 08 Jul 1994 (BBC): Added routines &visit(), &visitable(), &set_host_delay()
+#                    Improved /robots.txt parsing (more flexible)
+#                    Wrote documentation and examples for wwwbot routines
+# 20 Jul 1994 (RTF): Reformatted a bit for inclusion in standard libwww-perl.
+# 30 Jul 1994 (RTF): Changed interface to make use of default User-Agent.
+# 20 Sep 1994 (RTF): Added initialization of $headers
+#
+# If you have any suggestions, bug reports, fixes, or enhancements,
+# send them to the libwww-perl mailing list at <libwww-perl@@ics.uci.edu>.
+# ---------------------------------------------------------------------------
+#
+# The following are the ten commandments for writing a Web robot
+# (Sorted in the modern Letterman order.)
+#
+# 10. You will visit the list of known robots before writing a new one.
+#     Point your Web browser at the URL:
+#             http://web.nexor.co.uk/mak/doc/robots/active.html
+#     Also take a look at the URL 
+#       http://web.nexor.co.uk/mak/doc/robots/automated-tools.html
+#     Look for one you can use or modify if necessary before writing a
+#     new one, as existing robots are probably kinder on remote servers
+#     than yours will (at least initially) be.
+#
+# 9.  You will join the robots mailing list by sending mail to
+#     robots-request@@nexor.co.uk and read the newsgroup(s)
+#     comp.infosystems.www.providers, comp.infosystems.www.misc and
+#     comp.infosystems.www.users (in the order with the greatest chance
+#     of robot traffic).  Look for messages about about robots that
+#     meet your needs.
+#
+# 8.  Post a message to comp.infosystems.www.providers and send mail to
+#     robots@@nexor.co.uk announcing your intentions to write a robot.
+#     Include a brief description of the problem you intend to solve
+#     with this robot, and who it will benefit.  (A robot that benefits the
+#     entire net will be tolerated a longer than one that benefits a small
+#     group..)  Someone may already be working on a similar robot or
+#     one may exist and it isn't listed.  (Sent the author the URL in #10).
+#
+# 7.  You will read the Guidelines for Robot Writers at the URL
+#        http://web.nexor.co.uk/mak/doc/robots/guidelines.html
+#     These guidelines describe what your robot should and shouldn't do,
+#     and following them should ensure that your robot will be welcome
+#     (or at least not refused) at web sites all over..
+#
+# 6.  Make you set informative headers like 'User-Agent' with
+#     the name and version of your robot and 'From' with your email
+#     address.  For more information on these headers check out the URL
+#       http://info.cern.ch/hypertext/WWW/Protocols/HTTP/HTTP2.html
+#
+# 5.  Buttafuoco!   (Sorry...)
+#
+# 4.  Make the remote Web admin's glad your robot is walking their web.
+#     Code your robot so if it comes across a dead link it sends
+#     mail to either the address defined in the mailto link or the
+#     postmaster of that web server.
+#     You should also pass the HTTP/1.0 header 'Referer' when you
+#     access a document, with the URL of the document it was hyperlinked
+#     from.
+#
+# 3.  [Shameless plug] Use wwwbot.pl in Roy Fielding's excellent libwww-perl
+#     package, because it implements the latest Robot exclusion protcol
+#     and provides all support routines necessary to keep your robot
+#     welcome at web sites around the world (and makes you popular 
+#     at parties).
+#
+# 2.  Read the other documents listed at the URL
+#         http://web.nexor.co.uk/mak/doc/robots/robots.html
+#     Home of the "World Wide Web Robots, Wanderers and Spiders" page
+#
+# 1.  Save the results of your work and publish the results on
+#     the net.  Publish a list of sites your robot found or provide the
+#     digested data that your robot creates so others don't have to write
+#     robots that burden remote servers, they can use your data.
+#
+#     Of course, we have No doubts that you will joyfully provide this
+#     information to everyone on the net for free, since most of the
+#     software your using was made available to you because of others that
+#     feel the same way.
+#
+# This list was created with the aid of pages off the "World Wide Web Robots, 
+# Wanderers and Spiders" page written Martijn Koster.  That URL again:
+#     <http://web.nexor.co.uk/mak/doc/robots/robots.html>
+#
+# This list was inspired while working on a robot perl library for
+# libwww-perl, which was originally the backend of MOMspider.
+# You'll find more info on libwww-perl and MOMspider at 
+#     <http://www.ics.uci.edu/WebSoft/libwww-perl/>
+#     <http://www.ics.uci.edu/WebSoft/MOMspider/>
+#
+# This list was written by Brooks Cutter, while I was working
+# on wwwbot.pl which I wrote while working on the w3new package.
+# You'll find more info on w3new at
+#     <http://www.stuff.com/cgi-bin/bbcurn?user=bcutter&pkg=w3new>
+# Brooks Cutter's (bcutter@@stuff.com) home page is at
+#     <http://www.stuff.com/cgi-bin/bbcurn?user=bcutter>
+#
+# ===========================================================================
+require "www.pl";
+require "wwwurl.pl";
+
+package wwwbot;
+
+# ===========================================================================
+# Package / Global variables:
+# ( Don't modify these directly, as there are routines to change the value )
+# ( of these variables.  The subroutine API won't change, but the variable )
+# ( names or the way the data is stored may change in the future.          )
+
+# Flag that determines if the results of /robots.txt should be cached
+# Used in &do_cache, &dont_cache, &allowed and &load_robots
+
+$cache_flag = 1; 
+
+# These next two flags are related to the time a robot should wait
+# before accessing a host more than one time..
+# (Note - when the program retrieves /robots.txt, the program
+# is not penalized and can perform a immediate request.  Retrieving
+# /robots.txt (if it exists) is a freebee..)
+
+# Number of seconds to wait between robot visits to same site
+
+$bot_host_delay = 60; # wait for 1 minute between requests
+
+# The user can turn up the delay between host queries, but it can't go
+# below $bot_host_delay_min
+
+$bot_host_delay_min = $bot_host_delay;
+
+# ===========================================================================
+# ===========================================================================
+# allowed(): call this routine with the URL you wish to visit and the name 
+#            of your robot.  Unless the data has been cached, it will
+#            call &load_robots.  It returns 1 if you are allowed to retrieve
+#            the URL.
+#
+# $ok = &wwwbot'allowed($url,$user_agent);
+#
+# WHERE,
+#
+#         $ok: 1 if your robot is allowed to retrieve $url, otherwise 0
+#
+#        $url: the WWW URL in absolute form you wish to retrieve.
+#
+# $user_agent: The name of your program and optionally the version number.
+#              Use the form "program_name/v.er" (like "roundabot/1.0")
+#              If null or undefined, it will use the default User-Agent
+#              header defined in www.pl.
+#
+# Example:
+#
+# @@urls = (
+#     'http://www.ics.uci.edu/WebSoft/libwww-perl/',
+#     'http://www.stuff.com/', 
+#     'http://web.nexor.co.uk/mak/doc/robots/robots.html',
+# );
+# $user_agent = "roundabot/1.0";
+# foreach $url (@@urls) {
+#     unless(&wwwbot'allowed($url,$user_agent)) {
+#         warn "refused: $url\n"; 
+#         next;
+#     }
+#     &www'request('GET',$url,*headers,*content,30);
+#     ...
+# }
+#
+sub allowed
+{
+    local($url, $user_agent) = @@_;
+    local($scheme, $address, $port, $path, $query, $frag);
+    local($ret, $n, $ua);
+
+    if (!$user_agent)
+    {
+        unless($user_agent = &www'get_def_header('http','User-Agent'))
+        {
+           warn "wwwbot'allowed: requires 2nd argument of User-Agent header";
+           return(0);
+        }
+    }
+
+    ($scheme,$address,$port,$path,$query,$frag) = &wwwurl'parse($url);
+    unless($port) { $port = 80; }
+
+    $ua = $user_agent;
+    $ua =~ s!/.*!!;
+    $ua =~ tr/A-Z/a-z/;
+    unless ($botcache{'_visited',$address,$port})
+    {
+        $ret = &load_robots($address,$port,$ua);
+        if ($ret == -1) { return(1); } # Unable to connect/retrieve /robots.txt
+    }
+    for ($ua,'*')
+    {
+        $n = 0;
+        while ($botcache{$_,++$n})
+        {
+            if (($botcache{$_,$n} eq '*') ||
+                ($botcache{$_,$n} eq substr($path,0,length($botcache{$_,$n}))))
+                { return(0); }
+        }
+    }
+    unless ($cache_flag) { undef %botcache; }
+    return(1);
+}
+
+# ===========================================================================
+# load_robots(): Retrieves /robots.txt from the host and parses it.
+#                ( Internal routine that modifies internal variables. )
+#
+# $ok = &wwwbot'load_robots($host,$port,$user_agent);
+#
+# WHERE,
+#
+#         $ok: 1 if your robot is allowed to retrieve $url, otherwise 0
+#
+#       $host: the name of the http host you wish to retrieve /robots.txt from
+#
+#       $port: the port of the http host you wish to retrieve /robots.txt from
+#
+# $user_agent: The name of your program and optionally the version number.
+#              Use the form "program_name/v.er" (like "roundabot/1.0")
+#
+sub load_robots
+{
+    local($host, $port, $user_agent) = @@_;
+    local($headers, %headers, $content, $response, $url, $n, $ua, $dis);
+
+    local($timeout) = 30;
+
+    $port = 80 unless($port);
+    $botcache{'_visited',$host,$port} = 1;
+    $url = "http://$host:$port/robots.txt";
+
+    %headers = ();
+    $headers = '';
+    $content = '';
+
+    $response = &www'request('GET', $url, *headers, *content, $timeout);
+    return(-1) unless ($response =~ /^2/);
+
+    for (split(/\n/,$content))
+    {
+        next if (/^\s*#/);
+        s/\s*#.*$//;
+        if (/^\s*$/)
+        {
+            if (@@user_agent && @@disallow)
+            {
+                for $ua (@@user_agent)
+                {
+                    $n = 0;
+                    for $dis (@@disallow)
+                    {
+                        $botcache{$ua,++$n} = $dis;
+                    }
+                }
+            }
+            @@user_agent = @@disallow = ();
+        }
+        elsif (/^\s*(User.?Agent|Robot)s?\s*:\s+(\S+.*\S?)\s*$/i)
+        {
+
+        # The above regex is very forgiving.  Among others, it will recognize
+        # User-Agent: (correct form)
+        # User-Agents:
+        # User_Agent:
+        # UserAgent:
+        # Robot:
+        # Robots:
+        # ...etc... and any lower/upper case version of the string ..
+
+            $ua = $2;
+            $ua =~ s!/.*!!;
+            $ua =~ tr/A-Z/a-z/;
+            push(@@user_agent,$ua);
+        }
+        elsif (/^\s*Disallow\s*:\s*(\S+.*\S?)\s*$/i)
+        {
+            push(@@disallow,$1);
+        }                            # If I don't recognize it,
+    }                                # ignore it (for future compatibility)
+
+    if (@@user_agent && @@disallow)
+    {
+        for $ua (@@user_agent)
+        {
+            $n = 0;
+            for $dis (@@disallow)
+            {
+                $botcache{$ua,++$n} = $dis;
+            }
+        }
+    }
+    return(1);
+}
+
+
+# ===========================================================================
+# By default, the library will cache the /robots.txt file from each
+# server.  The cache is not restricted by size or expired by time, so
+# if you want to disable/re-enable the cache, you can use the routines
+#
+# &wwwbot'dont_cache;
+#     or
+# &wwwbot'do_cache;
+#
+# You can flush the cache by calling both 
+# &wwwbot'dont_cache and &wwwbot'do_cache;
+#
+
+sub do_cache   { $cache_flag = 1; }
+sub dont_cache { $cache_flag = 0; undef %botcache; }
+
+
+# ===========================================================================
+# set_host_delay(): Set the number of seconds between connections to the 
+#                   same host. the minimum value is 60 seconds.  This value
+#                   is used by &wwwbot'visited and &wwwbot'visitable
+#
+# $ok = &wwwbot'set_host_delay($delay);
+#
+# WHERE,
+#
+#    $ok: 1 if successful, 0 if not ($delay less than minimum)
+#
+# $delay: number of seconds that your robot should wait between queries.
+#
+# Example:
+#
+# unless(&wwwbot'set_host_delay(90)) {
+#   die "Unable to set host delay to 90 seconds.\n";
+# } else {
+#   print "Number of seconds between robot queries set to 90 seconds.\n";
+# }
+#
+sub set_host_delay
+{
+    local($delay) = @@_;
+
+    if ($delay >= $bot_host_delay_min)
+    { 
+        $bot_host_delay = $delay;
+        return(1);
+    }
+    else
+    { 
+        warn
+          "wwwbot'set_host_delay: Minimum host delay is $bot_host_delay_min\n";
+        return(0);
+    }
+}
+
+# ===========================================================================
+# get_host_delay(): Get the current host delay.  This is initially set 
+#                   to the minimum value, so if you call it before calling
+#                   set_host_delay() then you can get the value for the
+#                   minimum host delay.
+#
+# $delay = &get_host_delay;
+#
+# WHERE,
+#
+# $delay: Current delay in seconds between requests from same hosts
+#
+sub get_host_delay
+{
+    return($bot_host_delay);
+}
+
+# ===========================================================================
+# visited():  Should be called immediately after each &www'request call.
+#             Routine tracks the time of your visit to the host, and is used
+#             in the &visitable() routine.  See &visitable() for more info.
+#
+#           
+# &wwwbot'visited($url);
+#
+# WHERE,
+#
+# $url: the WWW URL in absolute form that the robot just visited.
+#
+# Note: See &visitable() for a example including &visited()
+#
+sub visited
+{
+    local($url) = @@_;
+
+    local($address) = (&wwwurl'parse($url))[1];
+
+    $botvisit{$address} = time;
+}
+
+# ===========================================================================
+# visitable(): Should be called immediately before each &www'request call.
+#              Routine returns 0 if enough time has elapsed since your
+#              robot's last visit, otherwise returns the number of seconds
+#              your browser should wait before visiting the host again.
+# 
+# $delay = &wwwbot'visitable($url);
+#
+# WHERE,
+#
+# $delay: If your browser has waited long enough since the last access,
+#         then $delay will be 0.  otherwise $delay will be set to the 
+#         number of seconds your robot should wait before trying this
+#         URL again.
+#
+#   $url: the WWW URL in absolute form that the robot is about to visit.
+#
+# Example:
+# 
+# $url = 'http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/Docs/whats-new.html';
+# $delay = &wwwbot'visitable($url);
+# if ($delay) { sleep($delay); }
+# # Of course you don't have to sleep - meanwhile, you can check other URLs..
+# $resp = &www'request('HEAD',$url,*headers,*content,30);
+# &wwwbot'visited($url);
+#
+sub visitable
+{
+    local($url) = @@_;
+
+    local($address)     = (&wwwurl'parse($url))[1];
+    local($last_access) = (time - $botvisit{$address});
+
+    if ($last_access >= $bot_host_delay) { return(0); }
+
+    return($bot_host_delay - $last_access);
+}
+
+# ===========================================================================
+
+1;
+@
+
+
+1.2
+log
+@Changed interface to make use of default User-Agent.
+@
+text
+@d1 1
+a1 1
+# $Id: wwwbot.pl,v 1.1 1994/07/21 02:46:45 fielding Exp fielding $
+d28 1
+d248 1
+a248 1
+    local(%headers, $content, $response, $url, $n, $ua, $dis);
+d257 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+# $Id$
+d27 1
+d30 1
+a30 2
+# send them to Roy Fielding at <fielding@@ics.uci.edu> or to the libwww-perl
+# mailing list at <libwww-perl@@ics.uci.edu>.
+d167 2
+d192 9
+@

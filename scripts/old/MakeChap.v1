@@ -1,0 +1,169 @@
+#!/usr/bin/perl
+
+# Create the chapter index files
+
+$Header = '$Header: /home/myoder/projects/SignalFirst/visible3/cdrom/support/scripts/RCS/MakeChap,v 2.1 2000/04/13 18:28:08 myoder Exp myoder $';
+#
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+require 'head.pl';
+
+$path = $ENV{'CDROOT'};
+$outfile = $path . "/contents/chapters.cd";
+$path .= "/chapters";
+print "$path\n";
+
+if(-e $outfile) {
+rename($outfile, $outfile.".old");
+}
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+
+opendir(CHAPS, $path) || die("$0: Can't open $path\n");
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=0 unit=chap>\n<title>Chapters</title>\n\n";
+print OUTPUT "<script type=\"text/javascript\" src=\"scripts/collapse/jquery-1.2.2.pack.js\"></script>
+<script type=\"text/javascript\" src=\"scripts/collapse/animatedcollapse.js\">
+
+/***********************************************
+* Animated Collapsible DIV v2.0- (c) Dynamic Drive DHTML code library (www.dynamicdrive.com)
+* This notice MUST stay intact for legal use
+* Visit Dynamic Drive at http://www.dynamicdrive.com/ for this script and 100s more
+***********************************************/
+</script>
+
+";
+print OUTPUT "<script type=\"text/javascript\">
+";
+foreach $chap (sort {$a <=> $b} readdir(CHAPS)) {
+  $_ = $chap;
+  if(/^\d+\w/) {# If it starts with a digit assume it a chapter.
+    print OUTPUT "animatedcollapse.addDiv('$chap', 'fade=1')\n";
+  }
+}
+print OUTPUT "
+animatedcollapse.init()
+</script>
+
+</cd-head>
+";
+close(CHAPS);
+opendir(CHAPS, $path) || die("$0: Can't open $path\n");
+
+# print OUTPUT "<body bgcolor=\"000000\" background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT "<cd-body>\n";
+
+#print OUTPUT "<table border=0 align=right><tr>\n";
+#print OUTPUT "<td><a href = \"cover.htm\">" .
+#	    	"<img border=0 src=\"chapback.gif\"></a></td>\n";
+#print OUTPUT "<td><a href = \"toc.htm\">" .
+#	    	"<img border=0 alt=\"Contents\" src=\"map.gif\"></a></td>\n";
+#print OUTPUT "<td><a href = \"help.htm\">" .
+#	    	"<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n";
+#print OUTPUT "<tr></table>\n";
+
+print OUTPUT "<h1>Chapters</h1>\n";
+print OUTPUT "<p>\n";
+
+foreach $chap (sort {$a <=> $b} readdir(CHAPS)) {
+    $_ = $chap;
+    if(/^\d+\w/) {# If it starts with a digit assume it a chapter.
+	$text = "../chapters/$chap/overview.txt";
+	$html = "../chapters/$chap/overview.htm";
+	$ind  = "../chapters/$chap/index.htm";
+	$gif  = "../chapters/$chap/overview.gif";
+	$png  = "../chapters/$chap/overview.png";
+	$wav  = "../chapters/$chap/overview.wav";
+	$au   = "../chapters/$chap/overview.au";
+	$mov  = "../chapters/$chap/overview.mov";
+	$name = "../chapters/$chap/name.txt";
+	$numb = "../chapters/$chap/number.txt";
+	# get the chapter number and name from the name.txt and 
+	# number.txt files
+	open(NAME, $name);   $chapname = <NAME>; chop($chapname); chop($chapname);
+	open(NAME, $numb);   $chapnum  = <NAME>; chop($chapnum); chop($chapnum);
+	print "$_, $chapnum: $hcapname\n";
+
+	# get the chapter number and name from the directory name
+	# ($chapnum,$chapname) = /(\d*)(\w*)/;
+
+	print OUTPUT "<table border=0>
+<colgroup>
+<col width=\"25\">
+<col width=\"64\">
+<col width=\"200\">
+";
+	print OUTPUT "<tr>\n";
+
+	print OUTPUT "<td>";
+	print OUTPUT "<a href=\"javascript:animatedcollapse.toggle('$chap')\">\n";
+	print OUTPUT "more</a>\n";
+	print OUTPUT "</td>\n";
+
+	print OUTPUT "<td>";
+	print OUTPUT "<a href=\"javascript:animatedcollapse.toggle('$chap')\">\n";
+	if(-e $png) {
+		print OUTPUT "<img src=$png width=64 height=64>";
+	} elsif(-e $gif) {
+		print OUTPUT "<img src=$gif width=64 height=64>";
+	} else {
+	    print OUTPUT &isthere($html);
+	}
+	print OUTPUT "</a>\n";
+	print OUTPUT "</td>\n";
+
+	if(-e $ind) {
+	print OUTPUT "<td><a href=\"$ind\">";
+    } else {
+	print OUTPUT "<td><a href=\"$html\">";
+    }
+	print OUTPUT "<font size=+1><strong>$chapnum. $chapname" .
+			"</strong></font>\n";
+	print OUTPUT "</a>\n";
+
+	if(-e $wav) {
+	    print OUTPUT "<a href=\"$wav\">\n";
+	    print OUTPUT "<img border=0 src=\"tape.gif\" alt=\"audio\">";
+	    print OUTPUT "</a>\n";
+	}
+
+	print OUTPUT "</td>\n";
+
+    if(-e $text) {
+	print OUTPUT "<td><font size=+0>\n";
+	open(TEXT, $text);
+
+	while(<TEXT>) {
+	    print OUTPUT;
+	}
+	print OUTPUT "</font></td>\n";
+
+	print OUTPUT "</tr></table>\n";
+        print OUTPUT "<div id=\"$chap\" style=\"background: #FFFFCC; display:none\">\n";
+# Summarize the chapter
+	foreach $head (@Headings[2..$#Headings]) {
+	  if(-e "../chapters/$chap/$head") {
+	    print "$chap/$head\n";
+	    print OUTPUT "<a href=\"$head/overview.htm\"><cd-h2>$HeadingsID{$head}</cd-h2></a>\n";
+	    makesummary("../chapters/$chap/$head", $head);
+	  }
+	}
+	print OUTPUT "</div><br>\n";
+
+    }
+#	print OUTPUT "</tr>\n";
+#	print OUTPUT "<p>\n";
+    }
+}
+
+#print OUTPUT "</table>\n";
+print OUTPUT "</cd-body>\n";
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+# system("cd2html $outfile; rm $outfile");
+system("cd2html $outfile");

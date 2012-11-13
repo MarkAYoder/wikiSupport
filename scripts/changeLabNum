@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $oldNum = $ARGV[0];
+my $newNum = $ARGV[1];
+
+opendir DIR, '.' or die "Can't open .";
+
+my @files = readdir DIR;
+
+# print "@files\n";
+
+my $file;
+foreach $file (@files) {
+  next if $file !~ /lab/;
+  print "$file\t";
+  
+  my $Newfile = $file;
+  $Newfile =~ s/$oldNum/$newNum/e;
+
+  print "$Newfile\n";
+
+  rename $file, $Newfile or die "Can't rename $file, $Newfile";
+}

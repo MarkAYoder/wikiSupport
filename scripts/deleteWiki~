@@ -1,0 +1,3 @@
+#!/bin/bash
+
+node $HOME/cdrom/wikiSupport/scripts/node.js/deleteFile.js $@

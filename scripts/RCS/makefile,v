@@ -1,0 +1,49 @@
+head	1.2;
+access;
+symbols;
+locks
+	monaco:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	95.04.28.14.47.11;	author monaco;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.04.28.13.24.33;	author hans;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changed CD_ROM to CD-ROM as requested by myoder
+@
+text
+@ROOTDIR		=	/database/bookcd
+SCRIPTSDIR	=	$(ROOTDIR)/support/scripts
+WORKDIR		=	$(ROOTDIR)/CD-ROM
+
+all:
+
+lndir:
+	$(SCRIPTSDIR)/lndir.sh $(WORKDIR)	
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 1
+WORKDIR		=	$(ROOTDIR)/CD_ROM
+@

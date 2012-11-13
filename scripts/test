@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+
+  use Text::ParseWords;
+  my $test = "a = \"hi there\" This is \"a test\" <here parm = this> and <there> bye\n";
+
+  $_ = $test;
+  print "$_\n";
+  s/\s*=\s*/=/g;		# remove stuff around ='s
+
+  @words = &quotewords('\s+', 0, $_);
+
+  print "words=@words\n";
+
+  $i = 0;
+  foreach (@words) {
+      print "$i: <$_>\n";
+      $i++;
+  }
+
+$_ = $test;
+s/<[^>]*>//g;
+print "$_\n";

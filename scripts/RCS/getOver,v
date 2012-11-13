@@ -1,0 +1,59 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	96.03.26.17.21.07;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Get the stuff between <title> and </title> in an html file
+and saves it in overview.txt.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/usr/sbin/perl
+
+# Gets the title (the stuff between <title> and </title) from an .html
+#	file and writes it to overview.txt
+
+$Header = '$Header$';
+# $Log:$
+# 
+
+$path = '.';
+$outfile = $path . "/" . "overview.txt";
+
+foreach $file (@@ARGV) {
+print "$file\n";
+$_ = $file;
+next unless(/\.cd$/);	# Skip unless it ends with .cd.
+
+open(INFILE, $file);
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+print "$outfile\n";
+
+while(<INFILE>) {
+    if(m/<title>/i) {
+	s/.*<title>(.*)<\/title>*/\1/i;
+	print OUTPUT "$_\n";
+	last;
+    }
+}
+}
+@

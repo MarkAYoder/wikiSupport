@@ -1,0 +1,19 @@
+#
+# Sets ARCH environment variable by testing operating system
+# and host type.
+#
+
+setenv MACH `uname -m | cut -c 1-4`
+setenv OS_VERSION `uname -r`
+
+if ( "${MACH}" == "sun4" && "${OS_VERSION}" == "5.3" ) then
+	setenv ARCH sol
+else if ( "${MACH}" == "sun4" ) then
+	setenv ARCH sun4
+else if ( "${MACH}" == "9000" ) then
+	setenv ARCH hp700
+else 
+	setenv ARCH sgi
+endif
+
+

@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use PDF::API2;
+
+print "@ARGV\n";
+
+my $pdf  = PDF::API2->open($ARGV[0]) or die "Can't open $ARGV[0])";
+print "pdf = $pdf, pages = " . $pdf->pages . "\n";
+
+for(my $i=1; $i<= $pdf->pages; $i++) {
+  my $pdf2 = PDF::API2->new;
+  $pdf2->importpage($pdf, $i, 1);
+
+  my $newfile = $ARGV[0];
+  $newfile =~ s/\.pdf$/Page$i.pdf/;
+
+  print "newfile = $newfile\n";
+
+  $pdf2->saveas($newfile);
+  $pdf2->end();
+}
+
+$pdf->end();

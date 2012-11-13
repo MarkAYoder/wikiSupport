@@ -1,0 +1,212 @@
+#!/usr/local/gnu/bin/perl
+# $Id: get,v 0.15 1994/09/21 01:23:18 fielding Exp $
+# ==========================================================================
+# Perform a WWW request on a (set of) absolute or relative URL(s).
+# The URL(s) may be on the command line or passed via a pipe.
+# The method used is equal to the uppercased name of this program,
+# so the intention is to name it "get" and create a symbolic links
+# called "HEAD" and "POST" which point to "get" (three programs for
+# the price of one).
+#
+# The program starts with the BASE URL equal to the current file directory.
+# To change it, enter a URL prefixed with "base=", e.g,
+#
+#    Enter a URL (^D to exit): base=http://www.ics.uci.edu/
+#
+# 13 Jun 1994 (RTF): Initial Version 
+# 14 Jun 1994 (RTF): Changed env variable to LIBWWW_PERL
+#                    Fixed the method name to remove any path garbage
+# 06 Jul 1994 (RTF): Added extra fallback code from Martijn Koster
+# 20 Jul 1994 (RTF): The default From header is now set by www.pl
+#                    and &www'set_def_header() is called to set User-Agent
+# 07 Sep 1994 (RTF): Added code to show original headers if they were received;
+#                    Added tout to interactively change the timeout value;
+#                    Added ims  to interactively give If-Modified-Since;
+#                    Added handling of POST content suggested by Mel Melchner.
+# 18 Sep 1994 (RTF): Added command-line options, debug and quiet modes.
+#
+# Created by Roy Fielding to test the libwww-perl system
+# ==========================================================================
+if ($libloc = $ENV{'LIBWWW_PERL'}) { unshift(@INC, $libloc); }
+
+require "getopts.pl";
+require "www.pl";
+require "wwwurl.pl";
+require "wwwerror.pl";
+
+$pname  = $0;
+$method = $pname;                                 # Method = program name
+$method =~ s#^.*/([^/]+)$#$1#;                    # lose the path
+$method =~ tr/a-z/A-Z/;                           # uppercase it
+
+$Version = "$method/0.5";
+                                                  # Set up User-Agent: header
+&www'set_def_header('http', 'User-Agent', $Version);
+
+$pwd = ( $ENV{'PWD'} || $ENV{'cwd'} || '' );
+
+$Base    = "file://localhost$pwd/";               # Set up initial Base URL
+$Tout    = 30;                                    # Time-out in seconds
+$Ims     = '';                                    # If-Modified-Since header
+$Contype = 'application/x-www-form-urlencoded';   # Content-type for POST
+$Debug   = 0;                                     # Ask before display?
+$Quiet   = 0;                                     # No headers if Quiet
+$Out     = STDOUT;
+
+# ==========================================================================
+# ==========================================================================
+# Print the usage information if help requested (-h) or a bad option given.
+#
+sub usage
+{
+    die <<"EndUsage";
+usage: $pname [-heq] [-b BaseURL] [-t Timeout] [-i IMS_date] [-c ContentType]
+              [URL ...]
+
+$Version -- A program for sending $method requests for World-Wide Web URLs
+Options:                                                        [DEFAULT]
+     -h  Help    -- just display this message and quit.
+     -e  Display the request and response headers to STDERR.    [STDOUT]
+     -q  Don't display the request and response headers.
+     -d  Don't display the content (useful for debugging servers).
+     -b  Start with the given Base URL.
+         [$Base]
+     -t  Start with the given Timeout value (in seconds)        [$Tout]
+     -i  Add the If-Modified-Since header (an HTTP date) to GET requests.
+     -c  Use the given MIME Content-type for POST, PUT, and CHECKIN requests.
+         [$Contype]
+URL ...  Perform the $method request on each URL listed.
+
+If no URLs are listed on the command-line, the program enters an
+interactive mode.  The following commands are available interactively:
+
+     base=BaseURL    -- changes the current Base URL to that given.
+     tout=NNNN       -- sets the current Timeout value (in seconds).
+     ims=IMS_date    -- sets the If-Modified-Since header value.
+     URL             -- performs the request on the given URL.
+
+EndUsage
+}
+
+
+# ==========================================================================
+# Get the command-line options
+
+if (!(&Getopts('heqdb:i:t:c:')) || $opt_h) { &usage; }
+
+if ($opt_e) { $Out     = STDERR; }
+if ($opt_q) { $Quiet   = 1;      }
+if ($opt_d) { $Debug   = 1;      }
+if ($opt_b) { $Base    = $opt_b; }
+if ($opt_i) { $Ims     = $opt_i; }
+if ($opt_c) { $Contype = $opt_c; }
+if ($opt_t) { $Tout    = $opt_t  if ($opt_t =~ /\d+/); }
+
+# ==========================================================================
+# Do the work
+
+if ($#ARGV >= 0) {                             # Quickie, one-line version
+    $Interactive = 0;
+    foreach $arg (@ARGV)
+    {
+        $url = &wwwurl'absolute($Base, $arg);
+        &do_req($method, $url);
+    }
+}
+else {                                         # Interactive version
+    $Interactive = 1;
+    print "Enter a command or URL (^D to exit): ";
+    while (<STDIN>) {
+        chop;
+        if (/^base=(.*)$/)  { $Base = $1;  next; }
+        if (/^tout=(\d+)$/) { $Tout = $1;  next; }
+        if (/^ims=(.*)$/)   { $Ims  = $1;  next; }
+        $url = &wwwurl'absolute($Base, $_);
+        &do_req($method, $url);
+    }
+    continue
+    {
+        print "\n==========================================================\n";
+        print "Enter a URL (^D to exit): ";
+    }
+    print "\n";
+}
+exit(0);
+
+#-----------------------------------------------------------------
+sub do_req
+{
+    local($method, $url) = @_;
+    local($hd, $response);
+
+    local(%headers) = ();
+    local($headers) = '';
+    local($content) = '';
+
+    if ($method eq 'GET')
+    {
+        if ($Ims) { $headers{'If-Modified-Since'} = $Ims; }
+    }
+    elsif (($method eq 'POST') || ($method eq 'PUT') || ($method eq 'CHECKIN'))
+    {
+        if ($Interactive)
+        {
+            print "Enter content-type [$Contype]: ";
+            $_ = <STDIN>;
+            chop;
+            if (/^\S/) { $Contype = $_; }
+            print 'Enter content ("." to end): ', "\n";
+        }
+        while (<STDIN>)
+        {
+            last if (/^\.$/);
+            chop;
+            $content .= $_;
+        }
+        $headers{'Content-type'}   = $Contype;
+        $headers{'Content-length'} = length($content);
+    }
+
+    print($Out "$method $url HTTP/1.0\n")     # Show user what it looks like
+          unless $Quiet;                      # and then do the request
+
+    $response = &www'request($method, $url, *headers, *content, $Tout);
+
+    if (!$Quiet)
+    {
+        foreach $hd (keys(%headers))          # This is cheating, but it shows
+        {                                     # the default headers generated
+            next if ($hd =~ m#^[a-z]#);       # by the www.pl request library.
+            print($Out "$hd: $headers{$hd}\n");
+        }
+        print($Out "\n");
+                                              # And print out the result
+        if ($headers)
+        {
+            print($Out $headers);
+        }
+        else
+        {
+            print($Out "HTTP/1.0 $response $wwwerror'RespMessage{$response}\n");
+            foreach $hd (keys(%headers))
+            {
+                next if ($hd =~ m#^[A-Z]#);
+                print($Out "$hd: $headers{$hd}\n");
+            }
+        }
+        print($Out "\n");
+    }
+    if ($Debug)
+    {
+        if ($Interactive)
+        {
+            print 'Do you want the content displayed (y/n)? [n] ';
+            $_ = <STDIN>;
+            chop;
+            if (/^y/i) { print $content if defined($content); }
+        }
+    }
+    else { print $content if defined($content); }
+}
+
+1;

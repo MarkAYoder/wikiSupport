@@ -1,0 +1,6 @@
+#!/bin/csh -f
+
+rm -rf /database/bookcd/zips/other.zip
+find /database/bookcd/visible/contents /database/bookcd/visible/matlab /database/bookcd/visible/graphics /database/bookcd/visible/apps -name tools -type d -prune -o -name '*OLD' -prune -o -name 'old' -type d -prune -o ! -name "support_makefile" ! -name "MatlabDataBase*" ! -name "runmat2html" ! -name "*.OLD" ! -size 0 ! -name "*.Z" ! -name "Makefile*" ! -name ".*" ! -name '*,v' ! -name '*.tar' ! -name 'RCS' ! -name '*.old' ! -name '*.GIF' ! -name 'rcs' ! -name 'mov_snd' ! -name '*.cd'  ! -name '*~' -print | ~dva/bin/sun/zip -4 /database/bookcd/zips/other -@
+find /database/bookcd/zips/ -name '*.zip' -exec chgrp bookcd {} \;
+find /database/bookcd/zips/ -name '*.zip' -exec chmod 664 {} \;

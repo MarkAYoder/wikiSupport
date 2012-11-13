@@ -1,0 +1,157 @@
+#!/usr/bin/perl
+
+# This file convert our html extensions to real html.
+
+# The input file must end in .cd.
+# The output file will end in .htm.
+
+# Revision 1.4  1995/06/01  19:03:39  myoder
+# Addd $tmp to specify the absolution paths to perl support
+# functions (I should learn about libraries and perl paths)
+# Added the Do not Edit line as the first written to the .html file.
+#
+# Revision 1.3  1995/06/01  11:56:03  myoder
+# Added foundtag().
+# Changed method of sending data to support routines such as the
+# routine that puts the URLs in matlab code.
+# Now the support routine reads the data from the global @allwords and
+# is responsible for knowing when to return to the main loop.
+#
+# Revision 1.2  1995/05/22  15:32:39  myoder
+# Added full path to mat2cd.pl.
+# Added full path to cd2htmlData.
+#
+# Revision 1.1  1995/05/17  13:40:41  myoder
+# Initial revision
+
+$Header = '$Header: /home/kirin/myoder/cd/support/scripts/RCS/cd2html,v 1.1 1995/05/17 13:40:41 myoder Exp myoder ';
+
+# local requires
+require 'mat2cd.pl';
+require 'head.pl';
+require 'labview.pl';
+require 'getparams.pl';
+require 'findpath.pl';
+require 'htmlscan.pl';
+
+# other requires
+require 'getopts.pl';
+
+chop($pwd = `pwd`);	# Used by relpath
+# print("pwd = $pwd\n");
+
+local($tag);
+
+# Path to file that maps page numbers in dtsp eBook to URLs on site.
+my $pagelinks = "/tmp/pagelinks.txt";
+
+$path = $ENV{'CDROOT'};
+
+@path = (".", "../", "../demos", "../solution",
+	 "graphics", 
+	 "../graphics",
+	 "../../graphics",
+	 $path . "/graphics",
+	 $path . "/archives",
+	 $path . "/contents",
+	 $path . "/chapters",
+	 $path . "/css"
+	 );
+
+# open the subsitutions database
+# this is where all the subs are
+$db_file = $ENV{'CD2HTMLDATA'};
+# print "$db_file\n";
+
+if ( !-e $db_file and !-e "$db_file.db" and !-e "$db_file.dir") {
+	die "$0: Cannot open subsitution database $db_file, first try\n";
+}
+dbmopen(%tmp, $db_file, 0666) or
+	die "Cannot open subsitution database $db_file";
+%data = %tmp;	# hack so we can open other databases;
+
+$print_db = 0;
+if($print_db) {
+	print "----------------\n";
+	while (($key,$val) = each %data) {
+ 		print $key, ' = ', $val, "\n";
+	}
+	print "----------------\n";
+}	# if($print_db)
+
+ # Process the command line options
+&Getopts('bdie');
+
+$back_flag = 1;
+if ($opt_b) {
+	print "Excluding backgrounds\n";
+	$back_flag = 0;
+}
+$debug = $opt_d;
+print "opt_b = $opt_b\topt_d = $opt_d\n" if $debug;
+
+# process each file on the command line
+
+foreach $file (@ARGV) {
+# print "$file\n";
+$_ = $file;
+next unless(/\.cd$/);	# Skip unless it ends with .cd.
+
+$outname = $file;
+$outname =~ s/.cd$/.wiki/;
+if ($opt_i) {			# install in master directory
+    print "Changing $outname\nto\n" if $debug;
+    $outname = $pwd . "/" . $outname;
+    print "$outname to \n" if $debug;
+    $outname =~ s#$ENV{'HOME'}#$ENV{'CDROOT'}#;
+    print "$outname to \n" if $debug;
+    $outname =~ s#bookcd/bookcd#bookcd/visible3#;
+    print "$outname\n" if $debug;
+}
+
+open(INFILE, $file);  # Open the html flie
+open(PAGELINKS, ">>$pagelinks"); # Open the pagelinks file.  Used in dtsplink()
+
+$mtime = (stat($file))[9];
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($mtime);
+$mon = (Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec)[$mon];
+$year+=1900;
+
+print "Reading $file, ";
+print "Last Modified $hour:$min on $mday-$mon-$year\n";
+print "Outputting to $outname\n\n";
+
+open(HTML, ">$outname") || die "Cannot open $outfile";
+# print HTML "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+# print HTML "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
+#         \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+# <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">
+
+print HTML "<!-- Do not Edit, this file is created by $0 -->
+
+";
+
+# Read the entire input file.
+while(<INFILE>) {
+	s/\x85/&hellip;/g;
+	s/\x91/&lsquo;/g;  # WORD adds some odd characters
+	s/\x92/&rsquo;/g;
+	s/\x93/&ldquo;/g;
+	s/\x94/&rdquo;/g;
+	s/\x95/&middot;/g;
+	s/\x96/&ndash;/g;
+	s/\x97/&mdash;/g;
+	s/\xA0//g;	   # Remove or replace them here.
+	@linewords = split(/([<>])/);
+	push(@allwords, @linewords);
+}
+
+&htmlscan(@allwords);
+
+} # foreach $file (@ARGV)
+
+dbmclose(%data);
+close(HTML);
+# symlink($outname, $outname . "l");
+# system("chgrp bookcd $outname");
+system("chmod 664 $outname");

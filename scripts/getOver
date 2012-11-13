@@ -1,0 +1,37 @@
+#!/usr/sbin/perl
+
+# Gets the title (the stuff between <title> and </title) from an .html
+#	file and writes it to overview.txt
+
+$Header = '$Header: /database/bookcd/support/scripts/RCS/getOver,v 1.1 1996/03/26 17:21:07 myoder Exp $';
+# $Log: getOver,v $
+# Revision 1.1  1996/03/26  17:21:07  myoder
+# Initial revision
+#
+# 
+
+$path = '.';
+$outfile = $path . "/" . "overview.txt";
+
+foreach $file (@ARGV) {
+print "$file\n";
+$_ = $file;
+next unless(/\.cd$/);	# Skip unless it ends with .cd.
+
+open(INFILE, $file);
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+print "$outfile\n";
+
+while(<INFILE>) {
+    if(m/<title>/i) {
+	s/.*<title>(.*)<\/title>*/\1/i;
+	print OUTPUT "$_\n";
+	last;
+    }
+}
+}

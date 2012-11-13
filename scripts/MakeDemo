@@ -1,0 +1,150 @@
+#!/usr/bin/perl
+
+# Create the demo index files
+# run in the Demo directory.
+# MakeDemo [-hide]
+# If -hide flag is given, then don't show things with hide.txt in the directory
+
+$Header = '$Header';
+# $Log: MakeDemo,v $
+# Revision 1.16  1997/10/14  18:06:13  myoder
+# Commented out some print statements.
+#
+# Revision 1.15  1997/10/13  21:51:20  myoder
+# Added 2nd argument to makesummary
+#
+# Revision 1.14  1997/10/01  22:05:40  myoder
+# Added $HeadingsID.
+# Removed .mov.
+#
+# Revision 1.13  1997/09/09  22:33:11  myoder
+# Added alt= field to images.
+#
+# Revision 1.12  1996/11/14  23:18:29  myoder
+# Added "tape" and "camera" icons.
+#
+# Revision 1.11  1996/07/05  21:06:50  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.10  1996/02/13  20:22:11  myoder
+# Moved the <table> building stuff to makesummary in /lib.
+#
+# Revision 1.9  1996/02/13  18:38:18  myoder
+# Added checks for .gif, .wav, and .mov.  If present, they are linked in.
+#
+# Revision 1.8  1996/01/24  21:30:20  myoder
+# Added a message telling when overview.txt can't be found.
+#
+# Revision 1.7  1996/01/17  20:51:51  myoder
+# Changed pwd back.  It didn't work onthe GT machines.
+#
+# Revision 1.6  1996/01/17  20:30:54  myoder
+# $pwd comes from pwd command rather than PWD in environment.
+#
+# Revision 1.5  1996/01/10  21:16:41  myoder
+# Changed .html to .htm.
+# If the .htm file is there it will use it.  If not it will use the .html file.
+#
+# Revision 1.4  1995/12/08  12:38:47  myoder
+# Generalized to work with Labs and Homeworks.  Uses the name of the
+# current directory (Demos, Labs, Homework, etc.) in title.
+#
+# Revision 1.2  95/10/26  10:29:16  10:29:16  schodorf (Jeff Schodorf)
+# didn't change anything, just tried to run it (and failed) :(
+# 
+# Revision 1.1  95/09/20  12:32:40  12:32:40  myoder (Mark Yoder)
+# Initial revision
+# 
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+
+my $noshow = 0;   # set to 1 if things with hide.txt should be skipped. 
+if($ARGV[0] eq '-hide') {  # Don't show Under Construction and old links
+  $noshow = 1;
+}
+
+$path = '.';
+$outfile = $path . "/" . "overview.cd";
+
+# $pwd = $ENV{'PWD'};
+chop($pwd = `pwd`);
+
+@tmp = split("/", $pwd);	# Find name of current directory
+@tmp = reverse(@tmp);
+$dir = $tmp[0];
+
+open(NAME, '../name.txt');   $chapname = <NAME>; chop($chapname);chop($chapname);
+open(NAME, '../number.txt'); $chapnum  = <NAME>; chop($chapnum);chop($chapnum);
+print "($chapname)\n";
+print "($chapnum)\n";
+
+# if(-e $outfile) {
+# rename($outfile, "$outfile.old");
+# }
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+# print "$outfile\n";
+
+#print OUTPUT "<cd-head chap=$chapnum unit=overview>\n";
+print OUTPUT "<title>$chapnum $chapname $HeadingsID{$dir}</title>\n";
+print OUTPUT "</cd-head>\n";
+print OUTPUT "[[Category:Chap$chapnum]]\n";
+print OUTPUT "[[Category:$dir]]\n";
+print OUTPUT "[[Category:$chapnum$dir]]\n";
+print OUTPUT "<!-- Do not Edit, this file is created by $0 -->\n\n";
+if(0) {
+print OUTPUT "<cd-body>\n";
+
+print "dir = $dir\n";
+if($dir ne 'figures' and $dir ne 'demosLV' and $dir ne 'labsLV') {
+print OUTPUT "
+<a href=\"http://www.mathworks.com\" target=\"_blank\"
+	onclick=\"javascript:urchinTracker ('Mathworks Link');\">
+<img src=\"images/m_examples.gif\" align=\"right\" style=\"border:none\" />
+</a>
+";
+}
+
+print OUTPUT "<cd-h1>$chapnum $chapname $HeadingsID{$dir}</cd-h1>\n";
+
+        $text = "overview.txt";
+	$wav  = "overview.wav";
+	$mov  = "overview.mov";
+
+        if(-e $text) {
+	  print OUTPUT "\n";
+	  open(TEXT, $text);
+
+	  while(<TEXT>) {
+	    print OUTPUT;
+	  }
+	  print OUTPUT "\n";
+	}
+
+#	if(-e $wav) {
+#	    print OUTPUT "<br><a href=\"$wav\">";
+#	    print OUTPUT "<img border=0 alt=\"audio\" src=\"tape.gif\">";
+#	    print OUTPUT "</a>\n";
+#	}
+#	if(-e $mov) {
+#	    print OUTPUT "<a href=\"$mov\">\n";
+#	    print OUTPUT "<img border=0 alt=\"video\" src=\"camera2.gif\">";
+#	    print OUTPUT "</a>\n";
+#	}
+} # if(0)
+print OUTPUT "\n";
+
+makesummary($path, $dir, $noshow, $chapnum);
+
+if(0) {
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+} # if(0)
+close(OUTPUT);
+#system("cd2html $outfile; rm $outfile");
+system("cd2wiki $outfile; uploadWiki $outfile");
+# ; deleteWiki \"$chapnum. $chapname $HeadingsID{$dir}\"

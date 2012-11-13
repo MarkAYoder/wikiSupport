@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# PDFlib client: image example in Perl
+#
+
+use strict;
+use pdflib_pl 4.0;
+
+die "Usage: $0 file.gif title" if $#ARGV lt 0;
+
+my $statement = 1;
+if($ARGV[0] eq '-s') {	# This is a solution.
+  shift @ARGV;
+  $statement = 0;
+}
+
+my $imagefile = $ARGV[0];
+my $title = $ARGV[1];
+
+my $pdffile = $imagefile;
+$pdffile =~ s/.gif$/.pdf/;
+my $solution = $imagefile;
+$solution =~ s/.gif$/.pdf/;
+$solution =~ s/^pset/p/;  # works for psets
+$solution =~ s/^q/qs/;    # works for quizes
+my $pngfile = $imagefile;
+$pngfile =~ s/.gif$/.png/;
+
+# Convert the .gif file to .png file so PDFLib and process it.
+system("giftopnm $imagefile > $imagefile.pnm");
+system("pnmtopng $imagefile.pnm > $pngfile");
+unlink "$imagefile.pnm";
+
+my $p = PDF_new();
+
+die "Couldn't open PDF file" if (PDF_open_file($p, "$pdffile") == -1);
+
+PDF_set_info($p, "Creator", "image.pl");
+PDF_set_info($p, "Author", "Jim McClellan");
+if($statement) {
+  PDF_set_info($p, "Title", $title);
+  PDF_set_info($p, "Keywords", $title);
+} else {
+  PDF_set_info($p, "Title", "Solution");
+}
+
+PDF_set_value($p, 'compress', 0);
+
+PDF_set_parameter($p, 'imagewarning', 'true');
+PDF_set_parameter($p, 'openmode',   'none');
+PDF_set_parameter($p, 'openaction', 'fitwidth');
+# print PDF_get_parameter($p, 'imagewarning', 0);
+my $image = PDF_open_image_file($p, "png", $pngfile, "", 0);
+die "Couldn't open image '$imagefile'" if ($image == -1);
+unlink "$pngfile";
+
+# See the PDFlib manual for more advanced image size calculations
+my $width = PDF_get_value($p, "imagewidth", $image);
+my $height = PDF_get_value($p, "imageheight", $image);
+
+my $scale = 1;
+# print "width = $width, height = $height\n";
+# Scale so page is not greater than 8.5 inches.
+my $pagewidth = 8;
+if($width > $pagewidth*72) {
+  $scale = $pagewidth*72/$width;
+  $width = $pagewidth*72;
+  $height *= $scale;
+}
+
+# We generate a page with the image's dimensions
+my $topmargin = 36;	# Prints nicer
+my $botmargin = 36;	# extra added at botom for the solution buttons.
+PDF_begin_page($p, $width, $height+$botmargin+$topmargin);
+PDF_place_image($p, $image, 0, $botmargin, $scale);
+PDF_add_weblink($p, $width-100, 0, $width, $botmargin, $solution) if $statement;
+PDF_add_pdflink($p, $width-200, 0, $width-100, $botmargin,
+		$solution, 1, 'retain') if $statement;
+PDF_close_image($p, $image);
+
+# Change "host" encoding to "winansi" or whatever you need!
+if($statement) {
+  my $font = PDF_findfont($p, "Helvetica-Bold", "host", 0);
+
+  PDF_setfont($p, $font, 12.0);
+
+  PDF_set_text_pos($p, $width-100+15, $botmargin/2.5);
+  PDF_setcolor($p, 'fill', 'cmyk', 1, 0, 0, 0);
+  PDF_show($p, "Solution");
+  PDF_continue_text($p, "(web)");
+
+  PDF_set_text_pos($p, $width-200+15, $botmargin/2.5);
+  PDF_setcolor($p, 'fill', 'cmyk', 1, 0, 0, 0);
+  PDF_show($p, "Solution");
+  PDF_continue_text($p, "(pwd)");
+}
+
+PDF_end_page($p);
+
+PDF_close($p);
+
+PDF_delete($p);

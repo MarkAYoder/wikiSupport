@@ -1,0 +1,37 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use PDF::API2;
+
+print "@ARGV\n";
+
+my $pdf  = PDF::API2->open($ARGV[0]) or die "Can't open $ARGV[0])";
+print "pdf = $pdf, pages = " . $pdf->pages . "\n";
+
+# Page numbers for TextAll.pdf
+#my @pages = (1,7,34,71,101,130,161,195,242,283,
+#	     323,343,379,418,435,446,$pdf->pages+1);
+
+# Page numbers for Chaps 1-4
+my @pages = (1,7,36,71,$pdf->pages+1);
+my $chap = 1;
+
+my $pdf2 = PDF::API2->new;
+for(my $i=1; $i<= $pdf->pages; $i++) {
+  $pdf2->importpage($pdf, $i, $i);
+
+  if($i >= $pages[$chap]-1) {
+    my $newfile = sprintf("chap%02d.pdf", $chap);
+    print "newfile = $newfile, ";
+    print "page = $i\n";
+
+    $pdf2->saveas($newfile);
+    $pdf2->end();
+
+    $pdf2 = PDF::API2->new;
+    $chap++;
+  }
+}
+
+$pdf->end();

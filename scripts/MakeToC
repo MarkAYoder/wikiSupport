@@ -1,0 +1,210 @@
+#!/usr/local/gnu/bin/perl
+
+# Create the Master Table of Contents
+
+$Header = '$Header: /home/ratbert5/myoder/cd/visible3/support/scripts/RCS/MakeToC,v 2.2 2000/04/17 21:33:28 myoder Exp myoder $';
+# $Log: MakeToC,v $
+# Revision 2.2  2000/04/17  21:33:28  myoder
+# Added chop's to get rid of \r char.
+# Works for visible2 now.
+# set table width to 630.
+#
+# Revision 2.1  2000/04/13  19:13:13  myoder
+# Version for 2nd editions..
+#
+# Revision 1.20  2000/04/13  19:10:59  myoder
+# <b> and </b> feedback to PH.
+#
+# Revision 1.20  2000/04/13  19:10:59  myoder
+# <b> and </b> feedback to PH.
+#
+# Revision 1.19  1997/10/21  02:24:39  myoder
+# Moved the feedback to PH to the bottom
+# Added Matlab Index button.
+#
+# Revision 1.18  1997/10/10  12:51:41  myoder
+# Added link to Book to CD links.
+#
+# Revision 1.17  1997/10/01  22:04:37  myoder
+# Put Help in a new window.
+# Added $HeadingsID
+# Removed Master.
+#
+# Revision 1.16  1997/09/12  20:52:18  myoder
+# Removed the "." at the top.
+#
+# Revision 1.15  1997/09/11  20:04:55  myoder
+# Set background color to black so white letters will show up.
+#
+# Revision 1.14  1996/09/02  16:07:48  myoder
+# Converted to lowercase.
+# Sorts numerically.
+#
+# Revision 1.13  1996/07/05  21:08:14  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.12  1996/06/04  21:04:17  myoder
+# The Chapters, Demos, and Labs heading are now links to the corresponding
+# summary files.
+#
+# Revision 1.11  1996/04/29  13:53:46  myoder
+# Changed the background to "cover.gif".
+# Moved the BACK button to the top right like the other pages.
+#
+# Revision 1.10  1996/04/15  19:55:28  myoder
+# looks for things in index.htm if it's not there it looks in overview.htm.
+#
+# Revision 1.9  1996/01/10  21:19:32  myoder
+# Changed .html to .htm
+# Will used .htm.  If it can't find it it will use .html.
+#
+# Revision 1.8  1995/12/13  20:27:10  myoder
+# Changed a <strong> to </strong>.
+#
+# Revision 1.7  1995/12/13  20:07:48  myoder
+# Removed overview column and make the chapter names link to the overview.
+# Changed some formating:  Bigger talbe headings, right justified names.
+#
+# Revision 1.6  1995/10/11  18:32:48  myoder
+# Changed the format of the table a bit.
+#
+# Revision 1.4  1995/07/18  15:15:03  myoder
+# cd-head give chap=0 and unit=master
+# Added cd-foot and /cd-foot
+# Automatically runs through cd2html.
+#
+# Revision 1.3  1995/06/29  21:21:16  myoder
+# Added requires's for constants.pl, isthere.pl, and getopts.pl.
+# $path now uses CDROOT enviroment variable.
+#
+# Revision 1.2  1995/05/22  15:28:11  myoder
+# Outputs a line warning that the MasterToC file is created by MakeToC.
+#
+# Revision 1.1  1995/05/18  14:26:17  myoder
+# Initial revision
+#
+
+require 'constants.pl';
+require 'isthere.pl' ;
+require 'getopts.pl';
+
+&Getopts('bd');
+
+$debug = $opt_d;
+
+$path = $ENV{'CDROOT'};
+$outfile = $path . "/contents/toc.cd";
+
+if(-e $outfile) {
+rename($outfile, $outfile.".old");
+}
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+print "writing $outfile\n";
+
+opendir(CHAPS, $path."/chapters") || die("$0: Can't open $path\n");
+print $path."/chapters\n" if $debug;
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=0 unit=master text=f0f0f0>\n";
+print OUTPUT "<cd-title>Table of Contents</cd-title>\n</cd-head>\n";
+print OUTPUT "<body bgcolor=\"000000\" background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+
+print OUTPUT "<a href = \"#\" onClick=window.open(\'help.htm\',\'help\',\'status=no,width=503,height=380,menubar=yes\')>	<img border=0 alt=\"Help\" src=\"ques2.gif\" align=right></a>\n";
+print OUTPUT "<a href = \"cover.htm\">" .
+	    	"<img align=right border=0 src=\"chapback.gif\"></a>\n";
+
+print OUTPUT "<br><font size=+3><strong>Table of Contents</strong></font>\n";
+print OUTPUT "<blockquote>\n";
+print OUTPUT "<table border=1>\n";
+print OUTPUT "<tr><td>\n";
+print OUTPUT "<a href=links.htm><b>Book to CD Links</b></a></td>\n";
+print OUTPUT "<td><b><a href=matlab.htm><cd-matlabname> Index</b></a></td>\n";
+print OUTPUT "</tr></table>\n";
+print OUTPUT "</blockquote>\n";
+
+print OUTPUT "<p>\n";
+print OUTPUT "<table border=0 width=630>\n";
+print OUTPUT "<tr>\n";
+foreach $head (@Headings) {
+    print "$head\n";
+    if(-e "$head.htm") {
+#	print "$head\n";
+	print OUTPUT "<th><font size=+2><strong>";
+	print OUTPUT "<a href=$head.htm>$HeadingsID{$head}</a>";
+	print OUTPUT "</strong></font></th>\n"; 
+    } else {
+	print OUTPUT "<th><font size=+2><strong>$HeadingsID{$head}</strong></font></th>\n";
+    }
+}
+
+print OUTPUT "\n</tr>\n";
+
+# This first two headings are special cases
+shift(@Headings);shift(@Headings);
+
+foreach $chap (sort {$a <=> $b} readdir(CHAPS)) {
+    $_ = $chap;
+    if(/\d+\w/) {# If it starts with a digit assume it a chapter.
+	print "$_\n" if $debug;;
+	# get the chapter number and name from the directory name
+	($chapnum,$chapname) = /(\d*)(\w*)/;
+	# get the chapter number from number.txt
+
+	if(open(TMP, "../chapters/$chap/number.txt")) {
+		$chapnum = <TMP>; chop($chapnum); chop($chapnum); close(TMP);
+	} else {
+		print "can't open ../chapters/$chap/number.txt\n";
+	}
+	# get the chapter name from name.txt
+	if(open(TMP, "../chapters/$chap/name.txt")) {
+		$chapname = <TMP>; chop($chapname); chop($chapname); close(TMP);
+	} else {
+		print "can't open ../chapters/$chap/name.txt\n";;
+	}
+	$html = "../chapters/$chap/overview.htm";
+	$htm  = "../chapters/$chap/index.htm";
+	print OUTPUT "<tr align=center>\n";
+	print OUTPUT "\t<td><font size=+1><strong>$chapnum</strong></font></td>";
+	if(-e $htm) {
+	    print OUTPUT "<td align=right width=35%><a href=\"$htm\">\n";
+	} else {
+	    print OUTPUT "<td align=right width=35%><a href=\"$html\">\n";
+	}
+	print OUTPUT "<font size=+1><strong>$chapname</strong></font>\n";
+	print OUTPUT "</a></td>\n";
+
+#	print OUTPUT "<td><a href=\"$html\">";
+#	print OUTPUT &isthere($html);
+#	print OUTPUT "</a></td>\n";
+	foreach $head (@Headings) {
+#		$html = "../chapters/$chap/$head/overview.html";
+		$htm  = "../chapters/$chap/$head/overview.htm";
+		if(-e $htm) {
+		    print OUTPUT "\t<td width=20%><a href=\"$htm\">\n\t\t";
+		    print OUTPUT &isthere($htm);
+		} else {
+		    print OUTPUT "\t<td width=20%><a href=\"$html\">\n\t\t";
+		    print OUTPUT &isthere($html);
+		}
+		print OUTPUT "</a></td>\n";
+	}
+	print OUTPUT "</tr>\n";
+    }
+}
+
+print OUTPUT "</table>\n";
+print OUTPUT "<br>\n";
+print OUTPUT "<a href = \"http://www.prenhall.com/~dspfirst/feedback.htm\">\n";
+print OUTPUT "<b>Feedback to Prentice Hall</b>\n";
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<a href = \"#\" onClick=window.open(\'help.htm\',\'help\',\'status=no,width=503,height=380,menubar=yes\')>	<img border=0 alt=\"Help\" src=\"ques2.gif\" align=right></a>\n";
+print OUTPUT "<a href = \"cover.htm\">" .
+	    	"<img align=right border=0 src=\"chapback.gif\"></a>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+system("cd2html $outfile; rm $outfile");

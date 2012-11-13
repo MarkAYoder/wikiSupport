@@ -1,0 +1,414 @@
+head	0.15;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+0.15
+date	94.09.21.01.23.18;	author fielding;	state Exp;
+branches;
+next	0.14;
+
+0.14
+date	94.07.20.18.10.37;	author fielding;	state Exp;
+branches;
+next	0.13;
+
+0.13
+date	94.07.20.18.09.01;	author fielding;	state Exp;
+branches;
+next	0.12;
+
+0.12
+date	94.07.08.08.08.14;	author fielding;	state Exp;
+branches;
+next	0.11;
+
+0.11
+date	94.07.06.19.19.12;	author fielding;	state Exp;
+branches;
+next	;
+
+
+desc
+@A perl program for testing WWW requests via libwww-perl
+@
+
+
+0.15
+log
+@Added command-line options, debug and quiet modes.
+@
+text
+@#!/usr/public/bin/perl
+# $Id: get,v 0.14 1994/07/20 18:10:37 fielding Exp fielding $
+# ==========================================================================
+# Perform a WWW request on a (set of) absolute or relative URL(s).
+# The URL(s) may be on the command line or passed via a pipe.
+# The method used is equal to the uppercased name of this program,
+# so the intention is to name it "get" and create a symbolic links
+# called "HEAD" and "POST" which point to "get" (three programs for
+# the price of one).
+#
+# The program starts with the BASE URL equal to the current file directory.
+# To change it, enter a URL prefixed with "base=", e.g,
+#
+#    Enter a URL (^D to exit): base=http://www.ics.uci.edu/
+#
+# 13 Jun 1994 (RTF): Initial Version 
+# 14 Jun 1994 (RTF): Changed env variable to LIBWWW_PERL
+#                    Fixed the method name to remove any path garbage
+# 06 Jul 1994 (RTF): Added extra fallback code from Martijn Koster
+# 20 Jul 1994 (RTF): The default From header is now set by www.pl
+#                    and &www'set_def_header() is called to set User-Agent
+# 07 Sep 1994 (RTF): Added code to show original headers if they were received;
+#                    Added tout to interactively change the timeout value;
+#                    Added ims  to interactively give If-Modified-Since;
+#                    Added handling of POST content suggested by Mel Melchner.
+# 18 Sep 1994 (RTF): Added command-line options, debug and quiet modes.
+#
+# Created by Roy Fielding to test the libwww-perl system
+# ==========================================================================
+if ($libloc = $ENV{'LIBWWW_PERL'}) { unshift(@@INC, $libloc); }
+
+require "getopts.pl";
+require "www.pl";
+require "wwwurl.pl";
+require "wwwerror.pl";
+
+$pname  = $0;
+$method = $pname;                                 # Method = program name
+$method =~ s#^.*/([^/]+)$#$1#;                    # lose the path
+$method =~ tr/a-z/A-Z/;                           # uppercase it
+
+$Version = "$method/0.5";
+                                                  # Set up User-Agent: header
+&www'set_def_header('http', 'User-Agent', $Version);
+
+$pwd = ( $ENV{'PWD'} || $ENV{'cwd'} || '' );
+
+$Base    = "file://localhost$pwd/";               # Set up initial Base URL
+$Tout    = 30;                                    # Time-out in seconds
+$Ims     = '';                                    # If-Modified-Since header
+$Contype = 'application/x-www-form-urlencoded';   # Content-type for POST
+$Debug   = 0;                                     # Ask before display?
+$Quiet   = 0;                                     # No headers if Quiet
+$Out     = STDOUT;
+
+# ==========================================================================
+# ==========================================================================
+# Print the usage information if help requested (-h) or a bad option given.
+#
+sub usage
+{
+    die <<"EndUsage";
+usage: $pname [-heq] [-b BaseURL] [-t Timeout] [-i IMS_date] [-c ContentType]
+              [URL ...]
+
+$Version -- A program for sending $method requests for World-Wide Web URLs
+Options:                                                        [DEFAULT]
+     -h  Help    -- just display this message and quit.
+     -e  Display the request and response headers to STDERR.    [STDOUT]
+     -q  Don't display the request and response headers.
+     -d  Don't display the content (useful for debugging servers).
+     -b  Start with the given Base URL.
+         [$Base]
+     -t  Start with the given Timeout value (in seconds)        [$Tout]
+     -i  Add the If-Modified-Since header (an HTTP date) to GET requests.
+     -c  Use the given MIME Content-type for POST, PUT, and CHECKIN requests.
+         [$Contype]
+URL ...  Perform the $method request on each URL listed.
+
+If no URLs are listed on the command-line, the program enters an
+interactive mode.  The following commands are available interactively:
+
+     base=BaseURL    -- changes the current Base URL to that given.
+     tout=NNNN       -- sets the current Timeout value (in seconds).
+     ims=IMS_date    -- sets the If-Modified-Since header value.
+     URL             -- performs the request on the given URL.
+
+EndUsage
+}
+
+
+# ==========================================================================
+# Get the command-line options
+
+if (!(&Getopts('heqdb:i:t:c:')) || $opt_h) { &usage; }
+
+if ($opt_e) { $Out     = STDERR; }
+if ($opt_q) { $Quiet   = 1;      }
+if ($opt_d) { $Debug   = 1;      }
+if ($opt_b) { $Base    = $opt_b; }
+if ($opt_i) { $Ims     = $opt_i; }
+if ($opt_c) { $Contype = $opt_c; }
+if ($opt_t) { $Tout    = $opt_t  if ($opt_t =~ /\d+/); }
+
+# ==========================================================================
+# Do the work
+
+if ($#ARGV >= 0) {                             # Quickie, one-line version
+    $Interactive = 0;
+    foreach $arg (@@ARGV)
+    {
+        $url = &wwwurl'absolute($Base, $arg);
+        &do_req($method, $url);
+    }
+}
+else {                                         # Interactive version
+    $Interactive = 1;
+    print "Enter a command or URL (^D to exit): ";
+    while (<STDIN>) {
+        chop;
+        if (/^base=(.*)$/)  { $Base = $1;  next; }
+        if (/^tout=(\d+)$/) { $Tout = $1;  next; }
+        if (/^ims=(.*)$/)   { $Ims  = $1;  next; }
+        $url = &wwwurl'absolute($Base, $_);
+        &do_req($method, $url);
+    }
+    continue
+    {
+        print "\n==========================================================\n";
+        print "Enter a URL (^D to exit): ";
+    }
+    print "\n";
+}
+exit(0);
+
+#-----------------------------------------------------------------
+sub do_req
+{
+    local($method, $url) = @@_;
+    local($hd, $response);
+
+    local(%headers) = ();
+    local($headers) = '';
+    local($content) = '';
+
+    if ($method eq 'GET')
+    {
+        if ($Ims) { $headers{'If-Modified-Since'} = $Ims; }
+    }
+    elsif (($method eq 'POST') || ($method eq 'PUT') || ($method eq 'CHECKIN'))
+    {
+        if ($Interactive)
+        {
+            print "Enter content-type [$Contype]: ";
+            $_ = <STDIN>;
+            chop;
+            if (/^\S/) { $Contype = $_; }
+            print 'Enter content ("." to end): ', "\n";
+        }
+        while (<STDIN>)
+        {
+            last if (/^\.$/);
+            chop;
+            $content .= $_;
+        }
+        $headers{'Content-type'}   = $Contype;
+        $headers{'Content-length'} = length($content);
+    }
+
+    print($Out "$method $url HTTP/1.0\n")     # Show user what it looks like
+          unless $Quiet;                      # and then do the request
+
+    $response = &www'request($method, $url, *headers, *content, $Tout);
+
+    if (!$Quiet)
+    {
+        foreach $hd (keys(%headers))          # This is cheating, but it shows
+        {                                     # the default headers generated
+            next if ($hd =~ m#^[a-z]#);       # by the www.pl request library.
+            print($Out "$hd: $headers{$hd}\n");
+        }
+        print($Out "\n");
+                                              # And print out the result
+        if ($headers)
+        {
+            print($Out $headers);
+        }
+        else
+        {
+            print($Out "HTTP/1.0 $response $wwwerror'RespMessage{$response}\n");
+            foreach $hd (keys(%headers))
+            {
+                next if ($hd =~ m#^[A-Z]#);
+                print($Out "$hd: $headers{$hd}\n");
+            }
+        }
+        print($Out "\n");
+    }
+    if ($Debug)
+    {
+        if ($Interactive)
+        {
+            print 'Do you want the content displayed (y/n)? [n] ';
+            $_ = <STDIN>;
+            chop;
+            if (/^y/i) { print $content if defined($content); }
+        }
+    }
+    else { print $content if defined($content); }
+}
+
+1;
+@
+
+
+0.14
+log
+@just fixed the comment
+@
+text
+@d2 2
+a3 2
+# $Id: get,v 0.13 1994/07/20 18:09:01 fielding Exp fielding $
+#-----------------------------------------------------------------
+d7 3
+a9 2
+# so the intention is to name it "get" and create a symbolic link
+# called "head" which points to "get" (two programs for the price of one).
+d22 5
+d29 1
+a29 1
+#-----------------------------------------------------------------
+d32 1
+d37 4
+a40 3
+$method = $0;                                  # Method = program name
+$method =~ s#^.*/([^/]+)$#$1#;                 # lose the path
+$method =~ tr/a-z/A-Z/;                        # uppercase it
+d42 3
+a44 2
+&www'set_def_header('http', 'User-Agent', "$method/0.3");
+                                               # Set up User-Agent: header
+d48 7
+a54 1
+$base = "file://localhost$pwd/";               # Set up initial Base URL
+d56 9
+a64 1
+#-----------------------------------------------------------------
+d66 23
+a88 3
+if ($#ARGV == 0) {                             # Quickie, one-line version
+    $url = &wwwurl'absolute($base, $ARGV[0]);
+    &do_req($method, $url);
+d90 26
+d117 3
+a119 2
+    print "Enter a URL (^D to exit): ";
+    while (<>) {
+d121 4
+a124 2
+        if (/^base=(.*)$/) { $base = $1;  next; }
+        $url = &wwwurl'absolute($base, $_);
+d129 1
+a129 1
+        print "===========================================================\n";
+d143 1
+d146 3
+a148 8
+    print "$method $url HTTP/1.0\n";          # Show user what it looks like
+                                              # and then do the request
+    $response = &www'request($method, $url, *headers, *content, 30);
+
+    foreach $hd (keys(%headers))              # This is cheating, but it shows
+    {                                         # the default headers generated
+        next if ($hd =~ m#^[a-z]#);           # by the www.pl request library.
+        print "$hd: $headers{$hd}\n";
+d150 19
+a168 2
+    print "\n";
+                                              # And print out the result
+d170 6
+a175 2
+    print "HTTP/1.0 $response $wwwerror'RespMessage{$response}\n";
+    foreach $hd (keys(%headers))
+d177 21
+a197 2
+        next if ($hd =~ m#^[A-Z]#);
+        print "$hd: $headers{$hd}\n";
+d199 11
+a209 4
+    print "\n";
+
+    print $content;
+    print "\n";
+@
+
+
+0.13
+log
+@The default From header is now set by www.pl
+and www'set_def_header is called to set User-Agent
+@
+text
+@d2 1
+a2 1
+# $Id: get,v 0.12 1994/07/08 08:08:14 fielding Exp fielding $
+d20 1
+@
+
+
+0.12
+log
+@Added extra fallback code from Martijn Koster
+@
+text
+@d2 1
+a2 1
+# $Id: get,v 0.11 1994/07/06 19:19:12 fielding Exp fielding $
+d19 1
+d33 2
+a34 1
+$UserAgent = "$method/0.3 $www'Library";       # Set up User-Agent: header
+a35 10
+$user = ( $ENV{'USER'} || $ENV{'LOGNAME'} || 'unknown' );
+
+chop($host = `hostname`);                      # Get default address 
+if (index($host,'.') == -1)
+{
+    $host = join('.', $host, `domainname`);
+    chop($host);
+}
+$ReplyTo = join('@@', $user, $host);            # Set up From: header
+
+d72 3
+a74 2
+    $headers{'User-Agent'} = $UserAgent;      # Define the HTTP request headers
+    $headers{'From'}       = $ReplyTo;
+d76 3
+a78 3
+    print "$method $url HTTP/1.0\n";          # Show user what it looks like
+    foreach $hd (keys(%headers))
+    {
+d81 1
+a81 4
+    print "\n";                               # Now do the request
+
+    $response = &www'request($method, $url, *headers, *content, 30);
+
+@
+
+
+0.11
+log
+@Placed under RCS version control
+@
+text
+@d2 1
+a2 1
+# $Id$
+d18 1
+d32 1
+a32 1
+$UserAgent = "$method/0.2 $www'Library";       # Set up User-Agent: header
+d34 1
+a34 2
+chop($thishost = `hostname`);                  # Get default address
+$ReplyTo = join('@@', $ENV{'USER'}, $thishost); # Set up From: header
+d36 11
+a46 1
+$base = 'file://localhost'. ($ENV{'PWD'} || $ENV{'cwd'}) .'/';
+@

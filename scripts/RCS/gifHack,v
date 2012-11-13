@@ -1,0 +1,33 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.05.17.13.40.41;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@This sets black to transparent of a gif file and saves it in interlace
+format.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/bin/csh -f
+mv $1 $1:r.GIF
+# giftoppm $1:r.GIF | ppmtogif -transparent \#ffffff -interlace > $1
+giftopnm $1:r.GIF | ppmtogif -transparent \#ffffff -interlace > $1
+
+# $Header$
+
+# $Log$
+@

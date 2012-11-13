@@ -1,0 +1,114 @@
+# $Id: wwwerror.pl,v 0.11 1994/07/06 19:19:12 fielding Exp fielding $
+# ---------------------------------------------------------------------------
+# wwwerror.pl: A package for handling World-Wide Web client errors as if
+#              they were being returned from a proxy server.
+#
+# This package has been developed by Roy Fielding <fielding@ics.uci.edu>
+# as part of the Arcadia project at the University of California, Irvine.
+# It is distributed under the Artistic License (included with your Perl
+# distribution files).
+#
+# 13 Jun 1994 (RTF): Initial version
+# 07 Jul 1994 (RTF): Added symbolic names for each error code so that clients
+#                    can protect themselves from changing error numbers.
+#                    000 Timed Out error was reassigned to response code 603.
+#                    602 Connection Failed response code was added.
+#                    A $msg parameter was added to &onrequest so that callers
+#                    can include a text message (e.g. $@) in canned error.
+#
+# If you have any suggestions, bug reports, fixes, or enhancements,
+# send them to Roy Fielding at <fielding@ics.uci.edu>.
+# ---------------------------------------------------------------------------
+require "wwwurl.pl";
+require "wwwmime.pl";
+
+package wwwerror;
+
+$RC_unknown                = 000;   # Define symbolic names for response codes
+$RC_ok                     = 200;
+$RC_created                = 201;
+$RC_accepted               = 202;
+$RC_partial                = 203;
+$RC_no_response            = 204;
+$RC_moved                  = 301;
+$RC_found                  = 302;
+$RC_method                 = 303;
+$RC_not_modified           = 304;
+$RC_bad_request            = 400;
+$RC_unauthorized           = 401;
+$RC_payment_required       = 402;
+$RC_forbidden              = 403;
+$RC_not_found              = 404;
+$RC_internal_error         = 500;
+$RC_not_implemented        = 501;
+$RC_bad_response           = 502;
+$RC_too_busy               = 503;
+$RC_bad_request_client     = 600;
+$RC_not_implemented_client = 601;
+$RC_connection_failed      = 602;
+$RC_timed_out              = 603;
+
+
+%RespMessage = (           # Define all response messages for use by callers
+    000, 'Unknown Error',
+    200, 'OK',
+    201, 'CREATED',
+    202, 'Accepted',
+    203, 'Partial Information',
+    204, 'No Response',
+    301, 'Moved',
+    302, 'Found',
+    303, 'Method',
+    304, 'Not Modified',
+    400, 'Bad Request',
+    401, 'Unauthorized',
+    402, 'Payment Required',
+    403, 'Forbidden',
+    404, 'Not Found',
+    500, 'Internal Error',
+    501, 'Not Implemented',
+    502, 'Bad Response',
+    503, 'Too Busy',
+    600, 'Bad Request in Client',
+    601, 'Not Implemented in Client',
+    602, 'Connection Failed',
+    603, 'Timed Out',
+);
+
+# ===========================================================================
+# onrequest(): Handle error responses to a WWW request that never made it
+#              outside the client.  The error code, request method, parsed URL
+#              (scheme,host,port,object) and optional message are passed in.
+#
+#              Returns the response code along with the appropriately faked
+#              headers and content as parameters.
+#
+sub onrequest
+{
+    local($respcode, $method, $scheme, $host, $port, $object,
+          *headers, *content, $msg) = @_;
+    local($url, $title);
+
+    $url = &wwwurl'compose($scheme, $host, $port, $object,'','');
+    $title = "$respcode $RespMessage{$respcode}";
+
+    if (!defined($msg)) { $msg = ''; }
+
+    $content = <<"EOF";
+<HEAD><TITLE>$title</TITLE></HEAD>
+<BODY><H1>$title</H1>
+The following request could not be satisfied by this client:
+<PRE>
+$method $url
+
+$msg
+</PRE></BODY>
+EOF
+
+    &wwwmime'fakehead('html', length($content), 0, *headers);
+
+    return $respcode;
+}
+
+
+1;

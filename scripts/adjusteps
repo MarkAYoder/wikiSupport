@@ -1,0 +1,40 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+# Usage:  adjusteps leftMarginOffset bottomMarginOffset input output
+
+if($#ARGV ne 3) {
+  print "Usage: $0 leftMarginOffset bottomMarginOffset input output\n";
+  exit;
+}
+
+my ($dleft, $dbottom, $input, $output) = @ARGV;
+
+ print "$dleft, $dbottom, $input, $output\n";
+
+open FD, "<$input" or die "Can't read $input";
+open FDOUT, ">$output" or die "Can't open $output for writing";
+
+$_ = <FD>;
+while(!/BoundingBox/) {
+  print FDOUT $_;
+  $_ = <FD>;
+}
+
+/ (\d*?) (\d*?) (\d*?) (\d*?)\D/;
+my $left = $1-$dleft;
+my $bottom = $2-$dbottom;
+my $right = $3+3;  # Add a bit since the right looks cutoff
+my $top = $4;
+
+print FDOUT "%%BoundingBox: $left $bottom $right $top\n";
+
+while(<FD>) {
+  print FDOUT $_;
+}
+
+print $right-$left, "\t", $top-$bottom, "\n";
+
+close FDOUT;
+close FD;

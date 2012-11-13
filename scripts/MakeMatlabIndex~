@@ -1,0 +1,59 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $dir = "$ENV{'CDROOT'}/visible3/matlab/spfirst";
+chdir $dir or die "Can't cd to $dir";
+
+my $outFile = "index.cd";
+
+open OUT, ">$outFile" or die "Can't open $outFile";
+print OUT "<! Do not Edit,  this file is created by $0>
+<cd-head>
+<title>SP First Toolbox</title>
+</cd-head>
+<cd-body>
+<cd-h1>SP First Toolbox</cd-h1>
+Here are all the m-files in the SP First Toolbox.
+<table border=1>
+<tr><th>M-file</th><th>Description</th></tr>
+";
+
+opendir MAT, $dir or die "Can't open $dir";
+my @files = sort readdir(MAT);
+
+my $file;
+foreach $file(@files) {
+  next if($file !~ /\.m$/);
+  print "$file\n";
+  print OUT "<tr>\n";
+  print OUT "<td><a href=\"$file\">$file</a></td>\n";
+  open FD, $file or die "Can't open $file";
+  print OUT "<td>\n";
+  <FD>;
+  while(my $Line = <FD>) {
+# print "*$Line*\n";
+    $Line =~ s/[\r\n]*//g;
+    last if($Line !~ /^%/);	# Quit if not a comment
+    last if($Line =~ /^%$/);	# Quit if blank comment
+    last if($Line =~ /usage/i);	# Quit if usage is in line
+    $Line =~ s/^%\s*//;		# Remove % from beginning
+    $Line =~ s/^[A-Z0-9]{2,}?\s//;	# Remove ALLCAPS word at beginning
+    print OUT "$Line\n";
+  }
+  print OUT "</td></tr>\n\n";
+  close FD;
+}
+
+closedir MAT;
+
+print OUT "
+</table>
+</cd-body>
+<cd-foot>
+</cd-foot>
+";
+
+close OUT;
+
+system("cd2html $outFile");

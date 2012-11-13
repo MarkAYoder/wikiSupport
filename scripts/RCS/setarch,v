@@ -1,0 +1,45 @@
+head     1.1;
+access   ;
+symbols  ;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     95.05.23.14.05.07;  author monaco;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@Short script to set ARCH environment variable.
+/.
+@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#
+# Sets ARCH environment variable by testing operating system
+# and host type.
+#
+
+setenv MACH `uname -m | cut -c 1-4`
+setenv OS_VERSION `uname -r`
+
+if ( "${MACH}" == "sun4" && "${OS_VERSION}" == "5.3" ) then
+	setenv ARCH sol
+else if ( "${MACH}" == "sun4" ) then
+	setenv ARCH sun4
+else if ( "${MACH}" == "9000" ) then
+	setenv ARCH hp700
+else 
+	setenv ARCH sgi
+endif
+
+
+@

@@ -1,0 +1,38 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.05.17.13.40.41;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@This tmp routine is for testing getp.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+do 'getp.pl';
+
+%tmp = &getp("<cd-matlab x=10  y = hello z = \"This_is_a_test\">");
+
+@@keys = keys %tmp;
+@@values = values %tmp;
+while ($#keys >= 0) {
+    print pop(@@keys), '=', pop(@@values), "\n";
+}
+
+$Log = "$Log$";
+$Header = "$Header$";
+@

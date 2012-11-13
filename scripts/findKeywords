@@ -1,0 +1,52 @@
+#!/usr/bin/perl -w
+
+#
+# make a sorted list of all the words in a file
+#
+
+use strict;
+
+my $stopwords = '/home/myoder/cdrom/support/scripts/stopword.lst';
+
+if( $#ARGV lt 0) {
+  print "Usage: $0 file1 file2  ...\n";
+  exit;
+}
+
+open STOP, "<$stopwords" or die "Can't open $stopwords";
+my @stopwords = <STOP>;
+close STOP;
+
+my %stopwords;
+my $word;
+foreach $word (@stopwords) {
+  chop $word;   chop $word;
+#  print "*$word*\n";
+  $stopwords{$word} = 1;
+}
+
+my $file;
+foreach $file (@ARGV) {
+  print "$file\n";
+
+  open FD, "<$file" or die "Can't open $file";
+
+  my @lines = <FD>;
+  my $bigline = join(' ', @lines);
+  my @words = split(/\W/, $bigline);
+  @words = map {lc} @words;
+  @words = sort @words;
+
+  print "$words[0]\n";
+  my $last = 0;
+  for(my $i=1; $i<=$#words; $i++) {
+    next if($words[$i] =~ /^[\s\d]/);
+    next if($words[$i] =~ /^$/);
+    if($words[$i] ne $words[$last]) {
+ #     print $stopwords{$words[$i]}, ": *$words[$i]*\n";
+      next if($stopwords{$words[$i]});
+      print "$words[$i]\n";
+      $last = $i;
+    }
+  }
+}

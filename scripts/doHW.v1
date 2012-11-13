@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $db = 'test5_DB_withKeywords.txt';
+
+my $fromGIF=1;	# Set to 1 if reading from gif files, otherwise pdf inputs are 
+		# used.
+system("adOff") if $fromGIF;	# Use the version of PDFLib that
+				# doesn't print pdflib in the background.
+# system("adOn");
+
+if(!@ARGV) {
+  print "Usage: $0 [hw | example | exercise]\n";
+  exit;
+}
+
+print "Only doing pdf's\n" unless $fromGIF;
+
+my $statementdir = 'statemnt';
+my $solutiondir  = 'sols';
+my $statesoldir  = 'statesol';
+
+my $type = $ARGV[0];
+
+if($ARGV[0] eq 'hw') {
+  $db = 'test5_DB_withKeywords.txt';
+} elsif($ARGV[0] eq 'example') {
+  $db = 'ALL_EXAMPLES.xlt';
+} elsif ($ARGV[0] eq 'exercise') {
+  $db = 'ALL_EXER.xlt';
+}
+
+open FD, "<$db" or die "Can't open $db";
+
+<FD> if $ARGV[0] eq 'hw';	# Skip headers
+
+my $i=0;
+while(<FD>) {
+#  print "=====\n$_";
+  /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+  my $quarter = $1;
+  my $statement = $2;
+  my $desc = $3;
+  my $chap = $4;
+  my $sol  = $5;
+  my $keywords = $6;
+  $keywords =~ s/[\r\n]*$//;  # Removing trailing return or linefeed/
+
+  if(0) {
+  print "$quarter\n";
+  print "$statement\n";
+  print "$desc\n";
+  print "$chap\n";
+  print "$sol\n";
+  print "$keywords\n";
+}
+
+#  $statement =~ s/\.pdf/\.png/;
+
+  $sol =~ s/\"//g;
+  my @sol = split /,/, $sol;
+
+  next if $chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+
+  if(!-e  "$statesoldir/$quarter") {
+    mkdir "$statesoldir/$quarter";
+    print "mkdir $statesoldir/$quarter\n";
+  }
+
+  $desc =~ s/\"//g;
+
+#  print "$statesoldir/$quarter/$statement\n";
+
+  my $pdf = $statement;
+  $pdf =~ s/\.png$/.pdf/;
+  my $eps = $statement;
+  $eps =~ s/\.pds$/.eps/;
+
+#  print "*$desc*\t*$statement*\t*@sol*$keywords*\n";
+  if($fromGIF) {
+    my $cmd = "meld2pdf \"chap$chap $type $desc\" \"$keywords\" $statesoldir/$quarter/$pdf $statementdir/$quarter/$statement page ";
+    while(@sol){
+      $cmd .= "$solutiondir/$quarter/$sol[0] ";
+      shift @sol;
+#      print "cmd = $cmd\n";
+    }
+    system($cmd);
+  } else {
+#    system("pdf2pdf \"chap$chap $type $desc\" $pdf $statement page $sol1 $sol2 $sol3 $sol4");
+  }
+  print "#";
+
+  $i++;
+#  last if $i>100;
+}
+
+print "\n$i\n";
+
+close FD;

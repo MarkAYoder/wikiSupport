@@ -1,0 +1,297 @@
+<HTML>
+<!-- $Id: README.html,v 0.14 1994/08/01 13:40:42 fielding Exp fielding $ -->
+<HEAD>
+<TITLE>libwww-perl: Distribution Information</TITLE>
+<META http-equiv="Owner"    content="fielding">
+<META http-equiv="Reply-To" content="fielding@ics.uci.edu">
+<LINK rev="made" href="mailto:fielding@ics.uci.edu">
+</HEAD><BODY>
+<H1><img align=top src="http://www.ics.uci.edu/Icons/anteater-ics.gif">
+libwww-perl: Distribution Information</H1>
+
+Copyright (c) 1994 Regents of the University of California.<P>
+
+<STRONG>libwww-perl</STRONG> is a library of Perl4 packages which
+provides a simple and consistent programming interface to the
+World-Wide Web.  This library is being developed as a collaborative
+effort to assist the further development of useful WWW clients and
+tools.  The library is based on version 4.036 of the <A
+HREF="http://www.cis.ufl.edu/perl/">Perl Programming Language</A>.<P>
+
+<STRONG>libwww-perl</STRONG> is freely available as described in
+the <A HREF="Artistic.txt">Artistic License</A> which accompanies the
+standard distribution.  The <EM>libwww-perl</EM> software
+architecture and standard distribution package are copyrighted by the
+University of California for the sole purpose of retaining consistency
+and coherence in the distribution of the library.  Contributions to the
+library are strongly encouraged and will be included in the standard
+distribution with full citation to the developers.  
+See below for the list of past and current contributors.<P>
+
+A <STRONG><A NAME="list">mailing list</A></STRONG> has been
+established for technical discussion about <EM>libwww-perl</EM>,
+including problem reports, interim fixes, suggestions for features,
+and contributions.  The mailing list address is
+<PRE>
+     libwww-perl@ics.uci.edu
+</PRE>
+and administrivia (including subscribe requests) should be sent to
+<PRE>
+     libwww-perl-request@ics.uci.edu
+</PRE>
+A <A HREF="http://www.ics.uci.edu/WebSoft/libwww-perl/archive/">Hypermail
+Archive</A> of the mailing list is also available.<P>
+
+A <A HREF="http://www.ics.uci.edu/WebSoft/libwww-perl/contrib/">contrib
+directory</A> has been established for perl source that is not (yet)
+part of the libwww-perl package, but which may be useful to current
+implementors.<P>
+
+Support for the initial development and distribution of <EM>libwww-perl</EM>
+has been provided by the <A HREF="http://www.ics.uci.edu/Arcadia/atUCI.html">
+Arcadia Project at UCI</A>, part of the larger 
+<A HREF="http://www.ics.uci.edu/Arcadia/">Arcadia Consortium</A> for 
+research in software engineering environments.<P>
+
+<H2>WWW Requests Currently Supported</H2>
+
+<DL>
+<DT><A HREF="http://info.cern.ch/hypertext/WWW/Proxies/References.html">
+Proxies</A> <DD>Full support is provided for redirecting WWW requests
+by protocol scheme to a proxy server via the HTTP protocol.
+
+<DT>HTTP/1.0 <DD>All requests and responses for the 
+<A HREF="http://info.cern.ch/hypertext/WWW/Protocols/HTTP/HTTP2.html">
+Hypertext Transfer Protocol</A> are supported.
+
+<DT>FILE <DD>Support for GET and HEAD requests on file://localhost URLs
+is provided, with results translated to HTTP responses as if they were
+handled by an HTTP gateway.
+</DL>
+
+<H2>Tools based on libwww-perl</H2>
+
+The following tools use libwww-perl and are available at their
+own distribution sites:
+<DL>
+<DT> <A HREF="http://www.ics.uci.edu/WebSoft/MOMspider/">MOMspider</A>
+<DD> The Multi-Owner Maintenance spider created by Roy Fielding.
+<DT> <A HREF="http://www.stuff.com/cgi-bin/bbcurn?user=bcutter&pkg=w3new">
+     w3new</A>
+<DD> Extract a list of URL's from either your mosaic hotlist or from a
+     HTML document, retrieve their Last-modified dates, and output a HTML
+     file with the URL's sorted by their last modification time.  
+</DL>
+
+
+<HR>
+<H2>Contributors</H2>
+
+Developing code to handle all the request formats and protocols present
+on the World-Wide Web is too big a task for any one person or organization.
+For that reason, the future of this library is dependent on the contributions
+of those who make use of it.  Please send in your extensions so that we can
+all benefit from the effort required to make distributed information systems
+work.<P>
+
+The following developers have contributed (either directly or indirectly)
+to the <EM>libwww-perl</EM> distribution:
+<DL>
+<DT> Alberto Accomazzi, Harvard-Smithsonian Center for Astrophysics, USA
+<DD> Suggestions for hostname.pl
+<DT> James Casey, CERN, Switzerland
+<DD> Routines for processing HTML anchors
+<DT> <A HREF="http://www.stuff.com/cgi-bin/bbcurn?user=bcutter">Brooks
+     Cutter</A>, STUFF.com, USA
+<DD> Contributed wwwbot.pl, testbot, code for escaping and unescaping URLs,
+     www'stat(), wwwmailcap.pl, and many suggestions and bug fixes.
+<DT> <A HREF="http://www.ics.uci.edu/dir/grad/Software/fielding">Roy 
+     Fielding</A>, University of California, Irvine, USA
+<DD> Architect and primary developer of the library.
+<DT> <A HREF="http://web.nexor.co.uk/mak/mak.html">Martijn Koster</A>,
+     NEXOR Ltd., UK
+<DD> Many bug fixes and part of Oscar's http.
+<DT> Mel Melchner, AT&amp;T Research, USA
+<DD> Suggested changes to <EM>get</EM> to support the POST method.
+<DT> <A HREF="http://iamwww.unibe.ch/~oscar/">Oscar
+     Nierstrasz</A>, University of Berne, Switzerland
+<DD> Oscar's collection of useful perl scripts formed the basis on
+     which the wwwhttp.pl and wwwhtml.pl packages were built.
+<DT> Gertjan van Oosten, West Consulting bv, NL
+<DD> Code for parsing WWW date formats (used in wwwdates.pl)
+<DT> <A HREF="http://www.hmc.edu/~jared/home.html">Jared Rhine</A>,
+     Harvey Mudd College, USA
+<DD> Makefile/config suggestions.
+<DT> Jack Shirazi, BIU, UK
+<DD> Many good suggestions regarding alarms and sockets.
+<DT> Gene Spafford, Purdue University, USA
+<DD> MailStuff package for parsing rfc822 headers.
+<DT> <A HREF="http://www.cs.indiana.edu/hyplan/mvanheyn.html">
+     Marc VanHeyningen</A>, Indiana University, USA
+<DD> HTML entity stuff and part of Oscar's http.
+<DT> Others
+<DD> These people contributed to prior packages which influenced the
+     development of <EM>libwww-perl</EM>: Steven E. Brenner (cgi-lib),
+     Marion Hakanson (ctime),
+     Waldemar Kebsch (ctime), Tony Sanders (Plexus), and Larry Wall (Perl).
+</DL>
+
+<HR>
+<H2>The Distribution</H2>
+
+For easy distribution, <EM>libwww-perl</EM> is available as a
+<A HREF="http://www.ics.uci.edu/WebSoft/libwww-perl/libwww-perl-0.40.tar.gz">
+gzip'd tar file</A> or as a 
+<A HREF="http://www.ics.uci.edu/WebSoft/libwww-perl/libwww-perl-0.40.tar.Z">
+compress'd tar file</A>.  It is also available via 
+<A HREF="ftp://liege.ics.uci.edu/pub/arcadia/libwww-perl/">anonymous
+ftp</A> from <EM>liege.ics.uci.edu</EM> in the directory
+<CODE>/pub/arcadia/libwww-perl</CODE><P>
+
+The distribution consists of the following files:
+<DL>
+<DT> <A HREF="Artistic.txt">Artistic.txt</A> 
+<DD> the Artistic License.
+
+<DT> <A HREF="INSTALL.txt">INSTALL.txt</A> 
+<DD> Installation instructions and usage information.
+
+<DT> <A HREF="LWP_Changes.pl">LWP_Changes.pl</A> 
+<DD> the complete list of changes and version information.
+
+<DT> <A HREF="Makefile">Makefile</A>
+<DD> a Makefile for automating the initial configuration.
+
+<DT> <A HREF="README.html">README.html</A> 
+<DD> this document.
+
+<DT> <A HREF="get">get</A> 
+<DD> a simple program for performing WWW GET requests from the
+     command-line.  The name of the program determines what request method
+     to be used (i.e. create a link to it called "HEAD" and you have a
+     program that does HEAD requests).  This program demonstrates the power
+     and simplicity of the <EM>libwww-perl</EM> interface.
+
+<DT> <A HREF="hostname.pl">hostname.pl</A>
+<DD> a library for determining the fully qualified domain
+     name for the host running libwww-perl. 
+
+<DT> <A HREF="mime.types">mime.types</A> 
+<DD> the standard MIME content-types
+     and default filename extensions in the same format as that used by
+     NCSA httpd_1.3 and many WWW clients.
+
+<DT> <A HREF="sys_socket_ph.c">sys_socket_ph.c</A>
+<DD> A simple C program for displaying your system's
+     symbolic values normally found in sys/socket.ph.
+
+<DT> <A HREF="testbot">testbot</A> 
+<DD> a simple program for testing the wwwbot.pl package.
+
+<DT> <A HREF="testdates">testdates</A> 
+<DD> a simple program for testing the wwwdates.pl package.
+
+<DT> <A HREF="testescapes">testescapes</A> 
+<DD> a simple program for testing the wwwurl'escape and unescape routines.
+
+<DT> <A HREF="testlinks">testlinks</A> 
+<DD> a simple program for testing HTML link extraction and
+     combinations of GET and HEAD requests.
+
+<DT> <A HREF="www.pl">www.pl</A> 
+<DD> the primary entry point for WWW requests -- give it any absolute
+     URL and a request method and it will try to perform the method using
+     the URL's protocol scheme (or a proxy).
+
+<DT> <A HREF="wwwbot.pl">wwwbot.pl</A>
+<DD> a package for implementing the 
+     <A HREF="http://web.nexor.co.uk/mak/doc/robots/robots.html">
+     robot exclusion protocol</A>.
+
+<DT> <A HREF="wwwdates.pl">wwwdates.pl</A> 
+<DD> a package of library utilities for reading, manipulating, and
+     writing dates as they are formatted by most World-Wide Web software
+     and protocols.
+
+<DT> <A HREF="wwwerror.pl">wwwerror.pl</A> 
+<DD> a package for defining and generating error messages for requests
+     which did not make it outside the client program.
+
+<DT> <A HREF="wwwfile.pl">wwwfile.pl</A> 
+<DD> a package for performing local file requests (URLs of the form
+     <CODE>file://localhost/*</CODE>) and returning a response as if it
+     came from an HTTP server.
+
+<DT> <A HREF="wwwhtml.pl">wwwhtml.pl</A> 
+<DD> a package of library utilities for reading and manipulating HTML
+     documents.
+
+<DT> <A HREF="wwwhttp.pl">wwwhttp.pl</A> 
+<DD> a package for performing HTTP requests (URLs of the form
+     <CODE>http:*</CODE>).
+
+<DT> <A HREF="wwwmailcap.pl">wwwmailcap.pl</A> 
+<DD> a package of library utilities for handling MIME mailcap files
+     and executing viewers by content-type.
+
+<DT> <A HREF="wwwmime.pl">wwwmime.pl</A> 
+<DD> a package of library utilities for handling MIME content-types
+     and message headers.
+
+<DT> <A HREF="wwwurl.pl">wwwurl.pl</A> 
+<DD> a package of library utilities for parsing, composing,
+     manipulating, and canonicalizing Uniform Resource Locators (URLs) as
+     they are used by the World-Wide Web software and protocols.
+
+</DL>
+
+<HR>
+<H2><A HREF="Changes.txt">Version History</A></H2>
+
+Current version is 0.40.
+<UL>
+<LI> <A HREF="patch030to040.txt">Patch from 0.30 to 0.40</A>
+<LI> <A HREF="patch020to030.txt">Patch from 0.20 to 0.30</A>
+<LI> <A HREF="patch012to020.txt">Patch from 0.12 to 0.20</A>
+<LI> <A HREF="patch011to012.txt">Patch from 0.11 to 0.12</A>
+<LI> <A HREF="patch010to011.txt">Patch from 0.10 to 0.11</A>
+</UL>
+
+If you have any suggestions, bug reports, fixes, or enhancements, send
+them to <A HREF="http://www.ics.uci.edu/dir/grad/Software/fielding">
+Roy Fielding</A> at (fielding@ics.uci.edu) or, preferably, join the
+libwww-perl mailing list as described <A HREF="#list">above</A>.
+Also, we would like to ask anyone who uses <EM>libwww-perl</EM> on a
+regular basis, or intends to include it as part of their own tool, to
+<STRONG>please</STRONG> send us an e-mail message which indicates how
+and where it is being used.  This is, of course, only voluntary and we
+don't want anyone to divulge private information, but please
+understand that such acknowledgements allow free-software authors like
+us to justify the time and effort needed to build quality tools and
+development environments.<P>
+
+<HR>
+Please see the file <A HREF="Artistic.txt">Artistic.txt</A> for complete
+licensing and redistribution information.<P>
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION
+(INCLUDING, BUT NOT LIMITED TO, LOST PROFITS) EVEN IF THE UNIVERSITY
+OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. <P>
+
+This work was sponsored in part by the Advanced Research Projects
+Agency under Grant Number MDA972-91-J-1010.  This software does not
+necessarily reflect the position or policy of the U.S. Government and no
+official endorsement should be inferred.  Their support is appreciated. <P>
+
+<HR>
+<ADDRESS>
+<A HREF="http://www.ics.uci.edu/dir/grad/Software/fielding">
+Roy Fielding &lt;fielding@ics.uci.edu&gt;</A><BR>
+<A HREF="http://www.ics.uci.edu/">
+Department of Information and Computer Science</A>,<BR>
+University of California, Irvine, CA  92717-3425
+</ADDRESS>
+Last modified: Tue Sep 20 18:13:06 1994
+</BODY></HTML>

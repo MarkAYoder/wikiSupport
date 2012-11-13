@@ -1,0 +1,42 @@
+#!/usr/local/gnu/bin/perl
+
+# This file prints the contents of the Matlab index created by 
+# mat2html.
+
+# $Log: printIndex,v $
+# Revision 1.4  1995/06/01  16:22:49  myoder
+# Now you must give the name of the database to be printed.
+#
+# Revision 1.3  1995/06/01  16:16:19  myoder
+# Bug fix:  changed " to ' in $Header.
+#
+# Revision 1.2  1995/05/22  15:41:18  myoder
+# Changed name from MatlabDataBase to MatlabIndex.
+#
+# Revision 1.1  1995/05/17  14:04:59  myoder
+# Initial revision
+#
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/printIndex,v 1.2 1995/05/22 15:41:18 myoder Exp myoder ';
+
+$db_file = $ARGV[0];
+
+dbmopen(%data, $db_file, 0666);
+
+# This creates some enteries in the database in case mat2html isn't available
+if (0) {
+$data{'plot'}		 = "plot.html";
+$data{'for'}		= "for.html";
+$data{'figure'}		= "firgure.html";
+$data{'length'}		= "length.html";
+$data{'uicontrol'}						= "uicontrol.html";
+$data{'subplot'}						= "subplot.html";
+$data{'findobj'}						= "findobj.html";
+}
+
+while (($key,$val) = each %data) {
+ 	print $key, ' = ', $val, "\n";
+}
+
+dbmclose(%data);
+
+

@@ -1,0 +1,140 @@
+head	1.2;
+access;
+symbols;
+locks
+	myoder:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2000.04.13.19.21.31;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.10.21.15.41.42;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Creates the links.cd file.
+Usage:	MakeIndex links.url
+@
+
+
+1.2
+log
+@Some fixes.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# process each file on the command line
+
+foreach $file (@@ARGV) {
+print "$file\n";
+$_ = $file;
+next unless(/\.url$/);	# Skip unless it ends with .cd.
+
+$outname = $file;
+$outname =~ s/.url$/.cd/;
+
+open(INFILE, $file);
+
+print "Reading $file, ";
+print "Outputting to $outname\n\n";
+
+open(HTML, ">$outname") || die "Cannot open $outfile";
+print HTML "<! Do not Edit, this file is created by $0>\n";
+print HTML "<cd-head chap=0 unit=chap>\n<cd-title>Book to CD Links</cd-title>\n</cd-head>\n";
+# print HTML "<body bgcolor=\"000000\" background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print HTML "<cd-body>\n";
+print HTML "<body bgcolor=\"aaaacc\">\n";
+
+print HTML "<br><br><br><font size=+3><strong>Book to CD Links</strong></font>\n";
+
+# Read the entire input file.
+$cols = 4;
+$i = 0;
+$firsttime = 1;
+while(<INFILE>) {
+	($name[$i], $url[$i], $newcols) = split(/\t/);
+	chop($url[$i]);
+	chop($newcols);
+	if($name[$i] eq "New Section") {
+	    print "Found $name[$i], $url[$i]\n";
+	    $sectionname = $url[$i];
+	    if(!$firsttime) {
+#		print "Not first time\n";
+		$lines = $i;
+#		print "$lines lines read\n";
+		$jump = int($lines/$cols+0.99);
+#		print "$lines/$cols  $lines/$cols+0.99\n";
+		print "formating for $cols columns.  Jumping $jump per col\n";
+
+		for($i=0; $i<$jump; $i++) {
+		    print HTML "<tr>\n";
+		    for($j=0; $j<$cols; $j++) {
+			print HTML "<td><a href=\"$url[$i+$j*$jump]\">$name[$i+$j*$jump]</a></td>\n";
+		    }
+		    print HTML "</tr>\n";
+		}
+		print HTML "</table>\n";
+	    }
+	    print HTML "<p><strong><font size=+2>$sectionname</font></strong>\n";
+	    print HTML "<p>\n";
+	    print HTML "<table border=1 >\n";
+	    $firsttime = 0;
+	    $i=-1;
+	    $cols = $newcols;
+	}
+#	print "name[$i]=$name[$i], url=$url[$i]\n";
+	$i++;
+}
+$lines = $i;
+# print "$lines lines read\n";
+$jump = int($lines/$cols+0.99);
+print "formating for $cols columns.  Jumping $jump per col\n";
+
+for($i=0; $i<$jump; $i++) {
+    print HTML "<tr>\n";
+    for($j=0; $j<$cols; $j++) {
+	print HTML "<td><a href=\"$url[$i+$j*$jump]\">$name[$i+$j*$jump]</A></td>\n";
+    }
+    print HTML "</tr>\n";
+}
+print HTML "</table>\n";
+
+print HTML "</cd-body>\n";
+print HTML "<cd-foot>\n";
+print HTML "</cd-foot>\n";
+
+} # foreach $file (@@ARGV)
+
+close(HTML);
+
+system("chgrp bookcd $outname");
+system("chmod 664 $outname");
+system("cd2html $outname");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d23 1
+d39 1
+a39 1
+		print "Not first time\n";
+d41 1
+a41 1
+		print "$lines lines read\n";
+d43 1
+d66 2
+a67 2
+print "$lines lines read\n";
+$cols = 4;  $jump = int($lines/$cols+0.99);
+@

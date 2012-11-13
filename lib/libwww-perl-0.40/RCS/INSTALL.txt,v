@@ -1,0 +1,577 @@
+head	0.15;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+0.15
+date	94.09.21.01.23.18;	author fielding;	state Exp;
+branches;
+next	0.14;
+
+0.14
+date	94.08.01.13.40.13;	author fielding;	state Exp;
+branches;
+next	0.13;
+
+0.13
+date	94.07.21.03.55.33;	author fielding;	state Exp;
+branches;
+next	0.12;
+
+0.12
+date	94.07.08.08.08.14;	author fielding;	state Exp;
+branches;
+next	0.11;
+
+0.11
+date	94.07.06.19.19.12;	author fielding;	state Exp;
+branches;
+next	;
+
+
+desc
+@Instructions on how to install and use libwww-perl
+@
+
+
+0.15
+log
+@Added new Makefile, FAQ answers, GET usage info
+@
+text
+@libwww-perl Installation Information
+====================================
+# $Id: INSTALL.txt,v 0.14 1994/08/01 13:40:13 fielding Exp fielding $
+
+See the files README.html and Artistic.txt for licensing and distribution info.
+See the file LWP_Changes.pl for a complete list of changes and version history.
+
+The latest version of libwww-perl can always be found at:
+
+       http://www.ics.uci.edu/WebSoft/libwww-perl/
+
+or by anonymous ftp from
+
+       ftp://liege.ics.uci.edu/pub/arcadia/libwww-perl/
+
+
+==========================================================================
+Installation instructions:
+
+1. Get the libwww-perl package from the distribution site (above).  Normally,
+   it will be in the form of a compressed unix tar file.  If it has not
+   already been decompressed by your WWW client, then do one of:
+
+       % uncompress libwww-perl-V.vv.tar.Z
+       % gunzip libwww-perl-V.vv.tar.gz
+
+   depending on which compressed version you downloaded. "V.vv" should
+   be replaced with the library version number, e.g. "0.40".
+
+
+2. Move the resulting libwww-perl-V.vv.tar file to the directory above
+   where you want to install libwww-perl, cd to that directory, and do
+
+       % tar xvf libwww-perl-V.vv.tar
+
+   to create the directory ./libwww-perl-V.vv containing the following:
+
+       Artistic.txt   -- the Artistic License governing redistribution
+                         of the libwww-perl package.
+       INSTALL.txt    -- this file
+       LWP_Changes.pl -- the list of known problems and version information.
+       Makefile       -- a Makefile for automating the initial configuration.
+       RCS/           -- the complete RCS repository, including all versions.
+       README.html    -- primary source of information about libwww-perl
+       get            -- a simple program for performing WWW GET requests from
+                         the command-line. The name of the program determines
+                         what request method to be used (i.e. create a link to
+                         it called "head" and you have a program that does
+                         HEAD requests). This program demonstrates the power
+                         and simplicity of the libwww-perl interface. 
+       hostname.pl    -- a library for determining the fully qualified domain
+                         name for the host running libwww-perl.
+       mime.types     -- the standard MIME content-types and default filename
+                         extensions in the same format as that used by NCSA
+                         httpd_1.3 and many WWW clients. 
+       sys_socket_ph.c - A simple C program for displaying your system's
+                         symbolic values normally found in sys/socket.ph.
+       testbot        -- a simple program for testing the wwwbot.pl package. 
+       testdates      -- a simple program for testing the wwwdates.pl package. 
+       testescapes    -- a program for testing wwwurl'escape and unescape.
+       testlinks      -- a simple program for testing HTML link extraction and
+                         combinations of GET and HEAD requests.
+       www.pl         -- the primary entry point for WWW requests -- give it
+                         any absolute URL and a request method and it will
+                         try to perform the method using the URL's protocol
+                         scheme (or a proxy). 
+       wwwbot.pl      -- a package for implementing the robot exclusion
+                         protocol.
+       wwwdates.pl    -- a package of library utilities for reading,
+                         manipulating, and writing dates as they are formatted
+                         by most World-Wide Web software and protocols. 
+       wwwerror.pl    -- a package for defining and generating error messages
+                         for requests which did not make it outside the client
+                         program. 
+       wwwfile.pl     -- a package for performing local file requests (URLs of
+                         the form file://localhost/*) and returning a response
+                         as if it came from an HTTP server. 
+       wwwhtml.pl     -- a package of library utilities for reading and
+                         manipulating HTML documents. 
+       wwwhttp.pl     -- a package for performing HTTP requests (URLs of the
+                         form http:*). 
+       wwwmailcap.pl  -- a package of library utilities for handling MIME
+                         mailcap files and executing viewers by content-type.
+       wwwmime.pl     -- a package of library utilities for handling MIME
+                         content-types and message headers. 
+       wwwurl.pl      -- a package of library utilities for parsing, composing,
+                         manipulating, and canonicalizing Uniform Resource
+                         Locators (URLs) as they are used by the World-Wide Web
+                         software and protocols. 
+
+
+3. Edit the Makefile to match your system configuration.  All you should
+   need to change is the value of PERLBIN -- the full pathname of your
+   perl interpreter.  Then, perform the command
+
+      % make
+
+   If the full pathname of your perl interpreter is not "/usr/public/bin/perl",
+   you should also perform the command:
+
+      % make config
+   
+
+4. Set the LIBWWW_PERL environment variable to point to the
+   libwww-perl directory, e.g. 
+
+        % setenv LIBWWW_PERL /usr/local/lib/libwww-perl-V.vv
+
+   This allows clients like "get" to place the libwww-perl on their @@INC path
+   and also allows wwwmime.pl to find the standard mime.types file.
+
+
+5. That's it.  You should now be able to run get, HEAD and POST, as well
+   as the other library test* programs.  See the usage info and the
+   FAQ list below for more information.
+
+
+==========================================================================
+Usage:
+
+See the "get" and test* programs for examples of how to interface with
+libwww-perl.  More documentation will be available later.
+
+The "get" program is a production-quality WWW client, useful for performing
+quick downloads from HTTP servers, translating FILE directories to HTML,
+and testing request/response headers on HTTP servers.
+
+usage: get [-heqd] [-b BaseURL] [-t Timeout] [-i IMS_date] [-c ContentType]
+           [URL ...]
+
+GET/0.5 -- A program for sending GET requests for World-Wide Web URLs
+Options:                                                        [DEFAULT]
+     -h  Help    -- just display this message and quit.
+     -e  Display the request and response headers to STDERR.    [STDOUT]
+     -q  Don't display the request and response headers.
+     -d  Don't display the content (useful for debugging servers).
+     -b  Start with the given Base URL.
+         [file://localhost/co/ub/fielding/public/www/lwp/libwww-perl/]
+     -t  Start with the given Timeout value (in seconds)        [30]
+     -i  Add the If-Modified-Since header (an HTTP date) to GET requests.
+     -c  Use the given MIME Content-type for POST, PUT, and CHECKIN requests.
+         [application/x-www-form-urlencoded]
+URL ...  Perform the GET request on each URL listed.
+
+If no URLs are listed on the command-line, the program enters an
+interactive mode.  The following commands are available interactively:
+
+     base=BaseURL    -- changes the current Base URL to that given.
+     tout=NNNN       -- sets the current Timeout value (in seconds).
+     ims=IMS_date    -- sets the If-Modified-Since header value.
+     URL             -- performs the request on the given URL.
+
+
+Here's a nice way to download information AND see the response headers:
+
+     % get -e http://www.ics.uci.edu/WWWdocs/papers/rfc1630.txt > rfc1630.txt
+
+And, since the method used is equal to the program's name (uppercased),
+you can use symbolic links to create other useful programs, e.g.
+
+     % echo "tick=sunw" | POST http://www.secapl.com/cgi-bin/qs
+
+Give it a try.  I have only tested the GET, HEAD, and POST methods, but all the
+others are supported as well (though they may not be supported by any server).
+
+==========================================================================
+Frequently Asked Questions
+
+1. Why doesn't libwww-perl support FTP, Gopher, WAIS, ... ?
+
+   Because you haven't written the interface yet ;-)
+
+   Seriously, though, all you need to do to add a new protocol to the
+   library is to copy an existing one (e.g. "cp wwwhttp.pl wwwftp.pl")
+   and define the contents of the %AllowedMethods array and the scheme's
+   request function (e.g. wwwftp'request()), and then include a "require"
+   statement in the main program that uses it.  That's it -- determination
+   of whether or not a protocol module exists is made dynamically by
+   &www'request().
+
+
+2. How do I contribute my changes to the standard distribution?
+
+   First, you should join the mailing list <libwww-perl@@ics.uci.edu>
+   by sending a subscribe request, including your name and preferred e-mail
+   address, to <libwww-perl-request@@ics.uci.edu>.  You will be sent a welcome
+   message when you are placed on the list.  To see what the list looks like,
+   see the Hypermail Archive of it at:
+
+       <http://www.ics.uci.edu/WebSoft/libwww-perl/archive/>
+
+   After that, send a mail message describing your changes or suggestions 
+   to <libwww-perl@@ics.uci.edu> and we can all talk about them.
+   If you have RCS (or CVS), you can use the included RCS repository
+   to keep track of your changes and merge them with later distributions.
+   You are also free to send changes to others by mail or news (or even disk),
+   just as long as you don't claim they are part of the "standard distribution"
+   of libwww-perl.
+
+
+3. Help, I have encountered a bug and I don't know what to do...
+
+   First, look at the hypertext archive (the URL above) to see if a similar
+   problem has already been discussed on the mailing list.  If not, send a
+   message to the mailing list <libwww-perl@@ics.uci.edu> which describes the
+   problem and symptoms, etc.  Above all, be sure to mention what platform
+   you are running on, since most of the problems discovered so far have
+   been platform-specific.  Finally, if you solve a problem, be sure to send
+   the solution to the mailing list as well.
+
+
+4. Undefined subroutine "main'_BSD" called at /usr/local/lib/perl/sys/socket.ph
+
+   Arrgh!
+
+   This has been the big problem so far with SVR4 and mach-based system
+   installs.  What you need to do is create a sys/socket.ph file for your
+   perl standard library which is valid for your system.  Normally,
+   you can just run the "h2ph" command (part of the perl distribution) to set
+   up the files, but some SVR4 and mach-based systems use extra symbols which
+   can't be found by h2ph.  So, you need to do one (or more) of the following:
+
+   A. Comment out the lines in sys/socket.ph that generate errors (they are
+      rarely needed in any case).
+
+   B. Add your own definitions to the sys/socket.ph, e.g.
+
+           eval 'sub BSD { 0; }';
+
+      You may have to guess the correct value, or do a grep on
+      /usr/include/sys/*.h  to find the exact definition.
+
+   C. Create your own canned socket.ph file via the included C program
+      sys_socket_ph.c -- compile and run it using the commands:
+
+        % make socket
+        % sys_socket_ph > my_socket.ph
+
+      and then edit "wwwhttp.pl" (in the libwww-perl stuff) to replace
+      the require "sys/socket.ph" with require "my_socket.ph";
+
+   Depending on the vagaries of your system, at least one of the above
+   fixes should work.
+
+==========================================================================
+Have fun,
+
+......Roy Fielding   ICS Grad Student, University of California, Irvine  USA
+                    <fielding@@ics.uci.edu>  <libwww-perl-request@@ics.uci.edu>
+                     <URL:http://www.ics.uci.edu/dir/grad/Software/fielding>
+@
+
+
+0.14
+log
+@Updated for version 0.30
+@
+text
+@d3 1
+a3 1
+# $Id: INSTALL.txt,v 0.13 1994/07/21 03:55:33 fielding Exp fielding $
+d6 1
+a6 1
+See the file Changes.txt for a complete list of changes and version history.
+d24 2
+a25 2
+        % uncompress libwww-perl-0.30.tar.Z
+        % gunzip libwww-perl-0.30.tar.gz
+d27 2
+a28 1
+   depending on which compressed version you downloaded.
+d31 1
+a31 1
+2. Move the resulting libwww-perl-0.30.tar file to the directory above
+d34 1
+a34 1
+        % tar xvf libwww-perl-0.30.tar
+d36 1
+a36 1
+   to create the directory ./libwww-perl-0.30 containing the following:
+d38 1
+a38 1
+        Artistic.txt  -- the Artistic License governing redistribution
+d40 6
+a45 4
+        Changes.txt   -- the list of known problems and version information.
+        INSTALL.txt   -- this file
+        README.html   -- primary source of information about libwww-perl
+        get           -- a simple program for performing WWW GET requests from
+d51 3
+a53 1
+        mime.types    -- the standard MIME content-types and default filename
+d56 6
+a61 4
+        testbot       -- a simple program for testing the wwwbot.pl package. 
+        testdates     -- a simple program for testing the wwwdates.pl package. 
+        testescapes   -- a program for testing wwwurl'escape and unescape.
+        testlinks     -- a simple program for testing HTML link extraction and
+d63 1
+a63 1
+        www.pl        -- the primary entry point for WWW requests -- give it
+d67 1
+a67 1
+        wwwbot.pl     -- a package for implementing the robot exclusion
+d69 1
+a69 1
+        wwwdates.pl   -- a package of library utilities for reading,
+d72 1
+a72 1
+        wwwerror.pl   -- a package for defining and generating error messages
+d75 1
+a75 1
+        wwwfile.pl    -- a package for performing local file requests (URLs of
+d78 1
+a78 1
+        wwwhtml.pl    -- a package of library utilities for reading and
+d80 1
+a80 1
+        wwwhttp.pl    -- a package for performing HTTP requests (URLs of the
+d82 1
+a82 1
+        wwwmailcap.pl -- a package of library utilities for handling MIME
+d84 1
+a84 1
+        wwwmime.pl    -- a package of library utilities for handling MIME
+d86 1
+a86 1
+        wwwurl.pl     -- a package of library utilities for parsing, composing,
+d92 3
+a94 1
+3. You may need to change the following (with any text editor).
+d96 1
+a96 2
+   The first line of each program (get and all test*)
+   should point to your perl executable:
+d98 2
+a99 1
+        #!/usr/local/bin/perl
+d101 2
+d104 1
+a104 1
+4. The LIBWWW_PERL environment variable must be set to point to the
+d107 1
+a107 1
+        % setenv LIBWWW_PERL /usr/local/lib/libwww-perl-0.30
+d113 3
+a115 1
+5. Make sure the programs are executable:
+a116 2
+        % chmod 755 get test*
+        % ln -s get HEAD
+d118 2
+a119 1
+   HEAD is in uppercase only because there already exists a unix head command.
+d121 2
+a122 1
+6. That's it.  You should now be able to run get and HEAD, e.g.
+d124 3
+a126 1
+        % get http://www.ics.uci.edu/
+d128 2
+d131 13
+a143 2
+==========================================================================
+Usage:
+d145 2
+a146 3
+See the "get" and test* programs for examples of how to interface with
+libwww-perl.  More documentation will be available later this summer
+(Northern Hemisphere ;-)
+d148 4
+d153 13
+d171 1
+a171 1
+Because you haven't written the interface yet ;-)
+d173 7
+a179 6
+Seriously, though, all you need to do to add a new protocol to the
+library is to copy an existing one (e.g. "cp wwwhttp.pl wwwftp.pl")
+and define the contents of the %AllowedMethods array and the scheme's
+request function (e.g. wwwftp'request()), and then add it to the list
+of required packages in www.pl.  That's it -- determination of whether
+or not a protocol module exists is made dynamically by &www'request().
+d184 5
+a188 5
+First, you should join the libwww-perl mailing list <libwww-perl@@ics.uci.edu>
+by sending a subscribe request, including your name and preferred e-mail
+address, to <libwww-perl-request@@ics.uci.edu>.  You will be sent a welcome
+message when you are placed on the list.  To see what the list looks like,
+see the Hypermail Archive of it at:
+d190 1
+a190 1
+    <http://www.ics.uci.edu/WebSoft/libwww-perl/archive/>
+d192 7
+a198 7
+After that, send a mail message describing your changes or suggestions 
+to <libwww-perl@@ics.uci.edu> and we can all talk about them.
+If you have RCS (or CVS), you can use the included RCS repository
+to keep track of your changes and merge them with later distributions.
+You are also free to send changes to others by mail or news (or even disk),
+just as long as you don't claim they are part of the "standard distribution"
+of libwww-perl.
+d200 45
+d248 3
+a250 4
+
+....Roy Fielding   ICS Grad Student, University of California, Irvine  USA
+                   (fielding@@ics.uci.edu)
+    <A HREF="http://www.ics.uci.edu/dir/grad/Software/fielding">About Roy</A>
+@
+
+
+0.13
+log
+@Updated for release 0.20
+@
+text
+@d3 1
+a3 1
+# $Id: INSTALL.txt,v 0.12 1994/07/08 08:08:14 fielding Exp fielding $
+d24 2
+a25 2
+        % uncompress libwww-perl-0.20.tar.Z
+        % gunzip libwww-perl-0.20.tar.gz
+d30 1
+a30 1
+2. Move the resulting libwww-perl-0.20.tar file to the directory above
+d33 1
+a33 1
+        % tar xvf libwww-perl-0.20.tar
+d35 1
+a35 1
+   to create the directory ./libwww-perl-0.20 containing the following:
+d75 2
+d81 1
+a81 1
+                         Locators (URLs) as they used by the World-Wide Web
+d96 1
+a96 1
+        % setenv LIBWWW_PERL /usr/local/lib/libwww-perl-0.20
+d142 4
+a145 1
+message when you are placed on the list.
+@
+
+
+0.12
+log
+@Updated version numbers, added testescapes, changed head to HEAD
+@
+text
+@d3 1
+a3 1
+# $Id: INSTALL.txt,v 0.11 1994/07/06 19:19:12 fielding Exp fielding $
+d24 2
+a25 2
+        % uncompress libwww-perl-0.12.tar.Z
+        % gunzip libwww-perl-0.12.tar.gz
+d30 1
+a30 1
+2. Move the resulting libwww-perl-0.12.tar file to the directory above
+d33 1
+a33 1
+        % tar xvf libwww-perl-0.12.tar
+d35 1
+a35 1
+   to create the directory ./libwww-perl-0.12 containing the following:
+d51 1
+d54 2
+d60 2
+d85 1
+a85 1
+   The first line of each program (get, testdates, and testescapes)
+d94 1
+a94 1
+        % setenv LIBWWW_PERL /usr/local/lib/libwww-perl-0.12
+d102 1
+a102 1
+        % chmod 755 get testdates testescapes
+d115 3
+a117 2
+See the "get" program for an example of how to interface with libwww-perl.
+More documentation will be available later this summer (Northern Hemisphere ;-)
+d137 7
+a143 2
+Just send them (preferably as a context diff suitable for reading by
+the patch program) to Roy Fielding at <fielding@@ics.uci.edu>.
+@
+
+
+0.11
+log
+@Placed under RCS version control
+@
+text
+@d3 1
+a3 1
+# $Id$
+d24 2
+a25 2
+        % uncompress libwww-perl-0.11.tar.Z
+        % gunzip libwww-perl-0.11.tar.gz
+d30 1
+a30 1
+2. Move the resulting libwww-perl-0.11.tar file to the directory above
+d33 1
+a33 1
+        % tar xvf libwww-perl-0.11.tar
+d35 1
+a35 1
+   to create the directory ./libwww-perl-0.11 containing the following:
+d52 1
+d80 2
+a81 2
+   The first line of each program (get and testdates) should point to
+   your perl executable:
+d89 1
+a89 1
+        % setenv LIBWWW_PERL /usr/local/lib/libwww-perl-0.11
+d95 1
+a95 1
+5. Make sure the scripts are executable:
+d97 2
+a98 2
+        % chmod 755 get testdates
+        % ln -s get head
+d100 1
+d102 1
+a102 1
+6. That's it.  You should now be able to run get, head and testdates, e.g.
+d133 3
+a135 1
+You are also free to send them to others by mail or news (or even disk),
+@

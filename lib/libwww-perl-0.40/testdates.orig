@@ -1,0 +1,30 @@
+#!/usr/public/bin/perl
+# $Id: testdates,v 0.12 1994/07/08 08:08:14 fielding Exp $
+#-----------------------------------------------------------------
+# testdates: A simple program for testing WWW date parsing, conversion,
+#            and formatted output.
+#
+# 13 Jun 1994 (RTF): Initial Version 
+# 14 Jun 1994 (RTF): Changed environment variable to LIBWWW_PERL
+#
+# Created by Roy Fielding to test the libwww-perl system
+#-----------------------------------------------------------------
+if ($libloc = $ENV{'LIBWWW_PERL'}) { unshift(@INC, $libloc); }
+
+require "wwwdates.pl";
+
+print 'Enter a date (^D to exit): ';
+while (<>)
+{
+    chop;
+
+    if ($_)
+    {
+        print $_,' = ',&wwwdates'wtime(&wwwdates'get_gmtime($_),'GMT'),"\n";
+        print $_,' = ',&wwwdates'owtime(&wwwdates'get_gmtime($_),'GMT'),"\n";
+    }
+    print 'Enter a date (^D to exit): ';
+}
+print "\n";
+
+exit(0);

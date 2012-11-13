@@ -1,0 +1,115 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Takes .pdf hw statements and wraps .gif homework solutions with them.
+#
+
+use strict;
+
+if( $#ARGV lt 0) {
+  print "Usage: $0 title out.pdf statement.pdf page sol1.gif sol2.gif ...\n";
+  exit;
+}
+
+# print "@ARGV\n";
+
+my $texfile = 'pdf2pdf.tex';
+my $title = shift @ARGV;
+my $pdffile = shift @ARGV;
+my $keywords = lc($title);
+$keywords =~ s/h\(s\)/hofs/ig;	# I normally remove all ()'s, but I keep H(s) and H(z).
+$keywords =~ s/h\(z\)/hofz/ig;
+# print "1: $keywords\n";
+$keywords =~ s/[^a-zA-Z0-9\[\]\/\-]+/,,/g;
+$keywords =~ s/hofs/H(s)/g;
+$keywords =~ s/hofz/H(z)/g;
+# print "2: $keywords\n";
+$keywords = ','. $keywords . ',';
+# print "3: $keywords\n";
+$keywords =~ s/,(([0-9]+)|a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|(-+)),/,/g;
+# print "4: $keywords\n";
+$keywords =~ s/,+/,/g;
+# print "5: $keywords\n";
+$keywords = substr($keywords, 1, -1);
+# print "6: $keywords\n";
+
+open FD, ">$texfile" or die "Can't open $texfile";
+
+print FD "
+\\documentclass[11pt]{report}
+
+\\usepackage[pdftex]{graphicx}
+\\usepackage[pdfpagemode=none, pdfview=fitV, pdfstartview=FitBH,
+pageanchor=false, plainpages=false]{hyperref}
+
+\\pdfinfo{
+            /Title      ($title)
+            /Author     (Jim McClellan)
+            /Subject    (Signal Processing First, Copyright 2012 Prentice-Hall)
+            /Keywords   ($keywords)
+          }
+
+\\pagestyle{empty}
+
+ \\setlength{\\textheight}{10in}
+ \\setlength{\\textwidth}{8.25in}
+ \\setlength{\\topmargin}{-1in}
+ \\setlength{\\oddsidemargin}{-0.75in}
+
+ \\usepackage{fancyhdr}
+ \\pagestyle{fancy}
+  \\lfoot{} \\cfoot{}
+  \\chead{\\tiny  McClellan, Schafer and Yoder,
+{\\em Signal Processing First}.
+Prentice Hall, Upper Saddle River, New Jersey, 2012.
+Copyright \\copyright 2012 Prentice Hall.}
+
+  \\renewcommand{\\headrulewidth}{0pt}
+
+\\begin{document}
+";
+
+my $page=1;
+my $file;
+foreach $file (@ARGV) {
+#  print "$file\n";
+  if($file eq 'page') {
+    print FD "\\newpage\n";
+  } else {
+    print FD "
+ \\includegraphics[width=500pt]{$file}\\
+";
+    if($page == 1) {
+      print FD "
+ \\begin{center}
+ \\hyperlink{sol}{Solution}
+ \\end{center}
+
+";
+    } elsif($page == 2) {
+      print FD "\t\\hypertarget{sol}{}\n";
+    }
+    $page++;
+  }
+}
+
+print FD "
+\\end{document}
+";
+
+close FD;
+my $font;
+for $font qw(rmtmi.pfb mysyn.pfb mtex.pfb) {
+symlink "/home/myoder/cdrom/visible3/localtexmf/fonts/type1/yandy/mathplys/$font",
+ $font  if(!-e $font);
+}
+
+system("pdflatex $texfile | grep Warning");
+
+my $pdf2file =$texfile; $pdf2file=~ s/\.tex/.pdf/;
+my $outfile = $texfile; $outfile =~ s/\.tex/.out/;
+my $logfile = $texfile; $logfile =~ s/\.tex/.log/;
+my $auxfile = $texfile; $auxfile =~ s/\.tex/.aux/;
+
+rename $pdf2file, $pdffile;
+# unlink ($texfile, $outfile, $logfile, $auxfile);

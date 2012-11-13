@@ -1,0 +1,18 @@
+#!/bin/csh -f
+chgrp bookcd $*
+chmod g+w $*
+foreach file ($*)
+	echo $file
+	if( -d $file && $file != 'RCS') then
+		mkdir $file/RCS
+		chgrp bookcd $file/RCS
+		chmod g+w $file/RCS
+	endif
+end
+
+# $Header: MakeRCS,v 1.1 95/05/17 13:40:41 myoder Exp $
+
+# $Log:	MakeRCS,v $
+# Revision 1.1  95/05/17  13:40:41  13:40:41  myoder (Mark Yoder)
+# Initial revision
+# 

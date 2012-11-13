@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+if($#ARGV ne 1) {
+	print "Usage:  $0 oldlab newlab\n";
+	exit;
+}
+
+my $old = $ARGV[0];
+my $new = $ARGV[1];
+
+opendir DIR, '.' or die "Can't open . ";
+
+my ($file, $newfile);
+
+while($file = readdir DIR) {
+	$newfile = $file;
+	next if $newfile !~ s/$old/$new/;
+	print "$newfile\n";
+	rename $file, $newfile or die "Can't rename $file, $newfile";
+}

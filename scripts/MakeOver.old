@@ -1,0 +1,74 @@
+#!/usr/local/gnu/bin/perl
+
+# Create Chapter overview html files.
+#	uses info from overview2.txt and from the Demos/Labs/Homework dires
+# run in the main chapter directory.
+
+$Header = '$Header: /database/bookcd/support/scripts/RCS/MakeOver,v 1.2 1996/04/29 13:52:34 myoder Exp $';
+# $Log: MakeOver,v $
+# Revision 1.2  1996/04/29  13:52:34  myoder
+# Puts things in overview.cd now.
+# Looks for chapter overview in overview.txt2.
+# Uses unit = overchap.
+#
+# Revision 1.1  1996/04/15  19:52:05  myoder
+# Initial revision
+#
+# 
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+
+$path = '.';
+$outfile = $path . "/" . "overview.cd";
+
+# $pwd = $ENV{'PWD'};
+chop($pwd = `pwd`);
+
+@tmp = split("/", $pwd);	# Find name of current directory
+@tmp = reverse(@tmp);
+$dir = $tmp[0];
+
+open(NAME, 'name.txt');   $chapname = <NAME>; chop($chapname);
+open(NAME, 'number.txt'); $chapnum  = <NAME>; chop($chapnum);
+print "($chapname)\n";
+print "($chapnum)\n";
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+print "$outfile\n";
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=$chapnum unit=overchap>\n";
+print OUTPUT "<cd-title>$chapnum. $chapname</cd-title>\n</cd-head>\n";
+print OUTPUT "<cd-body>\n";
+print OUTPUT "<cd-h1>$chapnum. $chapname</cd-h1>\n";
+
+open(TEXT, 'overview.txt2');
+# copy overview.txt2 to the output file
+while(<TEXT>) {
+    print OUTPUT;
+}
+
+
+print OUTPUT "<cd-h2><a href=\"Demos/overview.htm\">Demos</a></cd-h2>\n";
+makesummary('Demos');
+print OUTPUT "<cd-h2><a href=\"Labs/overview.htm\">Labs</a></cd-h2>\n";
+makesummary('Labs');
+print OUTPUT "<cd-h2><a href=\"Homework/overview.htm\">Homework</a></cd-h2>\n";
+makesummary('Homework');
+print OUTPUT "<cd-h2><a href=\"Notes/overview.htm\">Notes</a></cd-h2>\n";
+makesummary('Notes');
+
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+#system("cd2html $outfile; rm $outfile");
+system("cd2html $outfile");

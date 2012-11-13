@@ -1,0 +1,795 @@
+head	2.2;
+access;
+symbols;
+locks
+	myoder:2.2; strict;
+comment	@# @;
+
+
+2.2
+date	2000.04.17.21.33.28;	author myoder;	state Exp;
+branches;
+next	2.1;
+
+2.1
+date	2000.04.13.19.13.13;	author myoder;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2000.04.13.19.10.59;	author myoder;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	97.10.21.02.24.39;	author myoder;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	97.10.10.12.51.41;	author myoder;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	97.10.01.22.04.37;	author myoder;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	97.09.12.20.52.18;	author myoder;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	97.09.11.20.04.55;	author myoder;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	96.09.02.16.07.48;	author myoder;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.07.05.21.08.14;	author myoder;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.06.04.21.04.17;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.04.29.13.53.46;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.04.15.19.55.28;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.01.10.21.19.32;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.12.13.20.27.10;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.12.13.20.07.48;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.10.11.18.32.48;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.10.11.17.03.11;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.07.18.15.15.03;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.06.29.21.21.16;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.05.22.15.28.11;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.05.18.14.26.17;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Creates the Master Table of Contents in ~/Contents.
+@
+
+
+2.2
+log
+@Added chop's to get rid of \r char.
+Works for visible2 now.
+set table width to 630.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# Create the Master Table of Contents
+
+$Header = '$Header: /home/ratbert5/myoder/cd/visible2/support/scripts/RCS/MakeToC,v 2.1 2000/04/13 19:13:13 myoder Exp myoder $';
+# $Log: MakeToC,v $
+# Revision 2.1  2000/04/13  19:13:13  myoder
+# Version for 2nd editions..
+#
+# Revision 1.20  2000/04/13  19:10:59  myoder
+# <b> and </b> feedback to PH.
+#
+# Revision 1.20  2000/04/13  19:10:59  myoder
+# <b> and </b> feedback to PH.
+#
+# Revision 1.19  1997/10/21  02:24:39  myoder
+# Moved the feedback to PH to the bottom
+# Added Matlab Index button.
+#
+# Revision 1.18  1997/10/10  12:51:41  myoder
+# Added link to Book to CD links.
+#
+# Revision 1.17  1997/10/01  22:04:37  myoder
+# Put Help in a new window.
+# Added $HeadingsID
+# Removed Master.
+#
+# Revision 1.16  1997/09/12  20:52:18  myoder
+# Removed the "." at the top.
+#
+# Revision 1.15  1997/09/11  20:04:55  myoder
+# Set background color to black so white letters will show up.
+#
+# Revision 1.14  1996/09/02  16:07:48  myoder
+# Converted to lowercase.
+# Sorts numerically.
+#
+# Revision 1.13  1996/07/05  21:08:14  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.12  1996/06/04  21:04:17  myoder
+# The Chapters, Demos, and Labs heading are now links to the corresponding
+# summary files.
+#
+# Revision 1.11  1996/04/29  13:53:46  myoder
+# Changed the background to "cover.gif".
+# Moved the BACK button to the top right like the other pages.
+#
+# Revision 1.10  1996/04/15  19:55:28  myoder
+# looks for things in index.htm if it's not there it looks in overview.htm.
+#
+# Revision 1.9  1996/01/10  21:19:32  myoder
+# Changed .html to .htm
+# Will used .htm.  If it can't find it it will use .html.
+#
+# Revision 1.8  1995/12/13  20:27:10  myoder
+# Changed a <strong> to </strong>.
+#
+# Revision 1.7  1995/12/13  20:07:48  myoder
+# Removed overview column and make the chapter names link to the overview.
+# Changed some formating:  Bigger talbe headings, right justified names.
+#
+# Revision 1.6  1995/10/11  18:32:48  myoder
+# Changed the format of the table a bit.
+#
+# Revision 1.4  1995/07/18  15:15:03  myoder
+# cd-head give chap=0 and unit=master
+# Added cd-foot and /cd-foot
+# Automatically runs through cd2html.
+#
+# Revision 1.3  1995/06/29  21:21:16  myoder
+# Added requires's for constants.pl, isthere.pl, and getopts.pl.
+# $path now uses CDROOT enviroment variable.
+#
+# Revision 1.2  1995/05/22  15:28:11  myoder
+# Outputs a line warning that the MasterToC file is created by MakeToC.
+#
+# Revision 1.1  1995/05/18  14:26:17  myoder
+# Initial revision
+#
+
+require 'constants.pl';
+require 'isthere.pl' ;
+require 'getopts.pl';
+
+&Getopts('bd');
+
+$debug = $opt_d;
+
+$path = "$ENV{'CDROOT'}/visible2/";
+$outfile = $path . "contents/toc.cd";
+
+if(-e $outfile) {
+rename($outfile, $outfile.".old");
+}
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+print "writing $outfile\n";
+
+opendir(CHAPS, $path."/chapters") || die("$0: Can't open $path\n");
+print $path."/chapters\n" if $debug;
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=0 unit=master text=f0f0f0>\n";
+print OUTPUT "<cd-title>Table of Contents</cd-title>\n</cd-head>\n";
+print OUTPUT "<body bgcolor=\"000000\" background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+
+print OUTPUT "<a href = \"#\" onClick=window.open(\'help.htm\',\'help\',\'status=no,width=503,height=380,menubar=yes\')>	<img border=0 alt=\"Help\" src=\"ques2.gif\" align=right></a>\n";
+print OUTPUT "<a href = \"cover.htm\">" .
+	    	"<img align=right border=0 src=\"chapback.gif\"></a>\n";
+
+print OUTPUT "<br><font size=+3><strong>Table of Contents</strong></font>\n";
+print OUTPUT "<blockquote>\n";
+print OUTPUT "<table border=1>\n";
+print OUTPUT "<tr><td>\n";
+print OUTPUT "<a href=links.htm><b>Book to CD Links</b></a></td>\n";
+print OUTPUT "<td><b><a href=matlab.htm><cd-matlabname> Index</b></a></td>\n";
+print OUTPUT "</tr></table>\n";
+print OUTPUT "</blockquote>\n";
+
+print OUTPUT "<p>\n";
+print OUTPUT "<table border=0 width=630>\n";
+print OUTPUT "<tr>\n";
+foreach $head (@@Headings) {
+    print "$head\n";
+    if(-e "$head.htm") {
+#	print "$head\n";
+	print OUTPUT "<th><font size=+2><strong>";
+	print OUTPUT "<a href=$head.htm>$HeadingsID{$head}</a>";
+	print OUTPUT "</strong></font></th>\n"; 
+    } else {
+	print OUTPUT "<th><font size=+2><strong>$HeadingsID{$head}</strong></font></th>\n";
+    }
+}
+
+print OUTPUT "\n</tr>\n";
+
+# This first two headings are special cases
+shift(@@Headings);shift(@@Headings);
+
+foreach $chap (sort {$a <=> $b} readdir(CHAPS)) {
+    $_ = $chap;
+    if(/\d+\w/) {# If it starts with a digit assume it a chapter.
+	print "$_\n" if $debug;;
+	# get the chapter number and name from the directory name
+	($chapnum,$chapname) = /(\d*)(\w*)/;
+	# get the chapter number from number.txt
+
+	if(open(TMP, "../chapters/$chap/number.txt")) {
+		$chapnum = <TMP>; chop($chapnum); chop($chapnum); close(TMP);
+	} else {
+		print "can't open ../chapters/$chap/number.txt\n";
+	}
+	# get the chapter name from name.txt
+	if(open(TMP, "../chapters/$chap/name.txt")) {
+		$chapname = <TMP>; chop($chapname); chop($chapname); close(TMP);
+	} else {
+		print "can't open ../chapters/$chap/name.txt\n";;
+	}
+	$html = "../chapters/$chap/overview.htm";
+	$htm  = "../chapters/$chap/index.htm";
+	print OUTPUT "<tr align=center>\n";
+	print OUTPUT "\t<td><font size=+1><strong>$chapnum</strong></font></td>";
+	if(-e $htm) {
+	    print OUTPUT "<td align=right width=35%><a href=\"$htm\">\n";
+	} else {
+	    print OUTPUT "<td align=right width=35%><a href=\"$html\">\n";
+	}
+	print OUTPUT "<font size=+1><strong>$chapname</strong></font>\n";
+	print OUTPUT "</a></td>\n";
+
+#	print OUTPUT "<td><a href=\"$html\">";
+#	print OUTPUT &isthere($html);
+#	print OUTPUT "</a></td>\n";
+	foreach $head (@@Headings) {
+#		$html = "../chapters/$chap/$head/overview.html";
+		$htm  = "../chapters/$chap/$head/overview.htm";
+		if(-e $htm) {
+		    print OUTPUT "\t<td width=20%><a href=\"$htm\">\n\t\t";
+		    print OUTPUT &isthere($htm);
+		} else {
+		    print OUTPUT "\t<td width=20%><a href=\"$html\">\n\t\t";
+		    print OUTPUT &isthere($html);
+		}
+		print OUTPUT "</a></td>\n";
+	}
+	print OUTPUT "</tr>\n";
+    }
+}
+
+print OUTPUT "</table>\n";
+print OUTPUT "<br>\n";
+print OUTPUT "<a href = \"http://www.prenhall.com/~dspfirst/feedback.htm\">\n";
+print OUTPUT "<b>Feedback to Prentice Hall</b>\n";
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<a href = \"#\" onClick=window.open(\'help.htm\',\'help\',\'status=no,width=503,height=380,menubar=yes\')>	<img border=0 alt=\"Help\" src=\"ques2.gif\" align=right></a>\n";
+print OUTPUT "<a href = \"cover.htm\">" .
+	    	"<img align=right border=0 src=\"chapback.gif\"></a>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+system("cd2html $outfile; rm $outfile");
+@
+
+
+2.1
+log
+@Version for 2nd editions..
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/cd/visible2/support/scripts/RCS/MakeToC,v 1.20 2000/04/13 19:10:59 myoder Exp $';
+d7 3
+d90 1
+a90 1
+$path = "$ENV{'CDROOT'}/visible/";
+d122 1
+a122 1
+print OUTPUT "<table border=0 width=470>\n";
+d150 1
+a150 1
+		$chapnum = <TMP>; chop($chapnum); close(TMP);
+d156 1
+a156 1
+		$chapname = <TMP>; chop($chapname); close(TMP);
+@
+
+
+1.20
+log
+@<b> and </b> feedback to PH.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.19 1997/10/21 02:24:39 myoder Exp myoder $';
+d7 6
+@
+
+
+1.19
+log
+@Moved the feedback to PH to the bottom
+Added Matlab Index button.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.18 1997/10/10 12:51:41 myoder Exp myoder $';
+d7 4
+d183 1
+d185 1
+a185 1
+print OUTPUT "Feedback to Prentice Hall\n";
+@
+
+
+1.18
+log
+@Added link to Book to CD links.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.17 1997/10/01 22:04:37 myoder Exp myoder $';
+d7 3
+d99 1
+a99 1
+print OUTPUT "<br><br><font size=+3><strong>Table of Contents</strong></font>\n";
+d101 5
+a105 3
+print OUTPUT "<a href=links.htm>Book to CD Links</a><br>\n";
+print OUTPUT "<a href = \"http://www.prenhall.com/~dspfirst/feedback.htm\">\n";
+print OUTPUT "Feedback to Prentice Hall\n";
+d179 2
+@
+
+
+1.17
+log
+@Put Help in a new window.
+Added $HeadingsID
+Removed Master.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.16 1997/09/12 20:52:18 myoder Exp myoder $';
+d7 5
+d97 6
+@
+
+
+1.16
+log
+@Removed the "." at the top.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.15 1997/09/11 20:04:55 myoder Exp myoder $';
+d7 3
+d84 1
+a84 1
+print OUTPUT "<cd-title>Master Table of Contents</cd-title>\n</cd-head>\n";
+d86 2
+a87 2
+print OUTPUT "<a href = \"help.htm\">" .
+	    	"<img align=right border=0 src=\"ques2.gif\"></a>\n";
+d90 2
+a91 1
+print OUTPUT "<br><br><font size=+3><strong>Master Table of Contents</strong></font>\n";
+d98 1
+a98 1
+	print "$head\n";
+d100 1
+a100 1
+	print OUTPUT "<a href=$head.htm>$head</a>";
+d103 1
+a103 1
+	print OUTPUT "<th><font size=+2><strong>$head</strong></font></th>\n";
+d164 5
+@
+
+
+1.15
+log
+@Set background color to black so white letters will show up.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /database/bookcd/support/scripts/RCS/MakeToC,v 1.14 1996/09/02 16:07:48 myoder Exp myoder $';
+d7 3
+d87 1
+a87 1
+print OUTPUT ".<br><br><font size=+3><strong>Master Table of Contents</strong></font>\n";
+@
+
+
+1.14
+log
+@Converted to lowercase.
+Sorts numerically.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.13 1996/07/05 21:08:14 myoder Exp myoder $';
+d7 4
+d79 1
+a79 1
+print OUTPUT "<body background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+@
+
+
+1.13
+log
+@Converted to lowercase filenames.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.12 1996/06/04 21:04:17 myoder Exp myoder $';
+d7 3
+d76 2
+d79 1
+a79 1
+	    	"<img align=right src=\"chapback.gif\"></a>\n";
+d101 1
+a101 1
+foreach $chap (sort readdir(CHAPS)) {
+@
+
+
+1.12
+log
+@The Chapters, Demos, and Labs heading are now links to the corresponding
+summary files.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.11 1996/04/29 13:53:46 myoder Exp myoder $';
+d7 4
+d57 1
+a57 1
+$outfile = $path . "Contents/ToC.cd";
+d66 2
+a67 2
+opendir(CHAPS, $path."/Chapters") || die("$0: Can't open $path\n");
+print $path."/Chapters\n" if $debug;
+d72 3
+a74 3
+print OUTPUT "<body background=\"../Graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT "<a href = \"Cover.htm\">" .
+	    	"<img align=right src=\"ChapBack.gif\"></a>\n";
+d104 1
+a104 1
+	if(open(TMP, "../Chapters/$chap/number.txt")) {
+d107 1
+a107 1
+		print "can't open ../Chapters/$chap/number.txt\n";
+d110 1
+a110 1
+	if(open(TMP, "../Chapters/$chap/name.txt")) {
+d113 1
+a113 1
+		print "can't open ../Chapters/$chap/name.txt\n";;
+d115 2
+a116 2
+	$html = "../Chapters/$chap/overview.htm";
+	$htm  = "../Chapters/$chap/index.htm";
+d131 2
+a132 2
+		$html = "../Chapters/$chap/$head/overview.html";
+		$htm  = "../Chapters/$chap/$head/overview.htm";
+@
+
+
+1.11
+log
+@Changed the background to "cover.gif".
+Moved the BACK button to the top right like the other pages.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.10 1996/04/15 19:55:28 myoder Exp myoder $';
+d7 4
+d76 7
+d84 1
+@
+
+
+1.10
+log
+@looks for things in index.htm if it's not there it looks in overview.htm.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.9 1996/01/10 21:19:32 myoder Exp myoder $';
+d7 3
+d64 4
+a67 2
+print OUTPUT "<body background=\"../Graphics/barback.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT ".<br><font size=+3><strong>Master Table of Contents</strong></font>\n";
+a130 2
+print OUTPUT "<a href = \"Cover.htm\">" .
+	    	"<img src=\"ChapBack.gif\"></a></td>\n";
+@
+
+
+1.9
+log
+@Changed .html to .htm
+Will used .htm.  If it can't find it it will use .html.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /database/bookcd/support/scripts/RCS/MakeToC,v 1.8 1995/12/13 20:27:10 myoder Exp $';
+d7 4
+d94 2
+a95 2
+	$html = "../Chapters/$chap/overview.html";
+	$htm  = "../Chapters/$chap/overview.htm";
+@
+
+
+1.8
+log
+@Changed a <strong> to </strong>.
+@
+text
+@d1 1
+a1 1
+#!/usr/sbin/perl
+d5 1
+a5 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/MakeToC,v 1.7 1995/12/13 20:07:48 myoder Exp myoder $';
+d7 3
+d42 1
+a42 1
+$outfile = $path . "Contents/MasterToC.cd";
+d57 1
+a57 1
+print OUTPUT "<body background=\"../Graphics/ee2200barback.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+d91 1
+d94 5
+a98 1
+	print OUTPUT "<td align=right width=35%><a href=\"$html\">\n";
+d107 8
+a114 2
+		print OUTPUT "\t<td width=20%><a href=\"$html\">\n\t\t";
+		print OUTPUT &isthere($html);
+d122 1
+a122 1
+print OUTPUT "<a href = \"CoverPage.html\">" .
+@
+
+
+1.7
+log
+@Removed overview column and make the chapter names link to the overview.
+Changed some formating:  Bigger talbe headings, right justified names.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /database/bookcd/support/scripts/RCS/MakeToC,v 1.6 1995/10/11 18:32:48 myoder Exp $';
+d7 4
+d55 1
+a55 1
+print OUTPUT ".<br><font size=+3><strong>Master Table of Contents<strong></font>\n";
+@
+
+
+1.6
+log
+@Changed the format of the table a bit.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/scripts/RCS/MakeToC,v 1.4 1995/07/18 15:15:03 myoder Exp $';
+d7 3
+d48 2
+a49 1
+print OUTPUT "<cd-head chap=0 unit=master text=f0f0f0>\n<cd-title>Master Table of Contents</cd-title>\n</cd-head>\n";
+d56 1
+a56 1
+	print OUTPUT "<th>$head</th>";
+d58 1
+d61 2
+a62 2
+# This first three headings are special cases
+shift(@@Headings);shift(@@Headings);shift(@@Headings);
+d77 1
+a77 1
+	# get the chapter name from number.txt
+a82 2
+	print OUTPUT "<tr align=center>\n\t<td><font size=+1><strong>$chapnum</strong></font></td>";
+	print OUTPUT "<td width=25%><font size=+1><strong>$chapname</strong></font></td>";
+d84 4
+a87 2
+	print OUTPUT "<td><a href=\"$html\">";
+	print OUTPUT &isthere($html);
+d89 4
+d95 1
+a95 1
+		print OUTPUT "\t<td><a href=\"$html\">";
+@
+
+
+1.5
+log
+@Uses nunumber.txt and name.txt to build table.
+@
+text
+@d66 1
+a66 1
+	print "Opening $chap/number.txt\n";
+d78 2
+a79 2
+	print OUTPUT "<tr align=center>\n\t<td>$chapnum</td>";
+	print OUTPUT "<td><font size=+1><strong>$chapname</strong></font></td>";
+@
+
+
+1.4
+log
+@cd-head give chap=0 and unit=master
+Added cd-foot and /cd-foot
+Automatically runs through cd2html.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/scripts/RCS/MakeToC,v 1.3 1995/06/29 21:21:16 myoder Exp $';
+d7 5
+d65 13
+@
+
+
+1.3
+log
+@Added requires's for constants.pl, isthere.pl, and getopts.pl.
+$path now uses CDROOT enviroment variable.
+@
+text
+@d1 1
+a1 1
+#!/usr/local/gnu/bin/perl
+d5 1
+a5 1
+$Header = '$Header: /database/bookcd/CD-ROM/support/scripts/RCS/MakeToC,v 1.2 1995/05/22 15:28:11 myoder Exp $';
+d7 4
+d40 1
+a40 1
+print OUTPUT "<cd-head text=f0f0f0>\n<cd-title>Master Table of Contents</cd-title>\n</cd-head>\n";
+d77 2
+d80 5
+@
+
+
+1.2
+log
+@Outputs a line warning that the MasterToC file is created by MakeToC.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /database/bookcd/CD-ROM/support/scripts/RCS/MakeToC,v 1.1 1995/05/18 14:26:17 myoder Exp myoder $';
+d7 3
+d14 7
+a20 8
+sub isthere {
+	    local($html) = @@_;
+	if(-e $html) {
+		return("<cd-ybullet>");
+	} else {
+		return("<cd-underconstruct>");
+	}
+}
+d22 2
+a23 2
+$outfile = "MasterToC.cd";
+$path = "/database/bookcd/CD-ROM/Chapters";
+a28 2
+@@Headings = ("", "Chapter", "Overview", "Demos", "Labs", "Homework", "Solution", "Matlab");
+
+d30 1
+d32 2
+a33 1
+opendir(CHAPS, $path) || die("$0: Can't open $path\n");
+d53 1
+a53 1
+	print "$_\n";
+d60 1
+a60 1
+	print OUTPUT isthere($html);
+d65 1
+a65 1
+		print OUTPUT isthere($html);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 5
+a9 2
+$Header = '$Header$';
+# $Log$
+d33 1
+@

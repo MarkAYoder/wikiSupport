@@ -1,0 +1,157 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $outfile = 'overview.cd';
+rename $outfile, "$outfile.old";
+
+if(!@ARGV) {
+  print "Usage: $0 [hw | examples | exercises]\n";
+  exit;
+}
+
+my $title    = 'Signal Processing First';
+my $visible  = $ENV{'CDROOT'} . '/visible2';
+my $menupath = "$visible/contents/scripts";
+my $chapters = "$visible/chapters";
+# my $hwList   = "$visible/archives/ALL_HW.txt";
+my $hwList   = "$visible/archives/test_DB_withKeywords.txt";
+my $exampleList   = "$visible/archives/ALL_EXAMPLES.xlt";
+my $exerciseList   = "$visible/archives/ALL_EXER.xlt";
+my $db;
+my $type;	# Problems and Solutions | Examples | Exercises
+
+if($ARGV[0] eq 'hw') {
+  $db = $hwList;
+  $type = 'Problems and Solutions';
+} elsif($ARGV[0] eq 'examples') {
+  $db = $exampleList;
+  $type = 'Examples';
+} elsif ($ARGV[0] eq 'exercises') {
+  $db = $exerciseList;
+  $type = 'Exercises and Solutions';
+}
+
+#
+# Find the chapter number and name
+#
+open FD, '../number.txt' or die "Can't open ../number.txt";
+my $num = <FD>;
+close FD;
+$num =~ s/[\r\n]*$//;
+print "$num\n";
+
+open FD, '../name.txt' or die "Can't open ../name.txt";
+my $name = <FD>;
+close FD;
+$name =~ s/[\r\n]*$//;
+print "$name\n";
+
+#
+# Read in the HW database.
+#
+my %hw;
+
+open HW, "<$db" or die "Can't open $db";
+
+while(<HW>) {
+  /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+  my $Quarter = $1;
+  my $Statement = $2;
+  my $Desc = $3;
+  my $Chap = $4;
+  my $Sol  = $5;
+
+  $Desc =~ s/\"//g;
+
+  next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+  $hw{$Chap} = {} if(!defined($hw{$Chap}));
+  $hw{$Chap}{$Desc} = [] if(!defined($hw{$Chap}{$Desc}));
+  push @{$hw{$Chap}{$Desc}}, [$Quarter, $Statement];
+}
+close HW;
+
+open FD, ">$outfile" or die "Can't open $outfile";
+
+print FD "<! Do not edit.  This file is created by $0>
+<html>
+<cd-head chap=$num unit=overview>
+<cd-title>$num. $name, $type</cd-title>
+</cd-head>
+
+<cd-body>
+<cd-h1>$num. $name, $type</cd-h1>
+<table>
+<tr><th>Description</th><th>Problem</th></tr>
+";
+
+  # Link in the Homework
+
+if($hw{$num}) {
+  my $desc;
+  foreach $desc (sort keys %{$hw{$num}}) {
+    my $count = @{$hw{$num}{$desc}};
+    print "\t$desc: $count\n";
+    my $Quarter   = $hw{$num}{$desc}[0][0];
+    my $Statement = $hw{$num}{$desc}[0][1];
+    if($count == 1 and $ARGV[0] ne 'hw') {
+      my $link = $Quarter;
+      $link =~ s/_gif$//;
+      my $gif = $Statement;
+      $gif =~ s/\.pdf$/\.gif/;
+      print FD "<tr><td>$desc</td>";
+      print FD "<td><a href=$Quarter/$Statement>pdf</a></td>\n";
+#      print FD "<td><a href=$Quarter/$gif>gif</a></td></tr>\n";
+    } else {
+      my $mydesc = $desc;
+      $mydesc =~ s/<-->/&harr;/;
+      $mydesc =~ s/-->/&rarr;/;
+      $mydesc =~ s/<--/&larr;/;
+      print FD "<tr><td>$mydesc ($count)</td>";
+      printf FD "<td><select onChange=\"location=this.options[this.selectedIndex].value\">\n";
+      print FD "<option value=\"overview.htm\">Select\n";
+      my $hw;
+      my $count = 1;
+      foreach $hw (@{$hw{$num}{$desc}}) {
+	$Quarter   = $hw->[0];
+	$Statement = $hw->[1];
+	$Quarter =~ /(.*)_/;
+	my $desc = $1;
+	my $link = $Quarter;
+	$link =~ s/_gif$//;
+	$link = $count++;
+	print FD "<option value=\"../../../archives/statesol/$Quarter/$Statement\">$link\n";
+      }
+      print FD "</select></td>\n";
+      if(0) {
+      printf FD "<td><select onChange=\"location=this.options[this.selectedIndex].value\">\n";
+      print FD "<option value=\"overview.htm\">&nbsp;&nbsp;gif&nbsp;&nbsp;\n";
+      foreach $hw (@{$hw{$num}{$desc}}) {
+	$Quarter   = $hw->[0];
+	$Statement = $hw->[1];
+	$Statement =~ s/\.pdf$/.gif/;
+	$Quarter =~ /(.*)_/;
+	my $desc = $1;
+	my $link = $Quarter;
+	$link =~ s/_gif$//;
+	print FD "<option value=\"../../../archives/statesol/$Quarter/$Statement\">$link\n";
+      }
+      print FD "</select></td>\n";
+}
+      print FD "</tr>\n";
+    }
+  }
+}
+
+print FD "
+</table>
+</cd-body>
+<cd-foot>
+</cd-foot>
+<html>
+";
+
+close FD;
+
+system("cd2html $outfile");
+# unlink $outfile;

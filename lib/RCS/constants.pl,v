@@ -1,0 +1,586 @@
+head	1.19;
+access;
+symbols;
+locks
+	myoder:1.19; strict;
+comment	@#@;
+
+
+1.19
+date	2000.04.17.21.35.00;	author myoder;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	97.10.01.22.01.27;	author myoder;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	97.09.11.20.41.49;	author myoder;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	97.09.10.22.27.10;	author myoder;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	97.06.19.22.28.18;	author myoder;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	96.11.15.14.21.49;	author myoder;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.09.02.16.04.13;	author myoder;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.07.09.17.47.42;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.06.04.21.06.05;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.03.15.20.58.42;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.03.15.16.00.13;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.02.05.18.38.33;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.02.05.18.36.24;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.01.24.21.33.52;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.12.13.20.12.35;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.12.06.21.43.41;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.21.19.54.08;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.06.19.19.08.31;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.06.19.19.07.41;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Contains global constants.
+@
+
+
+1.19
+log
+@Added chapters 10, 11, 12, and 13.
+@
+text
+@# Contains global constants.
+# $Headings - unit headings for auto generated tables of contents.
+
+#'$Log: constants.pl,v $
+#Revision 1.18  1997/10/01  22:01:27  myoder
+#Removed notes.
+#Added HeadingsID.
+#
+#Revision 1.17  1997/09/11  20:41:49  myoder
+#Added chapid.
+#
+#Revision 1.16  1997/09/10  22:27:10  myoder
+#Added the exercise column.
+#
+#Revision 1.15  1997/06/19  22:28:18  myoder
+#Changed @@chapter for june-97 chapter renumbering.
+#
+#Revision 1.14  1996/11/15  14:21:49  myoder
+#Fixed a bug that had the wrong link when the left arrow on a demo was
+#pushed.
+#
+#Revision 1.13  1996/09/02  16:04:13  myoder
+#Split chapter 6 and changed the background colors.
+#
+#Revision 1.12  1996/07/09  17:47:42  myoder
+#Converted to lowercase.
+#
+#Revision 1.11  1996/06/04  21:06:05  myoder
+#Changed Chapter to Chapters
+#
+#Revision 1.10  1996/03/15  20:58:42  myoder
+#Added Notes column.
+#
+#Revision 1.9  1996/03/15  16:00:13  myoder
+#Added Notes column and a few more $Next $Prev's.
+#
+#Revision 1.8  1996/02/05  18:38:33  myoder
+#Added more $Prev and $Next enteries.
+#
+#Revision 1.6  1996/01/24  21:33:52  myoder
+#Added Chapter 1 info for $Next and $Prev.  Need to add for other chaps.
+#
+#Revision 1.5  1995/12/13  20:12:35  myoder
+#Removed "Overview" the @@Headings.
+#
+#Revision 1.3  1995/08/21  19:54:08  myoder
+#Removed Solution and Matlab from Headings.
+#
+#Revision 1.2  1995/06/19  19:08:31  myoder
+#fixed comments
+#
+#Revision 1.1  1995/06/19  19:07:41  myoder
+#Initial revision
+#
+#';
+$Header = '$Header: /home/ratbert5/myoder/cd/support/lib/RCS/constants.pl,v 1.18 1997/10/01 22:01:27 myoder Exp myoder $';
+
+@@Headings = ("", "Chapter", "Overview", "Demos", "Labs", "Homework", "Solution", "Matlab");
+@@Headings = ("", "Chapter", "Overview", "Demos", "Labs", "Homework");
+@@Headings = ("", "Chapter", "Demos", "Labs", "Homework");
+@@Headings = ("", "Chapters", "Demos", "Labs", "Homework", "Notes");
+@@Headings = ("", "Chapters", "Demos", "Labs", "Homework", "Notes");
+@@Headings = ("", "chapters", "demos", "labs", "homework", "notes");
+@@Headings = ("", "chapters", "demos", "labs", "exercise", "homework", "notes");
+@@Headings = ("", "chapters", "demos", "labs", "exercise", "homework");
+
+# Gives which section to go to when the Forward button is hit
+# used by head.pl
+# "notes" have been removed
+$Next{'demos'} = 'labs';
+$Next{'labs'} = 'exercise';
+$Next{'exercise'} = 'homework';
+$Next{'homework'} = 'demos';
+$Next{'notes'} = 'demos';
+
+$Next{'1sines'} = '2complex';
+$Next{'2complex'} = '3phasors';
+$next{'3phasors'} = '4spect';
+
+# Gives which section to go to when the Back button is hit
+# used by head.pl
+# "notes" have been removed
+$Prev{'demos'} = 'homework';
+$Prev{'labs'} = 'demos';
+$Prev{'exercise'} = 'labs';
+$Prev{'homework'} = 'exercise';
+$Prev{'notes'} = 'homework';
+
+$Prev{'2complex'} = '1sines';
+$Prev{'3phasors'} = '2complex';
+
+# Demos
+# Gives next demo to go to when Forward button is hit.
+# Chap 1
+$Next{'tuningfo'} = 'sine_dri';
+$Next{'sine_dri'} = 'sinusoid';
+$next{'sinusoid'} = 'tuningfo';
+
+# Chap 2
+$Next{'matmaple'} = 'z_drill';
+$Next{'z_drill'} = 'matmaple';
+
+# Gives previous demo to go to when Back button is hit.
+# Chap 1
+$Prev{'tuningfo'} = 'sinusoid';
+$Prev{'sine_dri'} = 'tuningfo';
+$Prev{'sinusoid'} = 'sine_dri';
+
+# Chap 2
+$Prev{'matmaple'} = 'z_drill';
+$Prev{'z_drill'} = 'matmaple';
+
+# Here are the Lab links
+# Gives next lab to go to when Forward button is hit.
+# Chap 1
+$Next{'lab1'} = 'lab1';
+
+# Chap 2
+
+# Gives previous lab to go to when Back button is hit.
+# Chap 1
+$Prev{'lab1'} = 'lab1';
+
+# Chap 2
+
+# Gives default background color for each chapter.
+# used by getcolor in head.pl
+@@color = ("8888bb", "ff9696", "ffd596", "eaff96", "abff96", "96ffc0", "96ffff", "96c0ff", "ab96ff", "ea96ff", "ff96d5"); 
+
+
+@@chapter = ("0", "1sines", "2complex", "3phasors", "4spect", 
+"5samplin", "6fir", "7firfreq", "8ztrans", "9feedbac", "10specta");
+
+@@chapter = ("0", "1intro", "2sines", "3spect", 
+"4samplin", "5fir", "6firfreq", "7ztrans", "8feedbac", "9specta", "10appa");
+
+@@chapter = ("0", "1intro", "2sines", "3spect",
+"4samplin", "5fir", "6firfreq", "7ztrans", "8feedbac", "9specta", 
+"10contin", "11confrq", "12confor", "13confil", "14appa");
+
+# "5samplin", "6fir", "7ztrans", "8feedbac", "9spectan");
+
+@@chapid = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+"11", "12", "13", "A");
+# @@HeadingsID = ("", "Chapters", "Demos", "Labs", "Exercises", "Homework");
+%HeadingsID = (
+'chapters', 'Chapters',
+'demos',    'Demos',
+'labs',     'Labs',
+'exercise', 'Exercises',
+'homework', 'Homework'
+    );
+@
+
+
+1.18
+log
+@Removed notes.
+Added HeadingsID.
+@
+text
+@d5 4
+d56 1
+a56 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.17 1997/09/11 20:41:49 myoder Exp myoder $';
+d137 4
+d143 2
+a144 1
+@@chapid = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A");
+@
+
+
+1.17
+log
+@Added chapid.
+@
+text
+@d5 3
+d52 1
+a52 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.16 1997/09/10 22:27:10 myoder Exp myoder $';
+d61 1
+d65 1
+d69 1
+a69 1
+$Next{'homework'} = 'notes';
+d78 2
+a79 1
+$Prev{'demos'} = 'notes';
+d136 8
+@
+
+
+1.16
+log
+@Added the exercise column.
+@
+text
+@d5 3
+d49 1
+a49 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.15 1997/06/19 22:28:18 myoder Exp myoder $';
+d128 2
+@
+
+
+1.15
+log
+@Changed @@chapter for june-97 chapter renumbering.
+@
+text
+@d5 3
+d46 1
+a46 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.14 1996/11/15 14:21:49 myoder Exp myoder $';
+d54 1
+d59 2
+a60 1
+$Next{'labs'} = 'homework';
+d72 2
+a73 1
+$Prev{'homework'} = 'labs';
+@
+
+
+1.14
+log
+@Fixed a bug that had the wrong link when the left arrow on a demo was
+pushed.
+@
+text
+@d5 4
+d43 1
+a43 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.13 1996/09/02 16:04:13 myoder Exp myoder $';
+d114 3
+@
+
+
+1.13
+log
+@Split chapter 6 and changed the background colors.
+@
+text
+@d5 3
+d39 1
+a39 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.12 1996/07/09 17:47:42 myoder Exp myoder $';
+d61 1
+a61 1
+$prev{'demos'} = 'notes';
+@
+
+
+1.12
+log
+@Converted to lowercase.
+@
+text
+@d5 3
+d36 1
+a36 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.11 1996/06/04 21:06:05 myoder Exp myoder $';
+d102 2
+a103 2
+@@color = ("8888bb", "ffeeee", "eeffee", "eeeeff", "ffffee", 
+	  "eeffff", "ffffff", "bb88bb", "bbbb88", "ccbbaa");
+d106 3
+a108 1
+"5samplin", "6fir", "7ztrans", "8feedbac", "9spectan");
+@
+
+
+1.11
+log
+@Changed Chapter to Chapters
+@
+text
+@d5 3
+d33 1
+a33 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.10 1996/03/15 20:58:42 myoder Exp myoder $';
+d39 2
+d44 8
+a51 8
+$Next{'Demos'} = 'Labs';
+$Next{'Labs'} = 'Homework';
+$Next{'Homework'} = 'Notes';
+$Next{'Notes'} = 'Demos';
+
+$Next{'1Sines'} = '2Complex';
+$Next{'2Complex'} = '3Phasors';
+$Next{'3Phasors'} = '4Spect';
+d55 4
+a58 4
+$Prev{'Demos'} = 'Notes';
+$Prev{'Labs'} = 'Demos';
+$Prev{'Homework'} = 'Labs';
+$Prev{'Notes'} = 'Homework';
+d60 2
+a61 2
+$Prev{'2Complex'} = '1Sines';
+$Prev{'3Phasors'} = '2Complex';
+d66 3
+a68 3
+$Next{'TuningFo'} = 'Sine_Dri';
+$Next{'Sine_Dri'} = 'Sinusoid';
+$Next{'Sinusoid'} = 'TuningFo';
+d71 2
+a72 2
+$Next{'MatMaple'} = 'Z_Drill';
+$Next{'Z_Drill'} = 'MatMaple';
+d76 3
+a78 3
+$Prev{'TuningFo'} = 'Sinusoid';
+$Prev{'Sine_Dri'} = 'TuningFo';
+$Prev{'Sinusoid'} = 'Sine_Dri';
+d81 2
+a82 2
+$Prev{'MatMaple'} = 'Z_Drill';
+$Prev{'Z_Drill'} = 'MatMaple';
+d87 1
+a87 1
+$Next{'Lab1'} = 'Lab1';
+d93 1
+a93 1
+$Prev{'Lab1'} = 'Lab1';
+d102 2
+a103 2
+@@chapter = ("0", "1Sines", "2Complex", "3Phasors", "4Spect", 
+"5Samplin", "6FIR", "7ZTrans", "8Feedbac", "9SpectAn");
+@
+
+
+1.10
+log
+@Added Notes column.
+@
+text
+@d5 3
+d30 1
+a30 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/constants.pl,v 1.9 1996/03/15 16:00:13 myoder Exp myoder $';
+d35 1
+a35 1
+@@Headings = ("", "Chapter", "Demos", "Labs", "Homework", "Notes");
+@
+
+
+1.9
+log
+@Added Notes column and a few more $Next $Prev's.
+@
+text
+@d5 3
+d27 1
+a27 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/constants.pl,v 1.8 1996/02/05 18:38:33 myoder Exp myoder $';
+d38 3
+a40 1
+$Next{'Homework'} = 'Demos';
+d47 1
+a47 1
+$Prev{'Demos'} = 'Homework';
+d50 2
+@
+
+
+1.8
+log
+@Added more $Prev and $Next enteries.
+@
+text
+@d5 3
+d24 1
+a24 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/constants.pl,v 1.6 1996/01/24 21:33:52 myoder Exp myoder $';
+d29 1
+d36 3
+d45 2
+@
+
+
+1.7
+log
+@Added more $Prev $Next entries.
+@
+text
+@d21 1
+a21 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/constants.pl,v 1.6 1996/01/24 21:33:52 myoder Exp $';
+d39 1
+d46 4
+d55 17
+@
+
+
+1.6
+log
+@Added Chapter 1 info for $Next and $Prev.  Need to add for other chaps.
+@
+text
+@d5 3
+d21 1
+a21 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/constants.pl,v 1.5 1995/12/13 20:12:35 myoder Exp $';
+@
+
+
+1.5
+log
+@Removed "Overview" the @@Headings.
+@
+text
+@d5 3
+d18 1
+a18 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/constants.pl,v 1.3 1995/08/21 19:54:08 myoder Exp $';
+d35 12
+@
+
+
+1.4
+log
+@Moved @@color from head.pl to here.
+Add3d $Next{} nad $Prev{} with tell where to go when the left and right
+buttons are pressed.
+Added @@chapter.
+@
+text
+@d19 1
+@
+
+
+1.3
+log
+@Removed Solution and Matlab from Headings.
+@
+text
+@d5 3
+d15 1
+a15 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/constants.pl,v 1.2 1995/06/19 19:08:31 myoder Exp myoder $';
+d19 20
+@
+
+
+1.2
+log
+@fixed comments
+@
+text
+@d5 3
+d12 1
+a12 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/constants.pl,v 1.1 1995/06/19 19:07:41 myoder Exp myoder $';
+d15 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 4
+a7 1
+#'$Log$
+d9 1
+a9 1
+$Header = '$Header$';
+@

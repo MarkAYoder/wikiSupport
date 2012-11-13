@@ -1,0 +1,124 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Reads text version of the book's index and creates enteries for
+# search.js
+#
+# Run using:
+# cd contents
+# getIndex ### DSPFirstIndex.txt
+#  Where ### is the index number of one past the last index in search.js
+#
+
+use strict;
+
+if( $#ARGV lt 2) {
+  print "Usage: $0 startpage [Toc|Index] file.txt\n";
+  exit;
+}
+
+my $page = shift;
+my $ToC  = shift;
+my $file = shift;
+my $title;
+my $pages;
+
+my $outfile;
+if($ToC eq 'ToC') {
+  $outfile = '/tmp/searchToC.js';
+} else {
+  $outfile = '/tmp/searchIndex.js';
+}
+open FD, ">$outfile" or die "Can't open $outfile";
+
+print FD "/////\n";
+print FD "// Created with getIndex $page $ToC $file\n";
+print FD "/////\n";
+
+# print "$ARGV[0]\n";
+
+# Go through each of the input files and add them to the output file.
+open FDIN, "<$file" || die "Can't open $file";
+$_ = <FDIN>;
+while ($_) {
+#  print "$_";
+  if($ToC eq 'ToC') {
+  /^([\d\-\.]+\D*?)[ \.]*(\d+)[\r\n]*$/;
+  $title = $1;
+  $pages = $2;
+} else {
+
+  if(/,/) {
+# Look for title followed by , follow by #
+      /(.*?), *([^\r\n]*)/;
+      $title = $1;
+      $pages = $2;
+  } else {
+# If no , whole thing is the title and there is no page number.
+      /(.*?)[\r\n]*$/;
+      $title = $1;
+      $pages = '';
+  }
+}
+#  print "title = *$title*\n";
+#  print "pages = *$pages*\n";
+  #
+  # If the next entry starts with a tab, include it with this entry
+  #
+  $_ = <FDIN>;
+  while(/^\t/ && $ToC eq 'Index') {
+    /^\t(.*?), *([^\r\n]*)/;
+    $title .= "; $1";
+    $pages .= ", $2";
+#    print "title = $title\n";
+#    print "pages = $pages\n";
+    $_ = <FDIN>;
+  }
+
+  $pages =~ s/\./-/g;  # Replace . with - in page numbers.
+  $pages =~ s/^, *//;  # Remove leading ,
+  $pages =~ s/, */, /g; # Always have a space after the ,
+
+# Extract keywords from the title.
+  my $keywords .= ' ' . lc($title);
+  $keywords =~ s/h\(s\)/hofs/ig;	# I normally remove all ()'s, but I keep H(s) and H(z).
+  $keywords =~ s/h\(z\)/hofz/ig;
+  # print "1: $keywords\n";
+  $keywords =~ s/[^a-zA-Z0-9\[\]\/\-]+/,,/g;
+  $keywords =~ s/hofs/H(s)/g;
+  $keywords =~ s/hofz/H(z)/g;
+  # print "2: $keywords\n";
+  $keywords = ','. $keywords . ',';
+  # print "3: $keywords\n";
+  $keywords =~ s/,(([0-9]+)|a|and|by|few|for|has|in|is|given|not|of|or|the|to|used|via|when|whose|with|\&|=|(-+)),/,/g;
+  # print "4: $keywords\n";
+  $keywords =~ s/,+/,/g;
+  # print "5: $keywords\n";
+  $keywords = substr($keywords, 1, -1);
+  if($ToC eq 'ToC') {
+    $keywords .= ',texttoc';
+  } else {
+    $keywords .= ',textindex';
+}
+# print "6: $keywords\n"; 
+
+#  print "**$title**$pages**$keywords\n";
+  $keywords =~ s/, /,/g;
+  if($pages) {
+    if($ToC eq 'ToC') {
+      print FD "entry.item[$page].page = \"../../contents/FRONT.pdf\";\n";
+  } else {
+      print FD "entry.item[$page].page = \"../../contents/INDEX.pdf\";\n";
+  }
+    print FD "entry.item[$page].description = \"<b>$ToC</b> $title, <i>$pages</i>\";\n";
+    print FD "entry.item[$page].keywords = \"$keywords\";\n";
+
+    $page++;
+  }
+}
+
+    close FDIN;
+
+print FD "\nvar index_max = $page;\n";
+
+close FD;

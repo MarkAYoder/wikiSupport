@@ -1,0 +1,10 @@
+#!/bin/csh -f
+
+rm -rf /database/bookcd/zips/chapters.zip
+find /database/bookcd/visible/chapters -name 'tmp' -type d -prune -o -name 'TRI' -prune -o -name 'IDEAL' -prune -o -name 'RECT' -prune -o -name 'OLD' -prune -o -name "RCS" -prune -o -name "tex" -type d -prune -o ! -name "overview.mov" ! -name "overview.au" ! -name "support_makefile" ! -name '#*' ! -name "*.OLD" ! -size 0 ! -name "*.Z" ! -name "Makefile*" ! -name ".*" ! -name '*.tar' ! -name '*.old' ! -name '*.GIF' ! -name '*.cd'  ! -name '*~' ! -name 'hack*' ! -name 'mov_snd' -print | ~dva/bin/sun/zip -4 /database/bookcd/zips/chapters -@
+rm -rf /database/bookcd/zips/archives.zip
+find /database/bookcd/visible/archives -name 'RCS' -prune -o ! -name "*.OLD" ! -size 0 ! -name "*.Z" ! -name "Makefile*" ! -name ".*" ! -name '*.tar' ! -name '*.old' ! -name '*.GIF' ! -name '*.cd'  ! -name '*~' ! -name 'mov_snd' -print | ~dva/bin/sun/zip -4 /database/bookcd/zips/archives -@
+rm -rf /database/bookcd/zips/other.zip
+find /database/bookcd/visible/contents /database/bookcd/visible/matlab /database/bookcd/visible/graphics /database/bookcd/visible/apps -name tools -type d -prune -o -name '*OLD' -prune -o -name 'old' -type d -prune -o ! -name "support_makefile" ! -name "*.OLD" ! -size 0 ! -name "*.Z" ! -name "Makefile*" ! -name ".*" ! -name '*,v' ! -name '*.tar' ! -name 'RCS' ! -name '*.old' ! -name '*.GIF' ! -name 'rcs' ! -name 'mov_snd' ! -name '*.cd'  ! -name '*~' -print | ~dva/bin/sun/zip -4 /database/bookcd/zips/other -@
+find /database/bookcd/zips/ -name '*.zip' -exec chgrp bookcd {} \;
+find /database/bookcd/zips/ -name '*.zip' -exec chmod 664 {} \;

@@ -1,0 +1,46 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.06.19.17.27.14;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Adds $Header and $Log to matlab files, then checks them in using % as
+the comment characters.
+Before checking in the first few lines are displayed so the user has
+a better change at writing a useful log entry.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/bin/csh
+# Make the matlab header file
+set Header = /tmp/header
+echo '%$Header$' >! $Header
+echo '%$Log$' >> $Header
+echo '' >> $Header
+
+foreach file ($*)
+    if(-e RCS/$file,v) then
+	echo Skipping $file, "it's" alrady checked in
+    else
+	echo ">>>>> " $file " <<<<<"
+	head $file
+	mv $file $file.old
+	cat /tmp/header $file.old > $file
+	rcs -il -c% $file
+	myci -l $file
+   endif
+end
+@

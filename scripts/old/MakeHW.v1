@@ -1,0 +1,268 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $outfile = 'overview.cd';
+rename $outfile, "$outfile.old";
+
+if(!@ARGV) {
+  print "Usage: $0 [-hw | -examples | -exercises]\n";
+  exit;
+}
+
+my $title    = 'Signal Processing First';
+my $visible  = $ENV{'CDROOT'};
+my $menupath = "$visible/contents/scripts";
+my $chapters = "$visible/chapters";
+# my $hwList   = "$visible/archives/ALL_HW.txt";
+my $hwList   = "$visible/archives/DB_withKeywords.txt";
+my $exampleList   = "$visible/archives/DBforExercises.txt";
+my $db;
+my $type;	# Problems and Solutions | Examples | Exercises
+my $color = 'blue';  # Color of text of links
+
+my $statesoldir  = 'stusol';
+
+my $incPNG = 0;  # Set to 1 to include PNG files in overview.
+
+if($ARGV[0] eq '-hw') {
+  $db = $hwList;
+  $type = 'Problems <span style="color:green">With</span> and <span style="color:blue">Without</span> Solutions';
+} elsif($ARGV[0] eq '-examples') {
+  $db = $exampleList;
+  $type = 'Examples';
+  $statesoldir = 'exersol';
+} elsif ($ARGV[0] eq '-exercises') {
+  $db = $exampleList;
+  $type = 'Exercises and Solutions';
+  $statesoldir = 'exersol';
+}
+my $arg = shift @ARGV;
+
+my $faculty = '';
+if(@ARGV and $ARGV[0] eq '-faculty') {
+  $faculty = shift @ARGV;
+  $statesoldir = 'facsol';
+}
+
+#
+# Find the chapter number and name
+#
+open FD, '../number.txt' or die "Can't open ../number.txt";
+my $num = <FD>;
+close FD;
+$num =~ s/[\r\n]*$//;
+print "$num\n";
+
+open FD, '../name.txt' or die "Can't open ../name.txt";
+my $name = <FD>;
+close FD;
+$name =~ s/[\r\n]*$//;
+print "$name\n";
+
+#
+# Read in the HW database.
+#
+my %hw;
+
+open HW, "<$db" or die "Can't open $db";
+
+while(<HW>) {
+  /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+  my $Quarter = $1;
+  my $Statement = $2;
+  my $Desc = $3;
+  my $Chap = $4;
+  my $Sol  = $5;
+
+  $Desc =~ s/\"//g;
+  $Desc =~ s/ & / &amp; /;
+  $Desc =~ s/<-->/&harr;/;
+  $Desc =~ s/-->/&rarr;/;
+  $Desc =~ s/<--/&larr;/;
+
+  $Chap =~ s/"//g;
+
+  if($Desc eq 'TITLE') {
+      $Statement =~ /exer(.*)_0*(\d*)\./;
+      $Desc = "$1.$2";
+  }
+  if($arg eq '-examples') {
+      $Statement =~ /exam(.*)_0*(\d*)\./;
+      $Desc = "$1-$2: $Desc";
+      $Sol = '';
+  }
+  
+  next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+# If $Chap has a ',' in it it need to appear in multiple chapters.
+  my @Chaps = split(/,/, $Chap);   # Put the chap numbers into a list
+#  print "$Chap\n";
+#  print "@Chaps\n";
+  foreach $Chap (@Chaps) {
+    $Chap = $Chap + 0;
+    $hw{$Chap} = {} if(!defined($hw{$Chap}));
+    $hw{$Chap}{$Desc} = [] if(!defined($hw{$Chap}{$Desc}));
+    push @{$hw{$Chap}{$Desc}}, [$Quarter, $Statement, $Sol, $Desc];
+#  push @{$hw{$Chap}{$Desc}}, [$Quarter, $Statement];
+  }
+}
+close HW;
+
+my $pdffile = 'overview.tmp';
+open PDF, ">$pdffile" or die "Can't open $pdffile";
+print PDF "pdfmeld -force ";
+
+# Create a string that will hold the picture information to be included later.
+my $pngs;
+my $ii = 0;
+
+open FD, ">$outfile" or die "Can't open $outfile";
+
+my $titleType = $type;
+$titleType =~ s/<[^>]*>//g;
+
+print FD "<cd-head chap=$num unit=overview>
+<!-- Do not edit.  This file is created by $0 -->
+<title>$num. $name, $titleType</cd-title>
+</cd-head>
+
+<cd-body>
+<cd-h1>$num. $name, $type</cd-h1>
+<p/>
+";
+
+print FD "<a href=overview.pdf>pdf overview</a><p>
+" if $incPNG;
+
+#<table>
+#<tr><th>Description</th><th>Problem</th></tr>
+
+  # Link in the Homework
+
+if($hw{$num}) {
+  my $desc;
+  my @desc;
+  if($arg eq '-examples' or $arg eq '-exercises') {
+#      @desc = sort {hack($a) <=> hack($b)} keys %{$hw{$num}};
+# This makes 11.10 sort after 11.2
+      @desc = sort {
+         ($a =~ /[-.](\d+)/)[0] <=> ($b =~ /[-.](\d+)/)[0]
+		    }  keys %{$hw{$num}};
+  } else {
+      @desc = sort keys %{$hw{$num}};
+  }
+  foreach $desc (@desc) {
+    my $count = @{$hw{$num}{$desc}};
+    print "\t$desc: $count\n";
+    my $Quarter   = $hw{$num}{$desc}[0][0];
+    my $Statement = $hw{$num}{$desc}[0][1];
+    my $Solution  = $hw{$num}{$desc}[0][2];
+
+#    $desc =~ s/&/&amp;/;
+    if($arg eq '-examples' and $Statement =~ /exer/) {
+	next;
+	} elsif($arg eq '-exercises' and $Statement =~ /exam/) {
+	    next;
+	}
+    if($count == 1 or !$faculty) {
+	my $link;
+	if($arg eq '-hw') {
+          $link = "../../../archives/$statesoldir/$Quarter";
+        } else {
+          $link = "../../../archives/$statesoldir";
+        }
+      if(-e "$link/$Statement") {
+#	  print FD "<tr><td>$desc</td>";
+#	  print FD "<td><a href=$link/$Statement>pdf</a></td>\n";
+	  my $link2 = $link;
+	  $link2 =~ s?^\.\./\.\./\.\./?/overview/?;
+
+	  my $link3 = $link;
+	  print "$link3\n";
+	  $link3 =~ s?stusol?statemnt?;
+	  my $Statement3 = $Statement;
+	  $Statement3 =~ s?pdf$?png?;
+
+	  print PDF "$link/$Statement,";
+	  if ($incPNG) {
+	     print FD "<a href=#png$ii onClick=\"javascript:urchinTracker('$link2/$Statement'); \">$desc</a><br/>\n";
+	     #	  print FD "<img src=\"$link3/$Statement3\" width=100% title=\"$desc\"></a><br/>\n";
+	     $pngs .= "<a id=png$ii href=$link/$Statement onClick=\"javascript:urchinTracker('$link2/$Statement'); \">\n";
+	     $pngs .= "<img src=\"$link3/$Statement3\" width=100% title=\"$desc\" /></a><p/>\n";
+	      $ii++;
+	   } else {
+	     if($Solution) {
+	       $color = 'green';
+	     } else {
+	       $color = 'blue';
+	     }
+	     print FD "<a href=\"$link/$Statement\" onClick=\"javascript:urchinTracker('$link/$Statement'); \" style=\"color:$color\">$desc</a><br/>\n";		       
+	   }
+      } else {
+	  print "Can't find $link/$Statement\n";
+      }
+      next unless $faculty eq '-faculty' or $arg eq '-exercises';
+    } else {
+      my $mydesc = $desc;
+      $mydesc =~ s/<-->/&harr;/;
+      $mydesc =~ s/-->/&rarr;/;
+      $mydesc =~ s/<--/&larr;/;
+
+      print FD "<tr><td>$mydesc ($count)</td>";
+      printf FD "<td><select onChange=\"location=this.options[this.selectedIndex].value\">\n";
+      print FD "<option value=\"overview.htm\">Select\n";
+      my $hw;
+      my $count = 1;
+      foreach $hw (@{$hw{$num}{$desc}}) {
+	$Quarter   = $hw->[0];
+	$Statement = $hw->[1];
+	$Quarter =~ /(.*)_/;
+	my $desc = $1;
+	my $link = $Quarter;
+	$link =~ s/_gif$//;
+	$link = $count++;
+	print FD "<option value=\"../../../archives/$statesoldir/$Quarter/$Statement\">$link\n";
+      }
+      print FD "</select></td>\n";
+      if(0) {
+      printf FD "<td><select onChange=\"location=this.options[this.selectedIndex].value\">\n";
+      print FD "<option value=\"overview.htm\">&nbsp;&nbsp;gif&nbsp;&nbsp;\n";
+      foreach $hw (@{$hw{$num}{$desc}}) {
+	$Quarter   = $hw->[0];
+	$Statement = $hw->[1];
+	$Statement =~ s/\.pdf$/.gif/;
+	$Quarter =~ /(.*)_/;
+	my $desc = $1;
+	my $link = $Quarter;
+	$link =~ s/_gif$//;
+	print FD "<option value=\"../../../archives/$statesoldir/$Quarter/$Statement\">$link\n";
+      }
+      print FD "</select></td>\n";
+}
+      print FD "</tr>\n";
+    }
+  }
+} else {
+  print FD "<br/>No problems for this chapter.<br/>\n";
+}
+
+print FD "
+$pngs
+" if $incPNG;
+
+print FD "
+
+</cd-body>
+<cd-foot>
+</cd-foot>
+";
+
+close FD;
+
+print PDF " overview.pdf < /dev/null > /dev/null \n";
+close PDF;
+system("rm overview.tmp");
+# system(". overview.tmp");
+
+system("cd2html $outfile");
+# unlink $outfile;

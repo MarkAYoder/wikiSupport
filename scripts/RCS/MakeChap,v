@@ -1,0 +1,640 @@
+head	2.1;
+access;
+symbols;
+locks
+	myoder:2.1; strict;
+comment	@# @;
+
+
+2.1
+date	2000.04.13.18.28.08;	author myoder;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	97.10.01.22.07.11;	author myoder;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	97.09.30.17.37.50;	author myoder;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	97.09.12.20.51.16;	author myoder;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	97.09.11.20.10.18;	author myoder;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	97.07.09.13.52.30;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.11.16.22.55.08;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.11.14.23.17.49;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.09.02.16.06.33;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.07.05.21.04.18;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.07.05.20.29.19;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.04.15.19.50.53;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	96.02.08.20.25.12;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	96.02.08.20.11.01;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.02.07.22.12.08;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.07.18.15.16.09;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.05.22.15.26.17;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@Creates Contents/Chapters.cd by looking for the file
+overview.txt in each of the Chapters directories.
+@
+
+
+2.1
+log
+@version for 2nd edition.  Changed visible to visible2.
+@
+text
+@#!/usr/local/gnu/bin/perl
+
+# Create the chapter index files
+
+$Header = '$Header: /home/ratbert5/myoder/cd/visible2/support/scripts/RCS/MakeChap,v 1.16 1997/10/01 22:07:11 myoder Exp myoder $';
+# $Log: MakeChap,v $
+# Revision 1.16  1997/10/01  22:07:11  myoder
+# Removed .mov
+#
+# Revision 1.15  1997/09/30  17:37:50  myoder
+# Now uses standard Nav Box.
+# No longer includes .au files.
+#
+# Revision 1.14  1997/09/12  20:51:16  myoder
+# Added toc and help buttons.
+#
+# Revision 1.13  1997/09/11  20:10:18  myoder
+# Removed "." from top.
+#
+# Revision 1.12  1997/07/09  13:52:30  myoder
+# Added bgcolor=000000 to <body> so white text will appear while
+# background image is being loaded.
+#
+# Revision 1.11  1996/11/16  22:55:08  myoder
+# Moved .wav .au, and .mov overviews under chapter title.
+#
+# Revision 1.10  1996/11/14  23:17:49  myoder
+# Added "tape" and "camera" icons.
+#
+# Revision 1.9  1996/09/02  16:06:33  myoder
+# Convert to lower case file names.
+# Sorts numerically.
+#
+# Revision 1.8  1996/07/05  21:04:18  myoder
+# Converted to lowercase filenames.
+#
+# Revision 1.7  1996/07/05  20:29:19  myoder
+# Changed background image to cover.gif
+#
+# Revision 1.6  1996/04/15  19:50:53  myoder
+# looks ofr index.htm and overview.htm.
+#
+# Revision 1.5  1996/02/08  20:25:12  myoder
+# Adds a link to overviwe.mov if it's there.
+#
+# Revision 1.4  1996/02/08  20:11:01  myoder
+# Uses name.txt and number.txt for chapter names and numbers.
+# Looks for overview.gif and overview.wav for each chapter.
+#
+# Revision 1.3  1996/02/07  22:12:08  myoder
+# html to htm stuff.
+#
+# Revision 1.2  1995/07/18  15:16:09  myoder
+# Gets @@Headings from constancts.pl.
+# Uses cd-head with chap=0 and unit=chap
+# Automatically runs through cd2html.
+#
+# Revision 1.1  1995/05/22  15:26:17  myoder
+# Initial revision
+#
+
+require 'isthere.pl';
+require 'constants.pl';
+
+$path = "$ENV{'CDROOT'}/visible2/";
+$outfile = $path . "contents/chapters.cd";
+$path .= "chapters";
+print "$path\n";
+
+if(-e $outfile) {
+rename($outfile, $outfile.".old");
+}
+
+open(OUTPUT, ">".$outfile)  || die("$0: Can't open $outfile\n");
+
+opendir(CHAPS, $path) || die("$0: Can't open $path\n");
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=0 unit=chap>\n<cd-title>Chapters</cd-title>\n</cd-head>\n";
+print OUTPUT "<body bgcolor=\"000000\" background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT "<cd-body>\n";
+
+#print OUTPUT "<table border=0 align=right><tr>\n";
+#print OUTPUT "<td><a href = \"cover.htm\">" .
+#	    	"<img border=0 src=\"chapback.gif\"></a></td>\n";
+#print OUTPUT "<td><a href = \"toc.htm\">" .
+#	    	"<img border=0 alt=\"Contents\" src=\"map.gif\"></a></td>\n";
+#print OUTPUT "<td><a href = \"help.htm\">" .
+#	    	"<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n";
+#print OUTPUT "<tr></table>\n";
+
+print OUTPUT "<br><br><br><font size=+3><strong>Chapters</strong></font>\n";
+print OUTPUT "<p>\n";
+print OUTPUT "<table border=1 >\n";
+
+foreach $chap (sort {$a <=> $b} readdir(CHAPS)) {
+    $_ = $chap;
+    if(/\d+\w/) {# If it starts with a digit assume it a chapter.
+	$text = "../chapters/$chap/overview.txt";
+	$html = "../chapters/$chap/overview.htm";
+	$ind  = "../chapters/$chap/index.htm";
+	$gif  = "../chapters/$chap/overview.gif";
+	$wav  = "../chapters/$chap/overview.wav";
+	$au   = "../chapters/$chap/overview.au";
+	$mov  = "../chapters/$chap/overview.mov";
+	$name = "../chapters/$chap/name.txt";
+	$numb = "../chapters/$chap/number.txt";
+	# get the chapter number and name from the name.txt and 
+	# number.txt files
+	open(NAME, $name);   $chapname = <NAME>; chop($chapname);
+	open(NAME, $numb);   $chapnum  = <NAME>; chop($chapnum);
+	print "$_\n";
+
+	# get the chapter number and name from the directory name
+	# ($chapnum,$chapname) = /(\d*)(\w*)/;
+
+	print OUTPUT "<tr>\n";
+
+	print OUTPUT "<td>";
+	if(-e $gif) {
+		print OUTPUT "<img src=$gif width=64 height=64>\n";
+	} else {
+	    print OUTPUT &isthere($html);
+	}
+	print OUTPUT "</td>\n";
+
+	if(-e $ind) {
+	print OUTPUT "<td><a href=\"$ind\">";
+    } else {
+	print OUTPUT "<td><a href=\"$html\">";
+    }
+	print OUTPUT "<font size=+1><strong>$chapnum. $chapname" .
+			"</strong></font>\n";
+	print OUTPUT "</a>\n";
+
+	if(-e $wav) {
+	    print OUTPUT "<br><a href=\"$wav\">\n";
+	    print OUTPUT "<img border=0 src=\"tape.gif\" alt=\"audio\">";
+	    print OUTPUT "</a>\n";
+	}
+#	if(-e $au) {
+#	    print OUTPUT "<a href=\"$au\">\n";
+#	    print OUTPUT "<img border=0 src=\"speaker.gif\">";
+#	    print OUTPUT "</a>\n";
+#	}
+#	if(-e $mov) {
+#	    print OUTPUT "<a href=\"$mov\">\n";
+#	    print OUTPUT "<img border=0 src=\"camera2.gif\">";
+#	    print OUTPUT "</a>\n";
+#	}
+	print OUTPUT "</td>\n";
+
+    if(-e $text) {
+	print OUTPUT "<td><font size=+1>\n";
+	open(TEXT, $text);
+
+	while(<TEXT>) {
+	    print OUTPUT;
+	}
+	print OUTPUT "</font></td>\n";
+    }
+
+	print OUTPUT "</tr>\n";
+    }
+}
+
+print OUTPUT "</table>\n";
+print OUTPUT "</cd-body>\n";
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+system("cd2html $outfile; rm $outfile");
+@
+
+
+1.16
+log
+@Removed .mov
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.15 1997/09/30 17:37:50 myoder Exp myoder $';
+d7 3
+d65 1
+a65 1
+$path = "$ENV{'CDROOT'}/visible/";
+@
+
+
+1.15
+log
+@Now uses standard Nav Box.
+No longer includes .au files.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.14 1997/09/12 20:51:16 myoder Exp myoder $';
+d7 4
+d143 5
+a147 5
+	if(-e $mov) {
+	    print OUTPUT "<a href=\"$mov\">\n";
+	    print OUTPUT "<img border=0 src=\"camera2.gif\">";
+	    print OUTPUT "</a>\n";
+	}
+@
+
+
+1.14
+log
+@Added toc and help buttons.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.13 1997/09/11 20:10:18 myoder Exp myoder $';
+d7 3
+d74 11
+a84 8
+print OUTPUT "<table border=0 align=right><tr>\n";
+print OUTPUT "<td><a href = \"cover.htm\">" .
+	    	"<img border=0 src=\"chapback.gif\"></a></td>\n";
+print OUTPUT "<td><a href = \"toc.htm\">" .
+	    	"<img border=0 alt=\"Contents\" src=\"map.gif\"></a></td>\n";
+print OUTPUT "<td><a href = \"help.htm\">" .
+	    	"<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n";
+print OUTPUT "<tr></table>\n";
+d131 1
+a131 6
+	    print OUTPUT "<img border=0 src=\"tape.gif\">";
+	    print OUTPUT "</a>\n";
+	}
+	if(-e $au) {
+	    print OUTPUT "<a href=\"$au\">\n";
+	    print OUTPUT "<img border=0 src=\"speaker.gif\">";
+d134 5
+@
+
+
+1.13
+log
+@Removed "." from top.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.12 1997/07/09 13:52:30 myoder Exp myoder $';
+d7 3
+d71 8
+a78 2
+print OUTPUT "<a href = \"cover.htm\">" .
+	    	"<img border=0 align=right src=\"chapback.gif\"></a>\n";
+@
+
+
+1.12
+log
+@Added bgcolor=000000 to <body> so white text will appear while
+background image is being loaded.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.11 1996/11/16 22:55:08 myoder Exp myoder $';
+d7 4
+d70 1
+a70 1
+print OUTPUT ".<br><br><br><font size=+3><strong>Chapters</strong></font>\n";
+@
+
+
+1.11
+log
+@Moved .wav .au, and .mov overviews under chapter title.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.10 1996/11/14 23:17:49 myoder Exp myoder $';
+d7 3
+d63 1
+a63 1
+print OUTPUT "<body background=\"../graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+@
+
+
+1.10
+log
+@Added "tape" and "camera" icons.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.9 1996/09/02 16:06:33 myoder Exp myoder $';
+d7 3
+d75 1
+d88 1
+a88 1
+	print OUTPUT "<tr align=left>\n";
+d96 11
+d112 5
+a123 9
+	if(-e $ind) {
+	print OUTPUT "<td><a href=\"$ind\">";
+    } else {
+	print OUTPUT "<td><a href=\"$html\">";
+    }
+	print OUTPUT "<font size=+1><strong>$chapnum. $chapname" .
+			"</strong></font>\n";
+	print OUTPUT "</a></td>\n";
+
+d125 1
+a125 1
+	print OUTPUT "<td>\n";
+d127 1
+d131 1
+a131 1
+	print OUTPUT "</td>\n";
+@
+
+
+1.9
+log
+@Convert to lower case file names.
+Sorts numerically.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.8 1996/07/05 21:04:18 myoder Exp myoder $';
+d7 4
+d62 1
+a62 1
+print OUTPUT "<table border=1 width=470>\n";
+a86 3
+	if(-e $wav) {
+	    print OUTPUT "<a href=\"$wav\">";
+	}
+d93 8
+a100 1
+	    print OUTPUT "</a>";
+a114 3
+	if(-e $mov) {
+	    print OUTPUT "<a href=\"$mov\">\n";
+	}
+a117 3
+	}
+	if(-e $mov) {
+	    print OUTPUT "</a>\n";
+@
+
+
+1.8
+log
+@Converted to lowercase filenames.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.7 1996/07/05 20:29:19 myoder Exp myoder $';
+d7 3
+d40 1
+a40 1
+$path .= "Chapters";
+d55 1
+a55 1
+	    	"<img align=right src=\"chapback.gif\"></a>\n";
+d60 1
+a60 1
+foreach $chap (sort readdir(CHAPS)) {
+@
+
+
+1.7
+log
+@Changed background image to cover.gif
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.6 1996/04/15 19:50:53 myoder Exp myoder $';
+d7 3
+d36 1
+a36 1
+$outfile = $path . "Contents/Chapters.cd";
+d50 3
+a52 3
+print OUTPUT "<body background=\"../Graphics/cover.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT "<a href = \"Cover.htm\">" .
+	    	"<img align=right src=\"ChapBack.gif\"></a>\n";
+d60 8
+a67 8
+	$text = "../Chapters/$chap/overview.txt";
+	$html = "../Chapters/$chap/overview.htm";
+	$ind  = "../Chapters/$chap/index.htm";
+	$gif  = "../Chapters/$chap/overview.gif";
+	$wav  = "../Chapters/$chap/overview.wav";
+	$mov  = "../Chapters/$chap/overview.mov";
+	$name = "../Chapters/$chap/name.txt";
+	$numb = "../Chapters/$chap/number.txt";
+@
+
+
+1.6
+log
+@looks ofr index.htm and overview.htm.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.5 1996/02/08 20:25:12 myoder Exp myoder $';
+d7 3
+d47 4
+a50 2
+print OUTPUT "<body background=\"../Graphics/ee2200barback.gif\" text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+print OUTPUT ".<br><font size=+3><strong>Chapters<strong></font>\n";
+d76 4
+a79 1
+	print OUTPUT "<td><a href=\"$wav\">";
+d85 4
+a88 1
+	print OUTPUT "</a></td>\n";
+d120 2
+@
+
+
+1.5
+log
+@Adds a link to overviwe.mov if it's there.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.4 1996/02/08 20:11:01 myoder Exp myoder $';
+d7 3
+d54 1
+d79 3
+d83 1
+@
+
+
+1.4
+log
+@Uses name.txt and number.txt for chapter names and numbers.
+Looks for overview.gif and overview.wav for each chapter.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.3 1996/02/07 22:12:08 myoder Exp myoder $';
+d7 4
+d53 1
+d82 3
+d88 3
+@
+
+
+1.3
+log
+@html to htm stuff.
+@
+text
+@d5 1
+a5 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/MakeChap,v 1.2 1995/07/18 15:16:09 myoder Exp myoder $';
+d7 3
+d47 8
+d56 1
+d58 1
+a58 1
+	($chapnum,$chapname) = /(\d*)(\w*)/;
+d62 8
+d71 2
+a72 1
+	print OUTPUT &isthere($html);
+a74 2
+	print OUTPUT "<td>$chapnum</td>";
+	print OUTPUT "<td><font size=+1><strong>$chapname</strong></font></td>";
+@
+
+
+1.2
+log
+@Gets @@Headings from constancts.pl.
+Uses cd-head with chap=0 and unit=chap
+Automatically runs through cd2html.
+@
+text
+@d1 1
+a1 1
+#!/usr/sbin/perl
+d5 1
+a5 1
+$Header = '$Header: /database/bookcd/CD-ROM/support/scripts/RCS/MakeChap,v 1.1 1995/05/22 15:26:17 myoder Exp $';
+d7 5
+d43 1
+a43 1
+	$html = "../Chapters/$chap/overview.html";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+#!/usr/local/gnu/bin/perl
+d5 13
+a17 7
+$Header = '$Header$';
+# $Log$
+
+do '/database/bookcd/support/scripts/isthere.pl';
+
+$outfile = "Chapters.cd";
+$path = "/database/bookcd/CD-ROM/Chapters";
+a22 2
+@@Headings = ("", "Chapter", "Overview", "Demos", "Labs", "Homework", "Solution", "Matlab");
+
+d28 1
+a28 1
+print OUTPUT "<cd-head>\n<cd-title>Chapters</cd-title>\n</cd-head>\n";
+d32 1
+a32 1
+print OUTPUT "<table border=0 width=470>\n";
+d46 1
+a46 1
+	print OUTPUT isthere($html);
+d66 3
+@

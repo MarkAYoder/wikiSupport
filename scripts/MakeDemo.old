@@ -1,0 +1,79 @@
+#!/usr/local/gnu/bin/perl
+
+# Create the demo index files
+# run in the Demo directory.
+
+$Header = '$Header';
+# $Log: MakeDemo,v $
+# Revision 1.10  1996/02/13  20:22:11  myoder
+# Moved the <table> building stuff to makesummary in /lib.
+#
+# Revision 1.9  1996/02/13  18:38:18  myoder
+# Added checks for .gif, .wav, and .mov.  If present, they are linked in.
+#
+# Revision 1.8  1996/01/24  21:30:20  myoder
+# Added a message telling when overview.txt can't be found.
+#
+# Revision 1.7  1996/01/17  20:51:51  myoder
+# Changed pwd back.  It didn't work onthe GT machines.
+#
+# Revision 1.6  1996/01/17  20:30:54  myoder
+# $pwd comes from pwd command rather than PWD in environment.
+#
+# Revision 1.5  1996/01/10  21:16:41  myoder
+# Changed .html to .htm.
+# If the .htm file is there it will use it.  If not it will use the .html file.
+#
+# Revision 1.4  1995/12/08  12:38:47  myoder
+# Generalized to work with Labs and Homeworks.  Uses the name of the
+# current directory (Demos, Labs, Homework, etc.) in title.
+#
+# Revision 1.2  95/10/26  10:29:16  10:29:16  schodorf (Jeff Schodorf)
+# didn't change anything, just tried to run it (and failed) :(
+# 
+# Revision 1.1  95/09/20  12:32:40  12:32:40  myoder (Mark Yoder)
+# Initial revision
+# 
+
+require 'isthere.pl';
+require 'constants.pl';
+require 'makesummary.pl';
+
+$path = '.';
+$outfile = $path . "/" . "overview.cd";
+
+# $pwd = $ENV{'PWD'};
+chop($pwd = `pwd`);
+
+@tmp = split("/", $pwd);	# Find name of current directory
+@tmp = reverse(@tmp);
+$dir = $tmp[0];
+
+open(NAME, '../name.txt');   $chapname = <NAME>; chop($chapname);
+open(NAME, '../number.txt'); $chapnum  = <NAME>; chop($chapnum);
+print "($chapname)\n";
+print "($chapnum)\n";
+
+if(-e $outfile) {
+rename($outfile, "$outfile.old");
+}
+
+open(OUTPUT, ">$outfile")  || die("$0: Can't open $outfile\n");
+print "$outfile\n";
+
+print OUTPUT "<! Do not Edit, this file is created by $0>\n";
+print OUTPUT "<cd-head chap=$chapnum unit=overview>\n<cd-title>$chapnum. $chapname $dir</cd-title>\n</cd-head>\n";
+print OUTPUT "<cd-body>\n";
+print OUTPUT ".<br><font size=+3><strong>$chapnum. $chapname $dir</strong></font>\n";
+print OUTPUT "<p>\n";
+
+makesummary($path);
+
+print OUTPUT "</cd-body>\n";
+
+print OUTPUT "<cd-foot>\n";
+print OUTPUT "</cd-foot>\n";
+
+close(OUTPUT);
+#system("cd2html $outfile; rm $outfile");
+system("cd2html $outfile");

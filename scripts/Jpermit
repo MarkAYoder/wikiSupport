@@ -1,0 +1,3 @@
+#!/bin/csh -f
+chmod -R ug=rw,o=r,a+X $1
+chgrp -R bookcd $1

@@ -1,0 +1,58 @@
+# $Id: mime.types,v 0.12 1994/07/08 08:08:14 fielding Exp fielding $
+
+application/mac-binhex40       hqx
+application/octet-stream       bin             
+application/oda                oda
+application/pdf                pdf
+application/postscript         ai eps ps       
+application/rtf                rtf             
+application/x-mif              mif
+application/x-maker            fm
+application/x-csh              csh             
+application/x-dvi              dvi             
+application/x-hdf              hdf             
+application/x-latex            latex           
+application/x-netcdf           nc cdf          
+application/x-sh               sh              
+application/x-tcl              tcl             
+application/x-tex              tex             
+application/x-texinfo          texinfo texi   
+application/x-troff            t tr roff       
+application/x-troff-man        man             
+application/x-troff-me         me              
+application/x-troff-ms         ms              
+application/x-wais-source      src             
+application/zip                zip             
+application/x-bcpio            bcpio           
+application/x-cpio             cpio            
+application/x-gtar             gtar            
+application/x-shar             shar            
+application/x-sv4cpio          sv4cpio         
+application/x-sv4crc           sv4crc          
+application/x-tar              tar             
+application/x-ustar            ustar           
+audio/basic                    au snd          
+audio/x-aiff                   aif aiff aifc
+audio/x-wav                    wav             
+image/gif                      gif             
+image/ief                      ief             
+image/jpeg                     jpeg jpg jpe
+image/tiff                     tiff tif        
+image/x-cmu-raster             ras
+image/x-portable-anymap        pnm             
+image/x-portable-bitmap        pbm             
+image/x-portable-graymap       pgm             
+image/x-portable-pixmap        ppm             
+image/x-rgb                    rgb
+image/x-xbitmap                xbm             
+image/x-xpixmap                xpm             
+image/x-xwindowdump            xwd             
+text/html                      html htm
+text/plain                     txt pl
+text/richtext                  rtx             
+text/tab-separated-values      tsv             
+text/x-setext                  etx             
+video/mpeg                     mpeg mpg mpe    
+video/quicktime                qt mov          
+video/x-msvideo                avi             
+video/x-sgi-movie              movie           

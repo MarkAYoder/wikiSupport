@@ -1,0 +1,4 @@
+Need to fix cd2html so it will work on menu.cd.  The javascript hrefs aren't being passed correctly.
+
+Need to see about saving and restoring objects.
+

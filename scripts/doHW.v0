@@ -1,0 +1,105 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $db = 'ALL_HW.txt';
+
+my $fromGIF=1;	# Set to 1 if reading from gif files, otherwise pdf inputs are 
+		# used.
+system("adOff") if $fromGIF;	# Use the version of PDFLib that
+				# doesn't print pdflib in the background.
+
+if(!@ARGV) {
+  print "Usage: $0 [hw | example | exercise]\n";
+  exit;
+}
+
+print "Only doing pdf's\n" unless $fromGIF;
+
+my $type = $ARGV[0];
+
+if($ARGV[0] eq 'hw') {
+  $db = 'ALL_HW.txt';
+} elsif($ARGV[0] eq 'example') {
+  $db = 'ALL_EXAMPLES.xlt';
+} elsif ($ARGV[0] eq 'exercise') {
+  $db = 'ALL_EXER.xlt';
+}
+
+open FD, "<$db" or die "Can't open $db";
+
+<FD> if $ARGV[0] eq 'hw';	# Skip headers
+
+my $i=0;
+while(<FD>) {
+  /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+  my $quarter = $1;
+  my $statement = $2;
+  my $sol1 = $3;
+  my $sol2 = $4;
+  my $sol3 = $5;
+  my $sol4 = $6;
+  my $chap = $7;
+  my $desc = $8;
+
+  $sol1 =~ s/\.gif$/.png/ if $sol1;
+  $sol2 =~ s/\.gif$/.png/ if $sol2;
+  $sol3 =~ s/\.gif$/.png/ if $sol3;
+  $sol4 =~ s/\.gif$/.png/ if $sol4;
+
+  next if $chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+
+  my $quarterPDF = $quarter;
+  $quarterPDF =~ s/-/_/;
+
+# Convert of ALL_HW.txt quarter format to archives format
+  $quarter =~ s/-//;
+  $quarter .= '_gif' if $ARGV[0] eq 'hw';
+
+# Convert to archive _pdf format.
+  my $myquarter = $quarter;
+  $myquarter =~ s/_gif/_pdf/ unless $fromGIF;
+
+  if(!-e $myquarter) {
+    mkdir $myquarter;
+    print "mkdir $myquarter\n";
+  }
+
+  $desc =~ s/\"//g;
+
+#  print "$quarter/$statement\n";
+
+  my $pdf = $statement;
+  $pdf =~ s/\.gif$/.pdf/;
+
+# Check to see if we have the pdf version of the statement.
+
+  if(!$fromGIF) {
+    my $newpdf =  "../FromJim/HW/$quarterPDF/$pdf";
+    #  print "$newpdf\n";
+    if (-e $newpdf) {
+      $statement = "../$newpdf";
+      $pdf = "../$myquarter/$pdf";
+    } else {
+      print "Skipping $myquarter $pdf\n";
+      next;
+    }
+  }
+
+  chdir $quarter;
+  # print "*$desc*\t*$statement*\t*$sol1*\n";
+  if($fromGIF) {
+    system("img2pdf \"chap$chap $type $desc\" $pdf $statement page $sol1 $sol2 $sol3 $sol4");
+  } else {
+    system("pdf2pdf \"chap$chap $type $desc\" $pdf $statement page $sol1 $sol2 $sol3 $sol4");
+  }
+  print "#";
+
+  chdir '..';
+  $i++;
+#  last if $i>5;
+}
+
+print "\n";
+
+close FD;

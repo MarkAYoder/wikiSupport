@@ -1,0 +1,43 @@
+#!/bin/csh
+set echo
+set INDEX = /database/bookcd/CD-ROM/Matlab/Index
+set toolbox = /database/bookcd/CD-ROM/Matlab/Toolbox
+cd $toolbox
+
+find $toolbox -type d -print | mat2html -i -g -H ${INDEX}
+
+mv MatlabDataBase.dir MatlabDataBase.pag ../Index
+
+echo << EOF
+	ee2200
+	/tools/matlab4/toolbox/matlab/general
+	/tools/matlab4/toolbox/matlab/ops
+	/tools/matlab4/toolbox/matlab/lang
+	/tools/matlab4/toolbox/matlab/elmat
+	/tools/matlab4/toolbox/matlab/elfun
+	/tools/matlab4/toolbox/matlab/datafun
+	/tools/matlab4/toolbox/matlab/plotxy
+	/tools/matlab4/toolbox/matlab/plotxyz
+	/tools/matlab4/toolbox/matlab/color
+	/tools/matlab4/toolbox/matlab/graphics
+	/tools/matlab4/toolbox/matlab/sounds
+	/tools/matlab4/toolbox/signal
+	Demos/Z2Freq
+	Labs/ee2200
+EOF
+
+#$Header: /database/bookcd/CD-ROM/support/scripts/RCS/buildIndex,v 1.3 1995/05/22 15:30:11 myoder Exp $
+#$Log: buildIndex,v $
+# Revision 1.3  1995/05/22  15:30:11  myoder
+# Uses "find" to determine which files to index, then moves the indices to
+# ../Index
+# Must be run from MatlabToolbox
+#
+# Revision 1.2  1995/05/17  13:47:57  myoder
+# Added the $Log: buildIndex,v $
+# Revision 1.3  1995/05/22  15:30:11  myoder
+# Uses "find" to determine which files to index, then moves the indices to
+# ../Index
+# Must be run from MatlabToolbox
+# and $Header: /database/bookcd/CD-ROM/support/scripts/RCS/buildIndex,v 1.3 1995/05/22 15:30:11 myoder Exp $
+#

@@ -1,0 +1,27 @@
+#!/bin/csh -f
+echo WARNING this will completely replace the matlab/windows/dspfirst
+echo directory.  If you do not want this to happen then hit ^C now.
+echo This script will continue in 15 seconds.
+sleep 15
+cd /database/bookcd/visible/matlab/unix
+rm dspfirst.tar
+echo Making dspfirst tar file
+tar cvf dspfirst.tar `find dspfirst -name "*.m" -print -o -name "*.mat" -print -o -name "*.gif" -print -o -name "_*" -print`
+cd /database/bookcd/visible/matlab/windows
+echo deleting old windows/dspfirst directory
+rm -rf dspfirst/
+echo creating windows/dspfirst directory
+tar xf ../unix/dspfirst.tar
+echo converting .m files to CR/LF format
+find ./dspfirst -name "*.m" -exec /home/ratbert2/dva/bin/todos -p -u {} \;
+find ./dspfirst -name "_*" -exec /home/ratbert2/dva/bin/todos -p -u {} \;
+echo creating zip archive
+rm dspfirst.zip
+/home/ratbert2/dva/bin/sun/zip -r dspfirst.zip dspfirst/*
+echo creating self-extracting archive
+cat /home/ratbert2/dva/classes/ee2200/DOSunzipsfx.exe dspfirst.zip > dspfirst.exe
+/home/ratbert2/dva/bin/sun/zip -A dspfirst.exe
+cd /database/bookcd/visible/matlab
+echo changing group ownership and file permissions
+find . ! -group bookcd -exec chgrp bookcd {} \; -exec chmod g+w {} \;
+

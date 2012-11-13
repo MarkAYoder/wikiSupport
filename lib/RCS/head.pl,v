@@ -1,0 +1,2044 @@
+head	2.3;
+access;
+symbols;
+locks
+	myoder:2.3; strict;
+comment	@#@;
+
+
+2.3
+date	2000.04.17.21.35.50;	author myoder;	state Exp;
+branches;
+next	2.2;
+
+2.2
+date	2000.04.12.19.35.00;	author myoder;	state Exp;
+branches;
+next	2.1;
+
+2.1
+date	2000.04.12.18.59.17;	author myoder;	state Exp;
+branches;
+next	1.37;
+
+1.37
+date	97.10.01.22.02.53;	author myoder;	state Exp;
+branches;
+next	1.36;
+
+1.36
+date	97.09.30.17.35.58;	author myoder;	state Exp;
+branches;
+next	1.35;
+
+1.35
+date	97.09.17.22.16.20;	author myoder;	state Exp;
+branches;
+next	1.34;
+
+1.34
+date	97.09.12.20.53.01;	author myoder;	state Exp;
+branches;
+next	1.33;
+
+1.33
+date	97.09.11.20.40.31;	author myoder;	state Exp;
+branches;
+next	1.32;
+
+1.32
+date	97.09.10.22.29.05;	author myoder;	state Exp;
+branches;
+next	1.31;
+
+1.31
+date	97.09.09.22.28.20;	author myoder;	state Exp;
+branches;
+next	1.30;
+
+1.30
+date	97.09.04.21.59.40;	author myoder;	state Exp;
+branches;
+next	1.29;
+
+1.29
+date	97.09.04.21.06.00;	author myoder;	state Exp;
+branches;
+next	1.28;
+
+1.28
+date	97.06.19.22.31.00;	author myoder;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	97.02.07.13.29.23;	author myoder;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	96.11.12.19.00.15;	author myoder;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	96.09.02.16.05.02;	author myoder;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	96.07.09.17.48.16;	author myoder;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	96.06.03.17.49.11;	author myoder;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	96.04.29.13.49.56;	author myoder;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	96.04.15.19.49.33;	author myoder;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	96.03.26.18.30.04;	author myoder;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	96.03.26.18.23.43;	author myoder;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	96.03.15.21.00.23;	author myoder;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	96.02.07.19.08.35;	author myoder;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	96.01.24.21.31.54;	author myoder;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	96.01.10.22.01.13;	author myoder;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.12.11.12.50.43;	author myoder;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.12.08.12.42.02;	author myoder;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.12.06.21.42.24;	author myoder;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.10.17.17.56.42;	author myoder;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.08.22.20.26.40;	author myoder;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.07.18.15.11.33;	author myoder;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.07.06.17.06.42;	author myoder;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.06.29.21.48.17;	author myoder;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.06.19.18.26.47;	author myoder;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.06.19.18.16.49;	author myoder;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.06.19.18.10.47;	author myoder;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.06.01.19.00.50;	author myoder;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.06.01.16.41.50;	author myoder;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.06.01.16.05.00;	author myoder;	state Exp;
+branches;
+next	;
+
+
+desc
+@# Contains:
+#  head(%params) - processed the <cd-head> tag
+#  body(%params) - processed the <cd-body> tag
+#  foot(%params) - processed the <cd-foot> tag
+# %params comes from getparams($tag)
+@
+
+
+2.3
+log
+@Uses visible2 now.
+New20001 copywright date.
+Appendex is now chapter 14.
+@
+text
+@#!/usr/local/gnu/bin/perl
+# Contains:
+#  head(%params) - processed the <cd-head> tag
+#  body(%params) - processed the <cd-body> tag
+#  foot(%params) - processed the <cd-foot> tag
+# %params comes from getparams($tag)
+
+#"$Log: head.pl,v $
+#Revision 2.2  2000/04/12  19:35:00  myoder
+#Found newer version of head.pl.  CHecking it in.
+#
+#Revision 1.37  1997/10/01  22:02:53  myoder
+#Added $HeadingsID.  Heading are now uppercase.
+#
+#Revision 1.36  1997/09/30  17:35:58  myoder
+#Fixxed a // bug.
+#demos.htm and labs.htm now go to chapters.htm when ChapBack is pushed.
+#demos.htm and labs.htm now just list demos and labs in Nav Box.
+#
+#Revision 1.35  1997/09/17  22:16:20  myoder
+#Removed some old commented out code.
+#Added code to handle exercise.
+#Help now opens in a new window.
+#
+#Revision 1.34  1997/09/12  20:53:01  myoder
+#Removed the nbsp at the in the Nav Box so the link would look more centered.
+#
+#Revision 1.33  1997/09/11  20:40:31  myoder
+#Added chapid so chapter 10 will appear as A.
+#
+#Revision 1.32  1997/09/10  22:29:05  myoder
+#Centered the navigation buttons.
+#Fixed BuildNav to work in new archive location.
+#
+#Revision 1.31  1997/09/09  22:28:20  myoder
+#Updated footer for final version.  No dates or bug report URL.
+#Added alt= filed to many images.
+#
+#Revision 1.30  1997/09/04  21:59:40  myoder
+#Added some space between the numbers and units in the nav box by
+#changing the spaces to non-braking spaces (&nbsp).
+#
+#Revision 1.29  1997/09/04  21:06:00  myoder
+#Added <cd-nav> tag.  It's will instert navigation buttons.
+#Major changed to handle homework.  homework doesn't appear in the usual
+#file locals, so I've had to do some kludgeing.
+#
+#Revision 1.28  1997/06/19  22:31:00  myoder
+#Added a hack to change chap A to 10.
+#
+#Revision 1.27  1997/02/07  13:29:23  myoder
+#Changed the path in foot() to reflect the new path returned by 'pwd'.
+#
+#Revision 1.26  1996/11/12  19:00:15  myoder
+#Changed footer to point to feedback.htm.
+#
+#Revision 1.25  1996/09/02  16:05:02  myoder
+#Split chapter 6.  Now uses location of file for the chapter number
+#rather than the parameter in the <cd-head> tag.
+#
+#Revision 1.24  1996/07/09  17:48:16  myoder
+#Converted to lowercase.
+#
+#Revision 1.23  1996/06/03  17:49:11  myoder
+#Added new navigation buttons.  Now you can jump straight to a chapter,
+#or a chapter section.
+#
+#Revision 1.22  1996/04/29  13:49:56  myoder
+#Added a "overchap" unit for chapter overviews.
+#Added a fifth argument of buildNav which allows one to specify the BACK
+#button.
+#
+#Revision 1.21  1996/04/15  19:49:33  myoder
+#Updated copyright notice to reflect the title.
+#Notes now know how to find who is up and down from them.
+#
+#Revision 1.20  1996/03/26  18:30:04  myoder
+#Put in DSP First title.
+#
+#Revision 1.19  1996/03/26  18:23:43  myoder
+#stuff
+#
+#Revision 1.18  1996/03/15  21:00:23  myoder
+#Added 'notes' as a type of unit.
+#No longer looks for .html, just .htm
+#
+#Revision 1.17  1996/02/07  19:08:35  myoder
+#Up and down button will not appear if directory isn't in $Prev{}.
+#New look for navigation buttons.  right justified.  Text wraps around it.
+#
+#Revision 1.16  1996/01/24  21:31:54  myoder
+#Improved navigation buttons so demos will have up and down buttons
+#that take them to the other demos in the same chapter.
+#You must put the up and down info in constants.pl.
+#
+#Revision 1.15  1996/01/10  22:01:13  myoder
+#Changed .html to .htm
+#.html is used if .htm isn't there.
+#
+#Revision 1.14  1995/12/11  12:50:43  myoder
+#Commented out many print debug statements.
+#Swapped left and right buttons.
+#
+#Revision 1.13  1995/12/08  12:42:02  myoder
+#Further refinement of how the navigation buttons operate.
+#
+#Revision 1.11  1995/10/17  17:56:42  myoder
+#Added two new heading styles:
+#1.	Has Map and help button only.
+#2.	HAs 1. plus back button.
+#
+#Revision 1.10  1995/08/22  20:26:40  myoder
+#Added background color and getcolor to pick which one to use.
+#
+#Revision 1.9  1995/07/18  15:11:33  myoder
+#Moved nav buttons from header to body since putting gifs in the
+#header seems to prevent the body from having a background.
+#
+#Revision 1.8  1995/07/06  17:06:42  myoder
+#head now passes it's html through the converter so path names can be
+#computed.
+#
+#Revision 1.7  1995/06/29  21:48:17  myoder
+#The -b option to cd2html will now prevent the background image
+#from being loaded.
+#The -d option will set the debug flag.
+#
+#Revision 1.6  1995/06/19  18:26:47  myoder
+#Added 1; at the end so it will work with 'require'.
+#
+#Revision 1.5  1995/06/19  18:16:49  myoder
+#*** empty log message ***
+#
+#Revision 1.4  1995/06/19  18:10:47  myoder
+#Fixed comment bug
+#
+#Revision 1.3  1995/06/01  19:00:50  myoder
+#back() now uses findpath() to find backgrounds.
+#
+#Revision 1.2  1995/06/01  16:41:50  myoder
+#Changed comment character to #
+#
+#Revision 1.1  1995/06/01  16:05:00  myoder
+#Initial revision
+#";
+$Header = '$Header: /home/ratbert5/myoder/cd/support/lib/RCS/head.pl,v 2.2 2000/04/12 19:35:00 myoder Exp myoder $';
+
+require 'htmlscan.pl';
+require 'constants.pl';
+
+#==============
+# head
+#==============
+
+sub head {
+local(%params) = @@_;
+local($debug) = 1;
+
+# Make some global assignments 
+
+$chap = $params{'chap'};	# global assignment for all to use.
+$unit = $params{'unit'};
+$next = $params{'next'};        # Used for homework
+$prev = $params{'prev'};
+
+print "head called with chap=$chap and unit=$unit\n" if $debug;
+
+# The following looks up the path for 'visible2', then goes down to
+# directorys to find the number.txt file
+#	print "$pwd\n";
+# Homework and Exercises  get their chap num from cd-head
+    if($unit ne 'homework' && $unit ne 'exercise') { 
+	@@tmp = split("/", $pwd);	# Find name of current directory
+	$i = 0;
+	foreach $dir (@@tmp) {
+		$i++;
+#		print "$i $dir\n";
+		last if ($dir eq 'visible2');
+	}
+#	print "@@tmp\n";
+	splice(@@tmp, $i+2, $#tmp-$i, 'number.txt');
+#	print "@@tmp\n";
+	$numb = join('/', @@tmp);
+	print "$tmp\n";
+	open(NAME, $numb);   $chapnum  = <NAME>; chop($chapnum);
+#	print "$chapnum\n";
+	if ($chapnum != $chap) {
+    		print "<cd-head> has chap = $chap, file is in $chapnum\n";
+		print "Using $chapnum\n";
+		$chap = $chapnum;
+	}
+   } # if($unit ne 'homework')
+
+# Hack
+if($chap eq "A") {
+    $chap = 14;
+}
+
+'<head>';
+}
+
+#==============
+# body
+#==============
+
+sub body {
+local(%params) = @@_;
+local($background, $controls);
+
+if($back_flag) {
+#    $background = "background=\"" . &findpath("back$chap$unit.gif") . "\"";
+    $background = "bgcolor=\"" . &getcolor($chap, $unit) . "\"";
+
+#    print HTML "<body $background text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+    print HTML "<body $background >\n";
+
+    # If not chapter 0, put up the navigation controls.
+#    if($chap >! 0) {
+    if(1) {
+	@@tmp = split("/", $pwd);	# Find name of current directory
+	@@tmp = reverse(@@tmp);
+	$dir = $tmp[0];
+	$_ = $dir;
+	($number, $name) = /(\d*)(\w*)/;
+	print "$number\n";
+	
+	if($unit eq 'demo' || $unit eq 'lab') {
+	    print "Found $unit\n";
+		$dir = $tmp[1];  # Kludge
+	    	print "no up/down\n";
+		&buildNav("","","","","../overview.htm","../..")
+#	    }
+
+	} elsif($unit eq 'notes') {
+	    $down = $number; $down++;
+	    $up   = $number; $up--; if($up<10){ $up = "0$up"}
+#	    print "up = $up, down = $down\n";
+	    opendir(NOTES, '..') || die("$0: Can't open ..\n");
+	    @@notes = sort readdir(NOTES);
+#	    print "notes = @@notes\n";
+	    @@down = grep(/$down/, @@notes);
+	    @@up   = grep(/$up/, @@notes);
+	    $dir = $tmp[1]; #kludge
+		&buildNav(
+		    "../$up[0]/index.htm",		# up
+		    "../$down[0]/index.htm", 	# down
+		    "",	# left
+	    	    "", 	# right
+			  "", # overview
+			  "../..");
+
+	} elsif($unit eq 'homework' || $unit eq 'exercise') {
+	    print "I Found $unit prev=$prev next=$next\n";
+	    $dir = $unit; #kludge
+		&buildNav(
+		    $prev,    # up
+                    $next,    # down
+		    "",	# left
+	    	    "", 	# right
+		    "../../chapters/$chapter[$chap]/$dir/overview.htm", # overview
+		    "../chapters");
+
+	} elsif($unit eq 'overview') {
+	    print "found overview\n";
+	    $upchap = $chap + 1; if($upchap > $#chapter) { $upchap = 1;}
+	    $downchap = $chap -1; if($downchap <1) {$downchap = $#chapter}
+#	    print "chap = $chap, up = $upchap, down= = $downchap\n";
+	    if($Next{$dir}) {
+		
+#	    print "$dir\t$Next{$dir}\t$Prev{$dir}\n";
+	    &buildNav(
+		"../../$chapter[$downchap]/$dir/overview.htm",	# up
+		"../../$chapter[$upchap]/$dir/overview.htm", 	# down
+		"../$Prev{$dir}/overview.htm",		# right
+		"../$Next{$dir}/overview.htm", 	# left
+		      "",  # overview
+		      "..");  # Where to find other overviews
+	    }
+
+	} elsif($unit eq 'overchap') {
+	    print "found overchap\n";
+	    $upchap = $chap + 1; if($upchap > $#chapter) { $upchap = 1;}
+	    $downchap = $chap -1; if($downchap <1) {$downchap = $#chapter}
+#	    print "chap = $chap, up = $upchap, down= = $downchap\n";
+		
+	    &buildNav(
+		"../$chapter[$downchap]/overview.htm",	# up
+		"../$chapter[$upchap]/overview.htm", 	# down
+		"",		# right
+		"", 	# left
+		      "../../contents/chapters.htm",    # Back
+		      "."); # overviews
+
+	} elsif($unit eq 'chap') {
+	    print "found chap\n";
+		
+	    # Hack
+	    $dir = "";
+	    &buildNav(
+		"",	# up
+		"", 	# down
+		"",	# right
+		"", 	# left
+		"chapters.htm",    # Back
+		      "chapters"); # overviews
+	    }
+    }
+    return('');
+    }
+    else {	# no background.
+	return("<body>");
+    }
+}
+
+#==============
+# foot
+#==============
+
+sub foot {
+local($file) = @@_;
+
+# Find the modification time of the input file
+# $mtime = (stat($file))[9];
+#($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($mtime);
+#$mon = (Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec)[$mon];
+
+# Find relative path to file
+# $file = &relpath2("$pwd/$file", "/a/crowe/export5/ee2200cd/visible2/");
+#$file = &relpath2("$pwd/$file", "/a/dogbert.ee.gatech.edu/export/www/public/research/DSP/courses/ee2200/ee2200cd/visible2/");
+
+$footer = 
+"<br><br><hr>\n" .
+$fullhead .
+"McClellan, Schafer and Yoder, " .
+"<i>DSP F<font size=-1>IRST</font>: A Multimedia Approach</i>, 2nd edition. " .
+"Prentice Hall, Upper Saddle River, New Jersey, 2001. " .
+" Copyright (c) 2001 Prentice Hall.\n" .
+"<p>\n" .
+# "<a href=\"feedback.htm\">Click here</a> to submit bug reports, comments, \n" .
+# "or suggestions for improvements.\n" .
+
+# "When submitting a report, please note the URL for this page is " .
+# "<code>$file</code>\n" .
+# "<br>It was last updated $hour:$min on $mday-$mon-19$year\n" .
+"<br><br><br><hr>\n";
+
+&htmlscan(split(/([<>])/,$footer));
+"";
+}
+
+
+#==============
+# getcolor
+#==============
+
+sub getcolor {
+local($chap, $unit) = @@_;
+# compute a background color based on the chapter and unit
+# $color is defined in constants.pl
+
+# print "getcolor($chap, $unit) = $color[$chap]\n";
+$color[$chap];
+
+}
+
+#==============
+# buildNav
+#==============
+
+sub buildNav {
+local($up, $down, $left, $right, $back, $over) = @@_;
+# Builds html code for navigation buttons.  Arguments tell where the
+# up, down, left, and right buttons should go.
+
+# print "up = $up\n";
+# print "down = $down\n";
+# print "left = $left\n";
+# print "right = $right\n";
+
+# if $fullhead has something in it, we've already built the nav buttons and
+# there is no need to do it again.
+if(!$fullhead) {
+$fullhead = "<table border=2 align=right>\n" .
+    "<tr>\n";
+
+# Figure the number of columns in the table.
+$colspan=2;    # ToC an help are always there.
+if($back || -e "../overview.htm") {$colspan++}
+if($left) {$colspan++}
+if($up || $down) {$colspan++}
+if($right) {$colspan++}
+
+# print "colspan=$colspan\n";
+$fullhead .="<td colspan=$colspan align=center>\n";
+
+# Build the chapter overview link at the top of the Nav panel
+
+# print "chapter = $#chapter\n";
+for($i=1; $i<=$#chapter; $i++) {
+    if($i eq $chap) {
+	$fullhead .= "$chapid[$i]\&nbsp\n";
+    } elsif($over eq ".") {
+	$fullhead .= "<a href=\"../$chapter[$i]/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+    } elsif($dir) {
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/$dir/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+    } else {
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+    }
+
+}
+# Remove the last &nbsp
+chop($fullhead);chop($fullhead);chop($fullhead);
+chop($fullhead);chop($fullhead);chop($fullhead);
+$fullhead .= "\n";
+$fullhead .= "</td></tr>\n";
+
+# Build the up/down left/right etc. icons in the middle of the Nav panel
+
+$fullhead .= "<tr align=center>";
+
+if($back) {
+        $fullhead .= "<td><a href = \"$back\">\t" .
+	    "<img border=0 alt=\"Back\" src=\"chapback.gif\"></a></td>\n";
+} elsif(-e "../overview.htm") {
+	$fullhead .= "<td><a href = \"../overview.htm\">\t" . 
+		"<img border=0 alt=\"Overview\" src=\"chapback.gif\"></a></td>\n";
+}
+if($left) {
+	$fullhead .= "<td><a href = \"$left\">\t" .
+		"<img border=0 alt=\"Left\" src=\"back.gif\"></a></td>\n";
+}
+if($up || $down) {
+	$fullhead .= "<td align=center>\t";
+}
+if(-e $up) {
+	$fullhead .= "<a href = \"$up\">\t" .
+		"<img border=0 alt=\"Up\" src=\"up.gif\"></a><br>\n";
+}
+if(-e $down) {
+	$fullhead .= "<a href = \"$down\">\t" .
+		"<img border=0 alt=\"Down\" src=\"down.gif\"></a>";
+}
+if($up || $down) {
+	$fullhead .= "</td>\n";
+}
+if($right) {
+	$fullhead .= "<td><a href = \"$right\">\t" .
+		"<img border=0 alt=\"Right\" src=\"forward.gif\"></a></td>\n";
+}
+$fullhead .= "<td><a href = \"toc.htm\"> <img border=0 alt=\"Contents\" src=\"map.gif\"></a></td>\n" .
+"<td><a href = \"#\" onClick=window.open(\'help.htm\',\'help\',\'status=no,width=503,height=380,menubar=yes\')>	<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n" .
+    "</tr>\n";
+
+# Build the demo/lab/exercise/hw link at the bottom of the Nav panel
+
+$fullhead .= "<tr><td colspan=$colspan align=center>\n";
+foreach $head (@@Headings[2..$#Headings]) {
+    if($head eq $dir) {
+	$fullhead .= "$HeadingsID{$head}\&nbsp\n";
+    } elsif($unit eq 'homework' || $unit eq 'exercise') {
+	$fullhead .= "<a href=\"../$over/$chapter[$chap]/$head/overview.htm\">$HeadingsID{$head}</a>\&nbsp\n";
+    } elsif($unit eq 'chap') {
+	if($head eq 'demos' || $head eq 'labs') {
+	    $fullhead .= "<a href=\"$head.htm\">$HeadingsID{$head}</a>\&nbsp\n";
+    }
+    } else {
+	$fullhead .= "<a href=\"$over/$head/overview.htm\">$HeadingsID{$head}</a>\&nbsp\n";
+    }
+}
+# Remove the last &nbsp
+chop($fullhead);chop($fullhead);chop($fullhead);
+chop($fullhead);chop($fullhead);chop($fullhead);
+$fullhead .= "\n";
+$fullhead .= "</td></tr>\n" .
+    "</table>\n" .
+    "<br>\n" .
+    "";
+}  # end of if(!$fullhead)
+
+&htmlscan(split(/([<>])/,$fullhead));
+}
+
+#==============
+# nav
+#==============
+
+sub nav {
+local($up, $down, $left, $right, $back, $over) = @@_;
+# Writes the html code for navigation buttons.  Must be run after BuildNav.
+
+print "Found <cd-nav>\n";
+&htmlscan(split(/([<>])/,$fullhead));
+"";
+}
+
+1;
+@
+
+
+2.2
+log
+@Found newer version of head.pl.  CHecking it in.
+@
+text
+@d9 3
+d146 1
+a146 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.37 1997/10/01 22:02:53 myoder Exp myoder $';
+d168 1
+a168 1
+# The following looks up the path for 'visible', then goes down to
+d178 1
+a178 1
+		last if ($dir eq 'visible');
+d196 1
+a196 1
+    $chap = 10;
+d328 2
+a329 2
+# $file = &relpath2("$pwd/$file", "/a/crowe/export5/ee2200cd/visible/");
+#$file = &relpath2("$pwd/$file", "/a/dogbert.ee.gatech.edu/export/www/public/research/DSP/courses/ee2200/ee2200cd/visible/");
+d335 3
+a337 3
+"<i>DSP F<font size=-1>IRST</font>: A Multimedia Approach</i>. " .
+"Prentice Hall, Upper Saddle River, New Jersey, 1998. " .
+" Copyright (c) 1998 Prentice Hall.\n" .
+@
+
+
+2.1
+log
+@Version for 2nd edition.
+@
+text
+@d9 19
+d143 1
+a143 1
+$Header = '$Header: /database/bookcd/support/lib/RCS/head.pl,v 1.32 1997/09/10 22:29:05 myoder Exp $';
+d163 1
+a163 1
+# print "head called with chap=$chap and unit=$unit\n" if $debug;
+d168 2
+a169 1
+    if($unit ne 'homework') { # Homework gets it's chap num from cd-head
+a206 16
+local($smallhead) = 
+	    "<a href = \"help.htm\"> .
+		<img src=\"ques2.gif\" align=\"right\"></a>\n" .
+	    "<a href = \"toc.htm\"> . 
+		<img src=\"map.gif\" align=\"left\"></a>\n" .
+	    "<br>\n";
+
+local($uphead) = 
+	    "<a href = \"help.htm\"> .
+		<img src=\"ques2.gif\" align=\"left\"></a>\n" .
+	    "<a href = \"toc.htm\"> . 
+		<img src=\"map.gif\" align=\"right\"></a>\n" .
+	    "<a href = \"../overview.htm\"> . 
+		<img src=\"back.gif\" align=\"right\"></a>\n" .
+	    "<br>\n";
+
+d215 2
+a216 1
+    if($chap != 0) {
+d222 1
+a222 1
+#	print "$number\n";
+a225 8
+#	    if ($Prev{$dir}) {
+#		&buildNav(
+#		    "../$Prev{$dir}/index.htm",		# up
+#		    "../$Next{$dir}/index.htm", 	# down
+#		    "",	# left
+#	    	    "", 	# right
+#			  "../..");
+#	    } else {
+d249 3
+a251 3
+	} elsif($unit eq 'homework') {
+	    print "I Found homework prev=$prev next=$next\n";
+	    $dir = 'homework'; #kludge
+d290 13
+d383 11
+a393 1
+$fullhead .="<td colspan=6 align=center>\n";
+d398 1
+a398 1
+	$fullhead .= "$i\&nbsp\n";
+d400 3
+a402 1
+	$fullhead .= "<a href=\"../$chapter[$i]/overview.htm\">$i</a>\&nbsp\n";
+d404 1
+a404 1
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/$dir/overview.htm\">$i</a>\&nbsp\n";
+d406 1
+d408 4
+d413 3
+d448 1
+a448 1
+"<td><a href = \"help.htm\">	<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n" .
+d451 3
+a453 1
+$fullhead .= "<tr><td colspan=6 align=center>\n";
+d456 7
+a462 3
+	$fullhead .= "$head\&nbsp\n";
+    } elsif($unit eq 'homework') {
+	$fullhead .= "<a href=\"../$over/$chapter[$chap]/$head/overview.htm\">$head</a>\&nbsp\n";
+d464 1
+a464 1
+	$fullhead .= "<a href=\"$over/$head/overview.htm\">$head</a>\&nbsp\n";
+d467 4
+@
+
+
+1.37
+log
+@Added $HeadingsID.  Heading are now uppercase.
+@
+text
+@a8 16
+#Revision 1.36  1997/09/30  17:35:58  myoder
+#Fixxed a // bug.
+#demos.htm and labs.htm now go to chapters.htm when ChapBack is pushed.
+#demos.htm and labs.htm now just list demos and labs in Nav Box.
+#
+#Revision 1.35  1997/09/17  22:16:20  myoder
+#Removed some old commented out code.
+#Added code to handle exercise.
+#Help now opens in a new window.
+#
+#Revision 1.34  1997/09/12  20:53:01  myoder
+#Removed the nbsp at the in the Nav Box so the link would look more centered.
+#
+#Revision 1.33  1997/09/11  20:40:31  myoder
+#Added chapid so chapter 10 will appear as A.
+#
+d124 1
+a124 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.36 1997/09/30 17:35:58 myoder Exp myoder $';
+d144 1
+a144 1
+print "head called with chap=$chap and unit=$unit\n" if $debug;
+d149 1
+a149 2
+# Homework and Exercises  get their chap num from cd-head
+    if($unit ne 'homework' && $unit ne 'exercise') { 
+d187 16
+d211 1
+a211 2
+#    if($chap >! 0) {
+    if(1) {
+d217 1
+a217 1
+	print "$number\n";
+d221 8
+d252 3
+a254 3
+	} elsif($unit eq 'homework' || $unit eq 'exercise') {
+	    print "I Found $unit prev=$prev next=$next\n";
+	    $dir = $unit; #kludge
+a292 13
+
+	} elsif($unit eq 'chap') {
+	    print "found chap\n";
+		
+	    # Hack
+	    $dir = "";
+	    &buildNav(
+		"",	# up
+		"", 	# down
+		"",	# right
+		"", 	# left
+		"chapters.htm",    # Back
+		      "chapters"); # overviews
+d373 1
+a373 11
+# Figure the number of columns in the table.
+$colspan=2;    # ToC an help are always there.
+if($back || -e "../overview.htm") {$colspan++}
+if($left) {$colspan++}
+if($up || $down) {$colspan++}
+if($right) {$colspan++}
+
+# print "colspan=$colspan\n";
+$fullhead .="<td colspan=$colspan align=center>\n";
+
+# Build the chapter overview link at the top of the Nav panel
+d378 1
+a378 1
+	$fullhead .= "$chapid[$i]\&nbsp\n";
+d380 1
+a380 3
+	$fullhead .= "<a href=\"../$chapter[$i]/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+    } elsif($dir) {
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/$dir/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+d382 1
+a382 1
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+a383 1
+
+a384 4
+# Remove the last &nbsp
+chop($fullhead);chop($fullhead);chop($fullhead);
+chop($fullhead);chop($fullhead);chop($fullhead);
+$fullhead .= "\n";
+a385 3
+
+# Build the up/down left/right etc. icons in the middle of the Nav panel
+
+d418 1
+a418 1
+"<td><a href = \"#\" onClick=window.open(\'help.htm\',\'help\',\'status=no,width=503,height=380,menubar=yes\')>	<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n" .
+d421 1
+a421 3
+# Build the demo/lab/exercise/hw link at the bottom of the Nav panel
+
+$fullhead .= "<tr><td colspan=$colspan align=center>\n";
+d424 3
+a426 7
+	$fullhead .= "$HeadingsID{$head}\&nbsp\n";
+    } elsif($unit eq 'homework' || $unit eq 'exercise') {
+	$fullhead .= "<a href=\"../$over/$chapter[$chap]/$head/overview.htm\">$HeadingsID{$head}</a>\&nbsp\n";
+    } elsif($unit eq 'chap') {
+	if($head eq 'demos' || $head eq 'labs') {
+	    $fullhead .= "<a href=\"$head.htm\">$HeadingsID{$head}</a>\&nbsp\n";
+    }
+d428 1
+a428 1
+	$fullhead .= "<a href=\"$over/$head/overview.htm\">$HeadingsID{$head}</a>\&nbsp\n";
+a430 4
+# Remove the last &nbsp
+chop($fullhead);chop($fullhead);chop($fullhead);
+chop($fullhead);chop($fullhead);chop($fullhead);
+$fullhead .= "\n";
+@
+
+
+1.36
+log
+@Fixxed a // bug.
+demos.htm and labs.htm now go to chapters.htm when ChapBack is pushed.
+demos.htm and labs.htm now just list demos and labs in Nav Box.
+@
+text
+@d9 5
+d140 1
+a140 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.35 1997/09/17 22:16:20 myoder Exp myoder $';
+d453 1
+a453 1
+	$fullhead .= "$head\&nbsp\n";
+d455 1
+a455 1
+	$fullhead .= "<a href=\"../$over/$chapter[$chap]/$head/overview.htm\">$head</a>\&nbsp\n";
+d458 1
+a458 1
+	    $fullhead .= "<a href=\"$head.htm\">$head</a>\&nbsp\n";
+d461 1
+a461 1
+	$fullhead .= "<a href=\"$over/$head/overview.htm\">$head</a>\&nbsp\n";
+@
+
+
+1.35
+log
+@Removed some old commented out code.
+Added code to handle exercise.
+Help now opens in a new window.
+@
+text
+@d9 5
+d135 1
+a135 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.34 1997/09/12 20:53:01 myoder Exp myoder $';
+d293 1
+a293 1
+		"toc.htm",    # Back
+d385 2
+d393 2
+d396 1
+a396 1
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/$dir/overview.htm\">$chapid[$i]</a>\&nbsp\n";
+d398 1
+d405 3
+d443 2
+d452 3
+a454 1
+	$fullhead .= "<a href=\"$head.htm\">$head</a>\&nbsp\n";
+@
+
+
+1.34
+log
+@Removed the nbsp at the in the Nav Box so the link would look more centered.
+@
+text
+@d9 3
+d130 1
+a130 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.33 1997/09/11 20:40:31 myoder Exp $';
+d150 1
+a150 1
+# print "head called with chap=$chap and unit=$unit\n" if $debug;
+d155 2
+a156 1
+    if($unit ne 'homework') { # Homework gets it's chap num from cd-head
+a193 16
+local($smallhead) = 
+	    "<a href = \"help.htm\"> .
+		<img src=\"ques2.gif\" align=\"right\"></a>\n" .
+	    "<a href = \"toc.htm\"> . 
+		<img src=\"map.gif\" align=\"left\"></a>\n" .
+	    "<br>\n";
+
+local($uphead) = 
+	    "<a href = \"help.htm\"> .
+		<img src=\"ques2.gif\" align=\"left\"></a>\n" .
+	    "<a href = \"toc.htm\"> . 
+		<img src=\"map.gif\" align=\"right\"></a>\n" .
+	    "<a href = \"../overview.htm\"> . 
+		<img src=\"back.gif\" align=\"right\"></a>\n" .
+	    "<br>\n";
+
+d202 2
+a203 1
+    if($chap != 0) {
+d209 1
+a209 1
+#	print "$number\n";
+a212 8
+#	    if ($Prev{$dir}) {
+#		&buildNav(
+#		    "../$Prev{$dir}/index.htm",		# up
+#		    "../$Next{$dir}/index.htm", 	# down
+#		    "",	# left
+#	    	    "", 	# right
+#			  "../..");
+#	    } else {
+d236 3
+a238 3
+	} elsif($unit eq 'homework') {
+	    print "I Found homework prev=$prev next=$next\n";
+	    $dir = 'homework'; #kludge
+d277 13
+d377 1
+a377 1
+print "colspan=$colspan\n";
+d427 1
+a427 1
+"<td><a href = \"help.htm\">	<img border=0 alt=\"Help\" src=\"ques2.gif\"></a></td>\n" .
+d434 1
+a434 1
+    } elsif($unit eq 'homework') {
+d436 2
+@
+
+
+1.33
+log
+@Added chapid so chapter 10 will appear as A.
+@
+text
+@d9 3
+d127 1
+a127 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.32 1997/09/10 22:29:05 myoder Exp myoder $';
+d377 5
+a381 5
+$i=2;    # ToC an help are always there.
+if($back || -e "../overview.htm") {$i++}
+if($left) {$i++}
+if($up || $down) {$i++}
+if($right) {$i++}
+d383 2
+a384 2
+print "i=$i\n";
+$fullhead .="<td colspan=$i align=center>\n";
+d396 4
+d436 1
+a436 1
+$fullhead .= "<tr><td colspan=6 align=center>\n";
+d446 4
+@
+
+
+1.32
+log
+@Centered the navigation buttons.
+Fixed BuildNav to work in new archive location.
+@
+text
+@d9 4
+d124 1
+a124 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.31 1997/09/09 22:28:20 myoder Exp myoder $';
+d373 9
+a381 1
+$fullhead .="<td colspan=6 align=center>\n";
+d386 1
+a386 1
+	$fullhead .= "$i\&nbsp\n";
+d388 1
+a388 1
+	$fullhead .= "<a href=\"../$chapter[$i]/overview.htm\">$i</a>\&nbsp\n";
+d390 1
+a390 1
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/$dir/overview.htm\">$i</a>\&nbsp\n";
+@
+
+
+1.31
+log
+@Updated footer for final version.  No dates or bug report URL.
+Added alt= filed to many images.
+@
+text
+@d9 4
+d120 1
+a120 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.30 1997/09/04 21:59:40 myoder Exp myoder $';
+d249 1
+a249 1
+	    print "Found homework prev=$prev next=$next\n";
+d256 2
+a257 2
+		    "../../../chapters/$chapter[$chap]/$dir/overview.htm", # overview
+		    "../../chapters");
+d382 1
+a382 1
+$fullhead .= "<tr>";
+@
+
+
+1.30
+log
+@Added some space between the numbers and units in the nav box by
+changing the spaces to non-braking spaces (&nbsp).
+@
+text
+@d9 4
+d116 1
+a116 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.29 1997/09/04 21:06:00 myoder Exp myoder $';
+d302 3
+a304 3
+$mtime = (stat($file))[9];
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($mtime);
+$mon = (Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec)[$mon];
+d308 1
+a308 1
+$file = &relpath2("$pwd/$file", "/a/dogbert.ee.gatech.edu/export/www/public/research/DSP/courses/ee2200/ee2200cd/visible/");
+d315 2
+a316 2
+"Prentice Hall, Upper Saddle River, New Jersey, 1997. " .
+" &copy1997 Prentice Hall.\n" .
+d318 2
+a319 2
+"<a href=\"feedback.htm\">Click here</a> to submit bug reports, comments, \n" .
+"or suggestions for improvements.\n" .
+d321 4
+a324 4
+"When submitting a report, please note the URL for this page is " .
+"<code>$file</code>\n" .
+"<br>It was last updated $hour:$min on $mday-$mon-19$year\n" .
+"<hr>\n";
+d382 1
+a382 1
+	    "<img border=0 src=\"chapback.gif\"></a></td>\n";
+d385 1
+a385 1
+		"<img border=0 src=\"chapback.gif\"></a></td>\n";
+d389 1
+a389 1
+		"<img border=0 src=\"back.gif\"></a></td>\n";
+d396 1
+a396 1
+		"<img border=0 src=\"up.gif\"></a><br>\n";
+d400 1
+a400 1
+		"<img border=0 src=\"down.gif\"></a>";
+d407 1
+a407 1
+		"<img border=0 src=\"forward.gif\"></a></td>\n";
+d409 2
+a410 2
+$fullhead .= "<td><a href = \"toc.htm\"> <img border=0 src=\"map.gif\"></a></td>\n" .
+"<td><a href = \"help.htm\">	<img border=0 src=\"ques2.gif\"></a></td>\n" .
+@
+
+
+1.29
+log
+@Added <cd-nav> tag.  It's will instert navigation buttons.
+Major changed to handle homework.  homework doesn't appear in the usual
+file locals, so I've had to do some kludgeing.
+@
+text
+@d9 5
+d112 1
+a112 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.28 1997/06/19 22:31:00 myoder Exp myoder $';
+d366 1
+a366 1
+	$fullhead .= "$i \n";
+d368 1
+a368 1
+	$fullhead .= "<a href=\"../$chapter[$i]/overview.htm\">$i</a> \n";
+d370 1
+a370 1
+	$fullhead .= "<a href=\"../$over/$chapter[$i]/$dir/overview.htm\">$i</a> \n";
+d412 1
+a412 1
+	$fullhead .= "$head  \n";
+d414 1
+a414 1
+	$fullhead .= "<a href=\"../$over/$chapter[$chap]/$head/overview.htm\">$head</a>  \n";
+d416 1
+a416 1
+	$fullhead .= "<a href=\"$over/$head/overview.htm\">$head</a>  \n";
+@
+
+
+1.28
+log
+@Added a hack to change chap A to 10.
+@
+text
+@d9 3
+d107 1
+a107 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.27 1997/02/07 13:29:23 myoder Exp myoder $';
+d124 2
+d132 1
+d152 2
+d202 1
+a202 1
+	if($unit eq 'demo' || $unit eq 'lab' || $unit eq 'homework') {
+d235 11
+d302 2
+a303 1
+"<br><br><hr>" .
+d350 4
+a353 1
+local($fullhead) = "<table border=2 align=right>\n" .
+d407 3
+a409 1
+	$fullhead .= "$head \n";
+d411 1
+a411 1
+	$fullhead .= "<a href=\"$over/$head/overview.htm\">$head</a> \n";
+d418 14
+d433 1
+@
+
+
+1.27
+log
+@Changed the path in foot() to reflect the new path returned by 'pwd'.
+@
+text
+@d9 3
+d104 1
+a104 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.26 1996/11/12 19:00:15 myoder Exp myoder $';
+d146 4
+@
+
+
+1.26
+log
+@Changed footer to point to feedback.htm.
+@
+text
+@d9 3
+d101 1
+a101 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.25 1996/09/02 16:05:02 myoder Exp myoder $';
+d272 2
+a273 1
+$file = &relpath2("$pwd/$file", "/a/crowe/export5/ee2200cd/visible/");
+@
+
+
+1.25
+log
+@Split chapter 6.  Now uses location of file for the chapter number
+rather than the parameter in the <cd-head> tag.
+@
+text
+@d9 4
+d98 1
+a98 1
+$Header = '$Header: /usr/users/faculty/yoder/bookcd/support/lib/RCS/head.pl,v 1.24 1996/07/09 17:48:16 myoder Exp yoder $';
+d262 1
+d268 5
+a272 1
+"<hr>" .
+d277 11
+a287 6
+"<hr>\n" .
+"URL = $pwd/$file\n<br>Last updated $hour:$min on $mday-$mon-19$year<br>" .
+"<hr>\n" .
+"Please Email <a href=\"mailto:Mark.A.Yoder\@@Rose-Hulman.edu\">\n" .
+"Mark.A.Yoder\@@Rose-Hulman.edu</a>\n" .
+"if you have trouble with this page.\n";
+d382 1
+a382 1
+	&htmlscan(split(/([<>])/,$fullhead));
+@
+
+
+1.24
+log
+@Converted to lowercase.
+@
+text
+@d9 3
+d94 1
+a94 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.23 1996/06/03 17:49:11 myoder Exp myoder $';
+d114 23
+d215 2
+a216 2
+	    $upchap = $chap + 1; if($upchap > 9) { $upchap = 1;}
+	    $downchap = $chap -1; if($downchap <1) {$downchap = 9}
+d232 2
+a233 2
+	    $upchap = $chap + 1; if($upchap > 9) { $upchap = 1;}
+	    $downchap = $chap -1; if($downchap <1) {$downchap = 9}
+d310 2
+a311 1
+for($i=1; $i<=9; $i++) {
+@
+
+
+1.23
+log
+@Added new navigation buttons.  Now you can jump straight to a chapter,
+or a chapter section.
+@
+text
+@d9 4
+d91 1
+a91 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.22 1996/04/29 13:49:56 myoder Exp myoder $';
+d125 2
+a126 2
+	    "<a href = \"ToC.htm\"> . 
+		<img src=\"Map.gif\" align=\"left\"></a>\n" .
+d132 2
+a133 2
+	    "<a href = \"ToC.htm\"> . 
+		<img src=\"Map.gif\" align=\"right\"></a>\n" .
+d135 1
+a135 1
+		<img src=\"Back.gif\" align=\"right\"></a>\n" .
+d156 8
+a163 8
+	    if ($Prev{$dir}) {
+		&buildNav(
+		    "../$Prev{$dir}/index.htm",		# up
+		    "../$Next{$dir}/index.htm", 	# down
+		    "",	# left
+	    	    "", 	# right
+			  "../..");
+	    } else {
+d166 2
+a167 2
+		&buildNav("","","","","","../..")
+	    }
+d215 1
+a215 1
+		      "../../Contents/Chapters.htm",    # Back
+d298 1
+a298 1
+	    "<img border=0 src=\"ChapBack.gif\"></a></td>\n";
+d301 1
+a301 1
+		"<img border=0 src=\"ChapBack.gif\"></a></td>\n";
+d305 1
+a305 1
+		"<img border=0 src=\"Back.gif\"></a></td>\n";
+d312 1
+a312 1
+		"<img border=0 src=\"Up.gif\"></a><br>\n";
+d316 1
+a316 1
+		"<img border=0 src=\"Down.gif\"></a>";
+d323 1
+a323 1
+		"<img border=0 src=\"Forward.gif\"></a></td>\n";
+d325 1
+a325 1
+$fullhead .= "<td><a href = \"ToC.htm\"> <img border=0 src=\"Map.gif\"></a></td>\n" .
+@
+
+
+1.22
+log
+@Added a "overchap" unit for chapter overviews.
+Added a fifth argument of buildNav which allows one to specify the BACK
+button.
+@
+text
+@d9 5
+d87 1
+a87 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.21 1996/04/15 19:49:33 myoder Exp myoder $';
+d146 4
+d157 2
+a158 1
+	    	    "") 	# right
+d160 1
+d162 1
+a162 1
+		&buildNav("","","","")
+a165 2
+	    $_ = $dir;
+	    ($number, $name) = /(\d*)(\w*)/;
+d174 1
+d179 3
+a181 1
+	    	    "") 	# right
+d195 3
+a197 1
+		"../$Next{$dir}/overview.htm") 	# left
+d211 2
+a212 1
+		      "../../Contents/Chapters.htm")# Back
+d266 1
+a266 1
+local($up, $down, $left, $right, $back) = @@_;
+d275 16
+a290 5
+# Check to see if the .htm files are in place.  If not, use the .html names.
+# if($up    && ! -e $up) { $up = $up . "l"}
+# if($down  && ! -e $down) { $down = $down . "l"}
+# if($left  && ! -e $left) { $left = $left . "l"}
+# if($right && ! -e $right) { $right = $right . "l"}
+a291 3
+local($fullhead) = "<table border=2 align=right>\n" .
+    "<tr>\n" .
+    "<td> </td>\n";
+d323 11
+a333 1
+    "</tr>\n" .
+d335 1
+a335 1
+#    "<hr>\n";
+@
+
+
+1.21
+log
+@Updated copyright notice to reflect the title.
+Notes now know how to find who is up and down from them.
+@
+text
+@d9 4
+d82 1
+a82 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.20 1996/03/26 18:30:04 myoder Exp myoder $';
+d185 14
+a198 1
+	}
+d251 1
+a251 1
+local($up, $down, $left, $right) = @@_;
+d264 1
+a264 1
+# if($rigth && ! -e $right) { $right = $right . "l"}
+d269 4
+a272 1
+if(-e "../overview.htm") {
+@
+
+
+1.20
+log
+@Put in DSP First title.
+@
+text
+@d9 3
+d78 1
+a78 1
+$Header = '$Header: /home/ratbert5/myoder/bookcd/support/lib/RCS/head.pl,v 1.19 1996/03/26 18:23:43 myoder Exp myoder $';
+d137 1
+a137 2
+	if($unit eq 'demo' || $unit eq 'lab' || 
+    		$unit eq 'homework' || $unit eq 'notes') {
+d149 18
+d205 7
+a211 3
+" &copy1997 Prentice Hall." .
+"<hr>" .
+"URL = $pwd/$file\n<br>Last updated $hour:$min on $mday-$mon-19$year<br>";
+d263 1
+a263 1
+if($up) {
+d267 1
+a267 1
+if($down) {
+@
+
+
+1.19
+log
+@stuff
+@
+text
+@d9 3
+d75 1
+a75 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/head.pl,v 1.18 1996/03/15 21:00:23 myoder Exp $';
+d181 7
+a187 1
+"<hr>URL = $pwd/$file\n<br>Last updated $hour:$min on $mday-$mon-19$year<br>";
+@
+
+
+1.18
+log
+@Added 'notes' as a type of unit.
+No longer looks for .html, just .htm
+@
+text
+@d9 4
+d72 1
+a72 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/head.pl,v 1.17 1996/02/07 19:08:35 myoder Exp $';
+@
+
+
+1.17
+log
+@Up and down button will not appear if directory isn't in $Prev{}.
+New look for navigation buttons.  right justified.  Text wraps around it.
+@
+text
+@d9 4
+d68 1
+a68 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/head.pl,v 1.16 1996/01/24 21:31:54 myoder Exp myoder $';
+d127 2
+a128 1
+	if($unit eq 'demo' || $unit eq 'lab' || $unit eq 'homework') {
+d141 1
+a141 1
+#	    print "found overview\n";
+d207 4
+a210 4
+if($up    && ! -e $up) { $up = $up . "l"}
+if($down  && ! -e $down) { $down = $down . "l"}
+if($left  && ! -e $left) { $left = $left . "l"}
+if($rigth && ! -e $right) { $right = $right . "l"}
+@
+
+
+1.16
+log
+@Improved navigation buttons so demos will have up and down buttons
+that take them to the other demos in the same chapter.
+You must put the up and down info in constants.pl.
+@
+text
+@d9 5
+d64 1
+a64 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/head.pl,v 1.15 1996/01/10 22:01:13 myoder Exp $';
+d125 10
+a134 5
+	    &buildNav(
+		"../$Prev{$dir}/index.htm",		# up
+		"../$Next{$dir}/index.htm", 	# down
+		"",	# left
+		"") 	# right
+d207 1
+a207 1
+local($fullhead) = "<table>\n" .
+d209 1
+a209 1
+    "<td width = 50%> </td>\n";
+d239 3
+a241 3
+    "</table>" .
+    "<hr>\n";
+
+@
+
+
+1.15
+log
+@Changed .html to .htm
+.html is used if .htm isn't there.
+@
+text
+@d9 4
+d59 1
+a59 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/head.pl,v 1.14 1995/12/11 12:50:43 myoder Exp $';
+d115 10
+a124 6
+	if($unit eq 'demo') {
+	    if(-e "../overview.htm") {
+	    	&htmlscan(split(/([<>])/,$uphead));
+	    } else {
+	    	&htmlscan(split(/([<>])/,$smallhead));
+	    }
+a126 3
+	    @@tmp = split("/", $pwd);	# Find name of current directory
+	    @@tmp = reverse(@@tmp);
+	    $dir = $tmp[0];
+d192 4
+a195 4
+if(! -e $up) { $up = $up . "l"}
+if(! -e $down) { $down = $down . "l"}
+if(! -e $left) { $left = $left . "l"}
+if(! -e $right) { $right = $right . "l"}
+d199 28
+a226 7
+    "<td width = 50%> </td>\n" .
+"<td><a href = \"../overview.htm\">\t<img border=0 src=\"ChapBack.gif\"></a></td>\n" .
+"<td><a href = \"$left\">\t<img border=0 src=\"Back.gif\"></a></td>\n" .
+"<td align=center><a href = \"$up\">\t<img border=0 src=\"Up.gif\"></a><br>\n" .
+"<a href = \"$down\">\t<img border=0 src=\"Down.gif\"></a></td>\n" .
+"<td><a href = \"$right\">\t<img border=0 src=\"Forward.gif\"></a></td>\n" .
+"<td><a href = \"ToC.htm\"> <img border=0 src=\"Map.gif\"></a></td>\n" .
+@
+
+
+1.14
+log
+@Commented out many print debug statements.
+Swapped left and right buttons.
+@
+text
+@d9 4
+d55 1
+a55 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/head.pl,v 1.13 1995/12/08 12:42:02 myoder Exp myoder $';
+d87 3
+a89 3
+	    "<a href = \"Help.html\"> .
+		<img src=\"Question2.gif\" align=\"right\"></a>\n" .
+	    "<a href = \"MasterToC.html\"> . 
+d94 3
+a96 3
+	    "<a href = \"Help.html\"> .
+		<img src=\"Question2.gif\" align=\"left\"></a>\n" .
+	    "<a href = \"MasterToC.html\"> . 
+d98 1
+a98 1
+	    "<a href = \"../overview.html\"> . 
+d112 1
+a112 1
+	    if(-e "../overview.html") {
+d129 4
+a132 4
+		"../../$chapter[$downchap]/$dir/overview.html",	# up
+		"../../$chapter[$upchap]/$dir/overview.html", 	# down
+		"../$Prev{$dir}/overview.html",		# right
+		"../$Next{$dir}/overview.html") 	# left
+d186 6
+d195 1
+a195 1
+"<td><a href = \"../overview.html\">\t<img border=0 src=\"ChapBack.gif\"></a></td>\n" .
+d200 2
+a201 2
+"<td><a href = \"MasterToC.html\"> <img border=0 src=\"Map.gif\"></a></td>\n" .
+"<td><a href = \"Help.html\">	<img border=0 src=\"Question2.gif\"></a></td>\n" .
+@
+
+
+1.13
+log
+@Further refinement of how the navigation buttons operate.
+@
+text
+@d9 3
+d51 1
+a51 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/head.pl,v 1.11 1995/10/17 17:56:42 myoder Exp $';
+d69 1
+a69 1
+print "head called with chap=$chap and unit=$unit\n" if $debug;
+d114 1
+a114 1
+	    print "found overview\n";
+d120 1
+a120 1
+	    print "chap = $chap, up = $upchap, down= = $downchap\n";
+d123 1
+a123 1
+	    print "$dir\t$Next{$dir}\t$Prev{$dir}\n";
+d127 2
+a128 2
+		"../$Next{$dir}/overview.html", 	# left
+		"../$Prev{$dir}/overview.html")	# right
+d163 1
+a163 1
+print "getcolor($chap, $unit) = $color[$chap]\n";
+d177 4
+a180 4
+print "up = $up\n";
+print "down = $down\n";
+print "left = $left\n";
+print "right = $right\n";
+@
+
+
+1.12
+log
+@Added buildNav which builds a navigation panel and is passed
+paths to the up down left and right buttons.
+@
+text
+@d182 7
+a188 7
+"<td><a href = \"CoverPage.html\">\t<img src=\"ChapBack.gif\"></a></td>\n" .
+"<td><a href = \"$left\">\t<img src=\"Back.gif\"></a></td>\n" .
+"<td align=center><a href = \"$up\">\t<img src=\"Up.gif\"></a><br>\n" .
+"<a href = \"$down\">\t<img src=\"Down.gif\"></a></td>\n" .
+"<td><a href = \"$right\">\t<img src=\"Forward.gif\"></a></td>\n" .
+"<td><a href = \"MasterToC.html\"> <img src=\"Map.gif\"></a></td>\n" .
+"<td><a href = \"Help.html\">	<img src=\"Question2.gif\"></a></td>\n" .
+@
+
+
+1.11
+log
+@Added two new heading styles:
+1.	Has Map and help button only.
+2.	HAs 1. plus back button.
+@
+text
+@d9 5
+d48 1
+a48 1
+$Header = '$Header: /a/crowe/export5/ee2200cd/support/lib/RCS/head.pl,v 1.10 1995/08/22 20:26:40 myoder Exp $';
+d51 1
+a77 20
+local($fullhead) = "<table>\n" .
+	    "<tr>\n" .
+	    "<td width = 50%> </td>\n" .
+	    "<td><a href = \"CoverPage.html\">" .
+	    	"<img src=\"ChapBack.gif\"></a></td>\n" .
+	    "<td><a href = \"CoverPage.html\">
+		<img src=\"Back.gif\"></a></td>\n" .
+	    "<td align=center><a href = \"CoverPage.html\">
+		<img src=\"Up.gif\"></a><br>\n" .
+	    "<a href = \"CoverPage.html\">
+		<img src=\"Down.gif\"></a></td>\n" .
+	    "<td><a href = \"CoverPage.html\">
+		<img src=\"Forward.gif\"></a></td>\n" .
+	    "<td><a href = \"MasterToC.html\">
+		<img src=\"Map.gif\"></a></td>\n" .
+	    "<td><a href = \"Help.html\">
+		<img src=\"Question2.gif\"></a></td>\n" .
+	    "</tr>\n" .
+	    "</table>" .
+	    "<hr>\n";
+d104 23
+a126 4
+	if(-e "../overview.html") {
+	    &htmlscan(split(/([<>])/,$uphead));
+	} else {
+	    &htmlscan(split(/([<>])/,$smallhead));
+a154 2
+@@color = ("8888bb", "ffeeee", "eeffee", "eeeeff", "ffffee", "eeffff", "ffffff");
+
+d158 1
+d163 31
+@
+
+
+1.10
+log
+@Added background color and getcolor to pick which one to use.
+@
+text
+@d9 3
+d43 1
+a43 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/head.pl,v 1.9 1995/07/18 15:11:33 myoder Exp myoder $';
+d72 1
+a72 12
+
+if($back_flag) {
+#    $background = "background=\"" . &findpath("back$chap$unit.gif") . "\"";
+    $background = "bgcolor=\"" . &getcolor($chap, $unit) . "\"";
+
+#    print HTML "<body $background text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+    print HTML "<body $background >\n";
+
+    # If not chapter 0, put up the navigation controls.
+    if($chap != 0) {
+	&htmlscan(split(/([<>])/,
+	    "<table>\n" .
+d87 1
+a87 1
+	    "<td><a href = \"CoverPage.html\">
+d91 31
+a121 1
+	    "<hr>\n"));
+d123 2
+a124 1
+	return('');
+d150 1
+a150 1
+@@color = ("ffeeee", "eeffee", "eeeeff", "ffffee", "eeffff", "ffffff");
+d156 2
+a157 2
+print "getcolor($chap, $unit) = $color[$chap-1]\n";
+$color[$chap-1];
+@
+
+
+1.9
+log
+@Moved nav buttons from header to body since putting gifs in the
+header seems to prevent the body from having a background.
+@
+text
+@d9 4
+d40 1
+a40 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/lib/RCS/head.pl,v 1.8 1995/07/06 17:06:42 myoder Exp $';
+d71 2
+a72 1
+    $background = &findpath("back$chap$unit.gif");
+d74 2
+a75 1
+    print HTML "<body background=$background text=f0f0f0 link=f0f0f0 vlink=f0e0e0>\n";
+d120 16
+@
+
+
+1.8
+log
+@head now passes it's html through the converter so path names can be
+computed.
+@
+text
+@d9 4
+d36 1
+a36 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/lib/RCS/head.pl,v 1.7 1995/06/29 21:48:17 myoder Exp $';
+a45 1
+local($head);
+d55 18
+a72 4
+if($chap == 0) {
+	$head = '<head>';
+	}
+else {
+a73 1
+	    "<head>\n" .
+d81 1
+a81 1
+	    "<td><a href = \"CoverPage.html\">
+d87 1
+a87 1
+	    "<td><a href = \"CoverPage.html\">
+d92 2
+a93 2
+	    "</table>"));
+	$head = '';
+d95 5
+a99 22
+
+print $head if $debug;
+$head;
+}
+
+#==============
+# body
+#==============
+
+sub body {
+local(%params) = @@_;
+local($background);
+
+if($back_flag) {
+$background = &findpath("back$chap$unit.gif");
+
+return("<body background=$background text=f0f0f0 link=f0f0f0 vlink=f0e0e0>");
+}
+else {
+return("<body>");
+}
+
+@
+
+
+1.7
+log
+@The -b option to cd2html will now prevent the background image
+from being loaded.
+The -d option will set the debug flag.
+@
+text
+@d9 5
+d32 3
+a34 1
+$Header = '$Header: /a/crowe/export/home/crowe3/ee2200cd/support/lib/RCS/head.pl,v 1.6 1995/06/19 18:26:47 myoder Exp $';
+d43 1
+a43 1
+local($debug) = 0;
+a46 2
+print "head called\n" if $debug;
+
+d50 2
+d56 22
+a77 14
+	$head = 
+		"<head>\n" .
+		"<table>\n" .
+		"<tr>\n" .
+		"<td width = 50%> </td>\n" .
+		"<td><a href = \"Contents/CoverPage.html\"><img src=\"Graphics/ChapBack.gif\"></a></td>\n" .
+		"<td><a href = \"Contents/CoverPage.html\"><img src=\"Graphics/Back.gif\"></a></td>\n" .
+		"<td><a href = \"Contents/CoverPage.html\"><img src=\"Graphics/Up.gif\"></a><br>\n" .
+		"	<a href = \"Contents/CoverPage.html\"><img src=\"Graphics/Down.gif\"></a></td>\n" .
+		"<td><a href = \"Contents/CoverPage.html\"><img src=\"Graphics/Forward.gif\"></a></td>\n" .
+		"<td><a href = \"Contents/CoverPage.html\"><img src=\"Graphics/Map.gif\"></a></td>\n" .
+		"<td><a href = \"Contents/CoverPage.html\"><img src=\"Graphics/Question2.gif\"></a></td>\n" .
+		"</tr>\n" .
+		"</table>";
+d93 1
+a93 1
+$background = &findpath("back$chap$unit.gif", @@path);
+d114 1
+a114 1
+"<hr>URL = $file\n<br>Last updated $hour:$min on $mday-$mon-19$year<br>";
+@
+
+
+1.6
+log
+@Added 1; at the end so it will work with 'require'.
+@
+text
+@d9 3
+d27 1
+a27 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/head.pl,v 1.5 1995/06/19 18:16:49 myoder Exp myoder $';
+d77 1
+d80 6
+a85 1
+"<body background=$background text=f0f0f0 link=f0f0f0 vlink=f0e0e0>";
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d9 3
+d24 1
+a24 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/head.pl,v 1.4 1995/06/19 18:10:47 myoder Exp myoder $';
+d92 2
+@
+
+
+1.4
+log
+@Fixed comment bug
+@
+text
+@d9 3
+d21 1
+a21 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/lib/RCS/head.pl,v 1.3 1995/06/01 19:00:50 myoder Exp myoder $';
+@
+
+
+1.3
+log
+@back() now uses findpath() to find backgrounds.
+@
+text
+@d9 3
+d18 1
+a18 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/head.pl,v 1.2 1995/06/01 16:41:50 myoder Exp myoder $';
+@
+
+
+1.2
+log
+@Changed comment character to #
+@
+text
+@d9 3
+d15 1
+a15 1
+$Header = '$Header: /home/kirin/myoder/bookcd/support/scripts/RCS/head.pl,v 1.1 1995/06/01 16:05:00 myoder Exp myoder $';
+d65 1
+a65 1
+$background = "back$chap$unit.gif";
+d67 1
+a67 1
+"<body background=$background>";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 5
+a12 2
+#"$Log$";
+$Header = '$Header$';
+@

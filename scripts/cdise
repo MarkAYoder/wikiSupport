@@ -1,0 +1,4 @@
+#!/bin/bash
+new=$(basename $1 .htm).cd
+sed -f ~/cdrom/support/scripts/cdise.script $1 > $new
+cd2html $new

@@ -1,0 +1,48 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $path = '/home/myoder/projects/SignalFirst/visible3/cdrom/visible3/archives';
+my $file = "$path/ALL_HW.txt";
+my %hw;
+my $count;	# Number of hws with same description.
+
+open HW, "<$file" or die "Can't open $file";
+
+while(<HW>) {
+    /(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)\t(.*)/;
+    my $Quarter="$1_gif";
+    my $Statement=$2;
+    my $Sol1=$3;
+    my $Sol2=$4;
+    my $Sol3=$5;
+    my $Sol4=$6;
+    my $Chap=$7;
+    my $Desc=$8;
+    $Quarter =~ s/-//;
+    $Desc =~ s/\"//g;
+#    $Desc =~ s/\'/\'\'/g;
+
+    next if $Chap =~ /[\.x]/;	# Skip chaps with . or x in them.
+    $hw{$Chap} = {} if(!defined($hw{$Chap}));
+    $hw{$Chap}{$Desc} = [] if(!defined($hw{$Chap}{$Desc}));
+    $count = @{$hw{$Chap}{$Desc}};
+#    print "$Chap: $Desc, count = $count\n";
+    push @{$hw{$Chap}{$Desc}}, $Statement;
+
+#    if($Chap eq $num) {
+#      # print "$Chap: $Desc\n";
+#      print FD "    tmp = theMenu.addChild(level2ID,'Document',\"$Desc\",\n\t\t'../archives/$Quarter/$Statement');\n";
+#    }
+  }
+  close HW;
+
+my $chap;
+my $desc;
+foreach $chap (sort keys %hw) {
+  print "$chap:\n";
+  foreach $desc (sort keys %{$hw{$chap}}) {
+    my $count = @{$hw{$chap}{$desc}};
+    print "\t$desc: $count\n";
+  }
+}

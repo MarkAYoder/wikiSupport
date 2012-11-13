@@ -1,0 +1,157 @@
+$Library = 'libwww-perl/0.40';
+__END__
+
+The first line of this file sets the User-Agent and Version number of
+libwww-perl and should not be changed unless you have modified the code
+to work beyond its originally intended purpose AND permission has been
+obtained from Roy Fielding at <fielding@ics.uci.edu>.
+
+Changes to libwww-perl
+======================
+# $Id$
+
+See the files README.html and Artistic.txt for licensing and distribution info.
+See the file INSTALL.txt for installation information.
+
+If you have any suggestions, bug reports, fixes, or enhancements,
+send them to the libwww-perl mailing list at <libwww-perl@ics.uci.edu>.
+
+
+Known problems
+   Documentation of the library architecture is sorely lacking,
+   although the code itself is fairly easy to read and understand.
+
+Things that need to be done (let us know if you are working on something good)
+   Interfaces to FTP, Gopher, WAIS, ...
+   A real HTML (or SGML) parser.
+
+NOTE: Version numbers increment according to the significance of the new
+      changes.  The major number is incremented only for large overhauls
+      of the code or changes in the basic architecture/interface which
+      makes if incompatible with prior releases.  The first minor number
+      reflects a change in the interface (such as a new library or a new
+      method for making requests) which is still compatible with the old.
+      The last number reflects minor bug fixes and documentation updates.
+      
+
+Version 0.40                                      September 20, 1994
+   Changed the name of this file from Changes.txt to LWP_Changes.pl
+   and moved the $www'Library version name so that it can be set here.
+   Added a new Makefile to ease the installation process.
+   Added sys_socket_ph.c to help find problems in SVR4 system installs.
+   Added hostname.pl so that people can more easily/portably get host names.
+   Fixed more usage of undefined proxy environment vars (from Martijn Koster).
+
+   Revamped the "get" program: Added code to show original headers if they
+   were received; Added tout= to interactively change the timeout value;
+   Added ims= to interactively give If-Modified-Since; Added handling of
+   POST content suggested by Mel Melchner; Added command-line options,
+   debug and quiet modes such that the program is now ideal for testing
+   server/proxy responses to requests;  Added "get -h" usage information.
+   Added $headers initialization to other test clients as well.
+
+   Fixed a number of problems with the handling of years in wwwdates.pl,
+   most of which were due to limitations in timelocal.pl, which goes into
+   an infinite loop if (year >= 2038).  Now handles 2 and 4-digit years
+   regardless of date format.
+
+   In wwwhttp.pl, removed unnecessary bind() and host stuff (Jack Shirazi);
+   Added a bunch of alarm() calls to lessen timeout problems; Now replaces
+   empty paths with "/" (Marc VanHeyningen); Changed name of &timeout
+   routine to &timed_out to avoid confusion with $timeout parameter.
+
+   In wwwurl.pl, the parsing sets were renamed to match the IETF draft
+   on Relative URLs and the method used to test them was changed to use
+   bitmap masks.  Modified parsing algorithm to use the new sets.
+   Parser now handles URLs like http://host:/ and uses the leftmost "?"
+   as the start of query info.  Added caching of base URL components so
+   that they don't get re-parsed for every URL in a document.  Now allows
+   lowercase hex digits in unescape().
+
+   Added a source code "contrib" directory at
+   <http://www.ics.uci.edu/WebSoft/libwww-perl/contrib/> for use as
+   a half-way house for wayward programs.
+   
+
+Version 0.30                                      August 1, 1994
+   Added the wwwmailcap.pl library for handling MIME mailcap files,
+   www'get_def_header() for reading the default headers, and www'lrequest()
+   for doing autoredirected requests (all submitted by Brooks Cutter).
+   Removed the default headers from the www'stat() interface.
+   Changed the testbot and wwwbot'allowed interface to make use of the 
+   default User-Agent header.
+   Firmed-up the URL parsing algorithm in wwwurl.pl (particularly relating
+   to the parsing of relative URLs) to coincide with the IETF standards
+   discussion.  This fixed several potential (but unlikely) bugs and also
+   got rid of any "URL:" prefix parsing [finally!].
+   Fixed parsing in wwwhtml.pl of href's that had a new-line after the
+   quote mark, causing an extra space to precede the extracted URL,
+   which in turn created a black hole.  Also added code to extract and change
+   the base URL if there exists a <BASE href="..."> element.
+   Updated the wording in Artistic.txt to represent a Perl API rather than
+   a compiler written in C (as is the Perl distribution).
+
+
+Version 0.20                                      July 20, 1994
+   Added the wwwbot.pl library and testbot program (by Brooks Cutter)
+   for implementing the robot exclusion protocol.
+   Added the testlinks program for yet another example of how useful
+   programs can be easily implemented on top of libwww-perl -- it also
+   tests just about every aspect of the request libraries.
+   Added &www'set_def_header() and check_defaults() so that protocol
+   header defaults (such as the HTTP From: header) can be set within
+   the library and other default request headers can be set
+   once by the client and effect all requests (e.g. User-Agent).
+   Fixed the source of an annoying warning from "perl -w" in wwwhttp.pl.
+   Moved some existing code in wwwmime.pl into a separate function
+   set_content() which can set the "content-type" header for any given
+   file extension.
+   Added &wwwurl'get_site() for extracting the site name (server:port)
+   from a given URL.
+   Updated the get program to make use of the new interface changes.
+   Changed the eval of &wwwscheme'request to a simpler &$routine call
+   after a suggestion from Brooks.
+   Fixed a bug in &wwwhtml'extract_links() which was causing a segmentation
+   fault when a completely <element>-free file (i.e. a text file) was
+   mistakenly extracted.
+
+
+Version 0.12                                      July  8, 1994
+   Placed everything under RCS version control and included repository.
+   Added www'stat (from Brooks Cutter) for doing stat-like calls on a URL.
+   Added message field to wwwerror'onrequest so that error-specific
+   messages (e.g. $@ and $!) can be included in the canned HTML output.
+   Added symbolic names for all response code numbers.
+   Reassigned 000 Timed Out error to response code 603.
+   Added 602 Connection Failed response code.
+   Vastly improved the error-handling for wwwhttp'request().
+   Now escapes the URL entries generated by wwwfile'dirlist().
+   Removed buggy attempt to delete comments at start of wwwhtml'extract_links.
+   Updated META parsing in wwwhtml to reflect HTML 2.0 proposed spec.
+   Moved require of sys/socket.ph outside of wwwhttp package declaration
+   due to a bug in perl4 found by Martijn Koster.
+   Added many checks to be sure environment variables are defined before
+   trying to use them in wwwmime, wwwurl, get, and testdates (Martijn Koster).
+   Fixed bug that occurred when parsing URLs with an empty path.
+   Replaced complicated wwwurl'unescape loop with a simple substitute
+   (from Steven E. Brenner via Brooks Cutter).
+   Added wwwurl'escape() to %hex escape URL segments (from Brooks Cutter).
+   Added testescapes program for testing wwwurl'escape and unescape.
+
+
+Version 0.11                                      June 17, 1994
+   Changed environment variable LIBWWW-PERL to LIBWWW_PERL because
+   some systems can't handle the dash (Charlie Stross).
+   Fixed bug in "get" that caused full pathname to be used as the method
+   (Martijn Koster).
+   Fixed handling of perverse relative URLs (e.g. ../../) in wwwurl'absolute.
+
+
+Version 0.10                                      June 13, 1994
+   First public version.  libwww-perl was developed by Roy Fielding
+   from the core of MOMspider, a program intended to assist multi-owner
+   maintenance of distributed hypertext infostructures. It was expanded
+   to a general-purpose library after some encouragement from
+   Oscar Nierstrasz and Martijn Koster during the First International
+   Conference on the World-Wide Web (WWW94).
+

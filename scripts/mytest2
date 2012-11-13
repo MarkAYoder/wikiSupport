@@ -1,0 +1,24 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Text::ParseWords;
+
+my $text = 'SAR001,"","Cimetrix, Inc","Bob Smith","CAM",N,8,1,0,7,"Error, Core Dumped"';
+
+$text = 'a href="This is a test" title = "test 2"';
+
+     my @new = ();
+     push(@new, $+) while $text =~ m{
+         "([^\"\\]*(?:\\.[^\"\\]*)*)"\s?  # groups the phrase inside the quotes
+       | ([^\s]+)\s?
+       | \s
+     }gx;
+     push(@new, undef) if substr($text,-1,1) eq ',';
+
+print "@new\n";
+
+@new = quotewords(" ", 0, $text);
+
+foreach (@new) {
+  print "$_\n";
+}

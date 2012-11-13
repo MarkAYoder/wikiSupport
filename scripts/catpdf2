@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+# $Id: image.pl,v 1.7.2.1 2001/05/16 12:25:50 york Exp $
+#
+# Concatinates pdf files.
+#
+
+use strict;
+use pdflib_pl 4.0;
+
+if( $#ARGV lt 0) {
+  print "Usage: $0 in1 in2 ... out\n";
+  exit;
+}
+
+# print "@ARGV\n";
+
+my $pagewidth  = 7;
+my $pageheight = 11;
+
+my $outfile = pop @ARGV;
+
+# Make a new pdf object and set a few parameters.
+my $p = PDF_new();
+
+die "Can;t open $outfile" if (PDF_open_file($p, "$outfile") == -1);
+
+PDF_set_info($p, "Creator", "image.pl");
+PDF_set_info($p, "Author", "Jim McClellan");
+PDF_set_info($p, "Title", "Title");
+PDF_set_info($p, "Keywords", "Keywords");
+
+# PDF_set_value($p, 'compress', 0);
+
+PDF_set_parameter($p, 'imagewarning', 'true');
+PDF_set_parameter($p, 'openmode',   'none');
+PDF_set_parameter($p, 'openaction', 'fitwidth');
+
+# Go through each of the input files and add them to the output file.
+my $page=1;
+my $file;
+my $pageno;
+foreach $file (@ARGV) {
+  my $doc = PDF_open_pdi($p, $file, "", 0);
+  die "Can't open $file" if($doc == -1);
+
+  my $pagecount = PDF_get_pdi_value($p, '/Root/Pages/Count', $doc, -1, 0);
+  print "page count = $pagecount\n";
+
+  for($pageno=1; $pageno<=$pagecount; $pageno++) {
+    my $page = PDF_open_pdi_page($p, $doc, $pageno, "");
+
+#    print "page=$page\n";
+
+    my $sheetwidth  = PDF_get_pdi_value($p, "width",  $doc, $page, 0);
+    my $sheetheight = PDF_get_pdi_value($p, "height", $doc, $page, 0);
+
+    PDF_begin_page($p, $sheetwidth, $sheetheight);
+    PDF_place_pdi_page($p, $page, 0.0, 0.0, 1.0, 1.0);
+    PDF_close_pdi_page($p, $page);
+
+    PDF_end_page($p);
+
+    $page++;
+  }
+}
+
+PDF_close($p);
+
+PDF_delete($p);
